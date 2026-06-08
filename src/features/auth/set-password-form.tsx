@@ -10,6 +10,7 @@ const errorCopy: Record<string, string> = {
   session: "Der Einladungslink ist abgelaufen oder wurde bereits verwendet. Bitte KW Sports um eine neue Einladung.",
   mismatch: "Die Passwörter stimmen nicht überein.",
   short: "Bitte wähle ein Passwort mit mindestens 8 Zeichen.",
+  invite: "Einladung konnte nicht aktiviert werden. Bitte Link erneut öffnen oder neue Einladung anfordern.",
   update: "Passwort konnte nicht gesetzt werden. Bitte Link erneut öffnen oder neue Einladung anfordern."
 };
 
@@ -21,11 +22,51 @@ export function SetPasswordForm() {
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
 
-    supabase.auth.getSession().then(({ data }) => {
+    async function prepareInviteSession() {
+      const sessionError = await hydrateSessionFromUrl();
+      if (sessionError) {
+        setReady(false);
+        setError(sessionError);
+        setLoading(false);
+        return;
+      }
+
+      const { data } = await supabase.auth.getSession();
       setReady(Boolean(data.session));
       setError(data.session ? null : errorCopy.session);
       setLoading(false);
-    });
+    }
+
+    async function hydrateSessionFromUrl() {
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+
+      if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        });
+
+        if (error) return errorCopy.invite;
+
+        window.history.replaceState(null, "", window.location.pathname);
+        return null;
+      }
+
+      const searchParams = new URLSearchParams(window.location.search);
+      const code = searchParams.get("code");
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) return errorCopy.invite;
+
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+
+      return null;
+    }
+
+    prepareInviteSession();
   }, []);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
