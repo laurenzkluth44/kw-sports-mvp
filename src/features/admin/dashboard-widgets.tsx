@@ -8,8 +8,8 @@ import type { PlayerNeedWithClub } from "@/types/domain";
 const quickFilters: Array<{ label: string; filters: AdminNeedFilters }> = [
   { label: "Offen", filters: { status: "offen" } },
   { label: "Hohe Priorität", filters: { priority: "hoch" } },
-  { label: "RL 2026/27", filters: { position: "RL", season: "2026/27" } },
-  { label: "3. Liga Süd", filters: { league: "3. Liga Süd" } },
+  { label: "2026/27", filters: { season: "2026/27" } },
+  { label: "1. Bundesliga", filters: { league: "1. Bundesliga" } },
   { label: "Besetzt", filters: { status: "besetzt" } }
 ];
 
