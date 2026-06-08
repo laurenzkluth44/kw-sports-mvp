@@ -1,0 +1,41 @@
+import { clsx, type ClassValue } from "clsx";
+
+export function cn(...inputs: ClassValue[]) {
+  return clsx(inputs);
+}
+
+export function formatDate(value: string | null | undefined) {
+  if (!value) return "-";
+
+  return new Intl.DateTimeFormat("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  }).format(new Date(value));
+}
+
+export function formatCurrency(amount: number | null, currency: string | null) {
+  if (amount === null || amount === undefined) return "-";
+
+  return new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: currency || "EUR",
+    maximumFractionDigits: 0
+  }).format(amount);
+}
+
+export function compactObject<T extends Record<string, string | undefined | null>>(input: T) {
+  return Object.fromEntries(
+    Object.entries(input).filter(([, value]) => value !== undefined && value !== null && value !== "")
+  ) as Partial<T>;
+}
+
+export function toSearchParams(input: Record<string, string | undefined | null>) {
+  const params = new URLSearchParams();
+
+  Object.entries(input).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
+
+  return params.toString();
+}
