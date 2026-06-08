@@ -115,7 +115,9 @@ export async function inviteUserAction(formData: FormData) {
     }
   } catch (error) {
     console.error("Invite user error", error);
-    redirect(`/admin/users?error=${getInviteErrorCode(error)}`);
+    const detail = getInviteErrorMessage(error);
+    const detailParam = detail ? `&detail=${encodeURIComponent(detail.slice(0, 180))}` : "";
+    redirect(`/admin/users?error=${getInviteErrorCode(error)}${detailParam}`);
   }
 
   revalidatePath("/admin/users");
@@ -123,13 +125,19 @@ export async function inviteUserAction(formData: FormData) {
 }
 
 function getInviteErrorCode(error: unknown) {
-  const message = error instanceof Error ? error.message.toLowerCase() : String(error || "").toLowerCase();
+  const message = getInviteErrorMessage(error).toLowerCase();
 
   if (message.includes("already") || message.includes("registered") || message.includes("exists")) return "invite_exists";
   if (message.includes("redirect") || message.includes("site url") || message.includes("not allowed")) return "invite_url";
   if (
     message.includes("smtp") ||
+    message.includes("mailer") ||
+    message.includes("mail") ||
     message.includes("email address not authorized") ||
+    message.includes("email provider") ||
+    message.includes("sending invite") ||
+    message.includes("sending email") ||
+    message.includes("send an email") ||
     message.includes("rate limit") ||
     message.includes("send email")
   ) {
@@ -137,4 +145,17 @@ function getInviteErrorCode(error: unknown) {
   }
 
   return "invite";
+}
+
+function getInviteErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message;
+
+  if (typeof error === "object" && error !== null) {
+    const maybeMessage = "message" in error ? String(error.message) : "";
+    const maybeCode = "code" in error ? String(error.code) : "";
+    const maybeStatus = "status" in error ? String(error.status) : "";
+    return [maybeMessage, maybeCode, maybeStatus].filter(Boolean).join(" ");
+  }
+
+  return String(error || "");
 }
