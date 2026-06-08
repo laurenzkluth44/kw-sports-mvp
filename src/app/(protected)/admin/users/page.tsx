@@ -2,6 +2,7 @@ import { MailPlus, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
 import { PageHeader } from "@/components/ui/page-header";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { createUserAction, inviteUserAction } from "@/features/admin/user-actions";
 import { ROLE_LABELS } from "@/lib/constants";
 import { requireAdmin } from "@/lib/auth";
@@ -11,7 +12,11 @@ const errorMessages: Record<string, string> = {
   validation: "Bitte alle Pflichtfelder ausfüllen.",
   club: "Club User benötigen einen Verein.",
   service: "Nutzer konnte nicht angelegt werden. Service Role Key und Supabase Auth prüfen.",
-  invite: "Einladung konnte nicht gesendet werden. Supabase Auth, SMTP und Site URL prüfen."
+  invite: "Einladung konnte nicht gesendet werden. Supabase Auth, SMTP und Site URL prüfen.",
+  invite_config: "Einladung konnte nicht gesendet werden. Service Role Key oder Supabase URL fehlt.",
+  invite_exists: "Für diese E-Mail existiert bereits ein Nutzer. Bitte Zugang prüfen oder den alten Zugang revoken.",
+  invite_smtp: "Supabase konnte die E-Mail nicht senden. Bitte SMTP, Sender-Adresse und Rate Limits prüfen.",
+  invite_url: "Supabase hat die Redirect URL abgelehnt. Bitte Site URL und Redirect URLs prüfen."
 };
 
 export default async function AdminUsersPage({
@@ -84,10 +89,10 @@ export default async function AdminUsersPage({
             </Select>
           </Field>
           <div className="md:col-span-2">
-            <Button type="submit">
+            <SubmitButton pendingLabel="Einladung wird gesendet...">
               <MailPlus className="h-4 w-4" aria-hidden="true" />
               Einladung senden
-            </Button>
+            </SubmitButton>
           </div>
         </form>
 

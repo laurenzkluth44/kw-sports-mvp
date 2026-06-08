@@ -75,8 +75,16 @@ export async function inviteUserAction(formData: FormData) {
     redirect("/admin/users?error=club");
   }
 
+  let adminClient: ReturnType<typeof createSupabaseAdminClient>;
+
   try {
-    const adminClient = createSupabaseAdminClient();
+    adminClient = createSupabaseAdminClient();
+  } catch (error) {
+    console.error("Invite configuration error", error);
+    redirect("/admin/users?error=invite_config");
+  }
+
+  try {
     const { data, error: authError } = await adminClient.auth.admin.inviteUserByEmail(email, {
       data: {
         name,
@@ -97,13 +105,36 @@ export async function inviteUserAction(formData: FormData) {
     });
 
     if (profileError) {
+      if (profileError.code === "23505") {
+        console.error("Invite profile conflict", profileError);
+        throw new Error("User already exists");
+      }
+
       await adminClient.auth.admin.deleteUser(data.user.id);
       throw profileError;
     }
-  } catch {
-    redirect("/admin/users?error=invite");
+  } catch (error) {
+    console.error("Invite user error", error);
+    redirect(`/admin/users?error=${getInviteErrorCode(error)}`);
   }
 
   revalidatePath("/admin/users");
   redirect("/admin/users?invited=1");
+}
+
+function getInviteErrorCode(error: unknown) {
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error || "").toLowerCase();
+
+  if (message.includes("already") || message.includes("registered") || message.includes("exists")) return "invite_exists";
+  if (message.includes("redirect") || message.includes("site url") || message.includes("not allowed")) return "invite_url";
+  if (
+    message.includes("smtp") ||
+    message.includes("email address not authorized") ||
+    message.includes("rate limit") ||
+    message.includes("send email")
+  ) {
+    return "invite_smtp";
+  }
+
+  return "invite";
 }
