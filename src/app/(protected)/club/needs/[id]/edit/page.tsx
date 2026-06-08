@@ -3,6 +3,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { NeedForm } from "@/features/player-needs/need-form";
 import { updateClubNeedAction } from "@/features/player-needs/actions";
 import { requireClubUser } from "@/lib/auth";
+import { CLUB_POSITION_LABELS, clubCopy } from "@/lib/club-i18n";
+import { getClubLocale } from "@/lib/club-locale";
 import type { PlayerNeed } from "@/types/domain";
 
 export default async function EditClubNeedPage({
@@ -15,6 +17,8 @@ export default async function EditClubNeedPage({
   const { id } = await params;
   const query = await searchParams;
   const { supabase, profile } = await requireClubUser();
+  const locale = await getClubLocale();
+  const t = clubCopy[locale].form;
 
   const { data: need } = await supabase
     .from("player_needs")
@@ -24,15 +28,20 @@ export default async function EditClubNeedPage({
     .single();
 
   if (!need) redirect("/club");
+  const typedNeed = need as PlayerNeed;
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Bedarf bearbeiten" description={`${need.position} · ${need.season}`} />
+      <PageHeader
+        title={t.editTitle}
+        description={`${CLUB_POSITION_LABELS[locale][typedNeed.position]} · ${typedNeed.season}`}
+      />
       <NeedForm
         action={updateClubNeedAction}
-        need={need as PlayerNeed}
-        submitLabel="Änderungen speichern"
+        need={typedNeed}
+        submitLabel={t.submitUpdate}
         error={query.error === "save" ? query.error : null}
+        locale={locale}
       />
     </div>
   );

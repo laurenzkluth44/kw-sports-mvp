@@ -6,7 +6,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { NeedBadges } from "@/features/player-needs/need-badges";
 import { NeedStatusForm } from "@/features/player-needs/need-status-form";
 import { duplicateClubNeedAction } from "@/features/player-needs/actions";
-import { STATUS_LABELS } from "@/lib/constants";
+import { CLUB_STATUS_LABELS, clubCopy } from "@/lib/club-i18n";
+import { getClubLocale } from "@/lib/club-locale";
 import { requireClubUser } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
 import type { PlayerNeed } from "@/types/domain";
@@ -17,6 +18,8 @@ export default async function ClubDashboardPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { supabase, profile } = await requireClubUser();
+  const locale = await getClubLocale();
+  const t = clubCopy[locale].dashboard;
   const params = await searchParams;
 
   const { data: needs = [] } = await supabase
@@ -34,53 +37,53 @@ export default async function ClubDashboardPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow={profile.clubs?.name || "Club Dashboard"}
-        title="Eigene Kaderbedarfe"
-        description="Aktive Suchaufträge deines Vereins."
+        eyebrow={profile.clubs?.name || t.eyebrowFallback}
+        title={t.title}
+        description={t.description}
         actions={
           <LinkButton href="/club/needs/new" variant="accent">
             <Plus className="h-4 w-4" aria-hidden="true" />
-            Neuer Bedarf
+            {t.newNeed}
           </LinkButton>
         }
       />
 
       {params.error === "status" ? (
         <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          Status konnte nicht geändert werden.
+          {t.statusError}
         </div>
       ) : null}
       {params.error === "duplicate" ? (
         <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          Bedarf konnte nicht dupliziert werden.
+          {t.duplicateError}
         </div>
       ) : null}
 
       <section className="grid gap-3 sm:grid-cols-3">
-        <Metric label="Offen" value={openCount} />
-        <Metric label="In Gesprächen" value={talksCount} />
-        <Metric label="Hohe Priorität" value={highCount} />
+        <Metric label={t.open} value={openCount} />
+        <Metric label={t.talks} value={talksCount} />
+        <Metric label={t.highPriority} value={highCount} />
       </section>
 
       {typedNeeds.length === 0 ? (
         <EmptyState
-          title="Keine aktiven Bedarfe"
-          body="Aktive Suchaufträge erscheinen hier, sobald ein Bedarf angelegt wurde."
+          title={t.emptyTitle}
+          body={t.emptyBody}
           action={
             <LinkButton href="/club/needs/new" variant="accent">
               <Plus className="h-4 w-4" aria-hidden="true" />
-              Neuer Bedarf
+              {t.newNeed}
             </LinkButton>
           }
         />
       ) : (
         <section className="panel overflow-hidden">
           <div className="hidden grid-cols-[0.7fr_0.7fr_0.8fr_1.35fr_auto] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase text-slate-500 lg:grid">
-            <span>Position</span>
-            <span>Saison</span>
-            <span>Benötigt ab</span>
-            <span>Status</span>
-            <span className="text-right">Aktion</span>
+            <span>{t.position}</span>
+            <span>{t.season}</span>
+            <span>{t.neededFrom}</span>
+            <span>{t.status}</span>
+            <span className="text-right">{t.action}</span>
           </div>
 
           <div className="divide-y divide-slate-200">
@@ -97,32 +100,32 @@ export default async function ClubDashboardPage({
                     <p className="mt-1 text-sm text-slate-500 lg:hidden">{need.season}</p>
                     {stale ? (
                       <p className="mt-2 rounded-md bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700">
-                        Bitte aktualisieren
+                        {t.updateHint}
                       </p>
                     ) : null}
                   </div>
                   <p className="hidden text-sm font-medium text-slate-700 lg:block">{need.season}</p>
-                  <p className="text-sm text-slate-700">{formatDate(need.needed_from_date)}</p>
+                  <p className="text-sm text-slate-700">{formatDate(need.needed_from_date, locale)}</p>
                   <div className="space-y-3">
-                    <NeedBadges need={need} />
+                    <NeedBadges need={need} locale={locale} />
                     {need.status_note ? <p className="text-xs text-slate-500">{need.status_note}</p> : null}
-                    <NeedStatusForm need={need} />
+                    <NeedStatusForm need={need} locale={locale} />
                   </div>
                   <div className="flex flex-wrap justify-start gap-2 lg:justify-end">
                     <form action={duplicateClubNeedAction}>
                       <input type="hidden" name="id" value={need.id} />
-                      <Button type="submit" variant="secondary" className="px-3" title="Bedarf als Vorlage kopieren">
+                      <Button type="submit" variant="secondary" className="px-3" title={t.copyTitle}>
                         <Copy className="h-4 w-4" aria-hidden="true" />
-                        Als Vorlage kopieren
+                        {t.copy}
                       </Button>
                     </form>
                     <Link
                       href={`/club/needs/${need.id}/edit`}
                       className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 bg-white text-navy-900 hover:bg-slate-50"
-                      title="Bedarf bearbeiten"
+                      title={t.editTitle}
                     >
                       <Edit className="h-4 w-4" aria-hidden="true" />
-                      <span className="sr-only">Bedarf bearbeiten</span>
+                      <span className="sr-only">{t.editSr}</span>
                     </Link>
                   </div>
                 </article>
@@ -133,8 +136,8 @@ export default async function ClubDashboardPage({
       )}
 
       <section className="panel px-5 py-4 text-sm text-slate-600">
-        Archivierte und besetzte Suchaufträge bleiben gespeichert. Besetzte Bedarfe erscheinen weiterhin, archivierte nicht.
-        Aktueller Statusfilter: {STATUS_LABELS.offen}, {STATUS_LABELS.in_gespraechen}, {STATUS_LABELS.besetzt}.
+        {t.footer} {t.statusFilter}: {CLUB_STATUS_LABELS[locale].offen}, {CLUB_STATUS_LABELS[locale].in_gespraechen},{" "}
+        {CLUB_STATUS_LABELS[locale].besetzt}.
       </section>
     </div>
   );

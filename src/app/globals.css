@@ -4,7 +4,7 @@
 
 :root {
   color-scheme: light;
-  background: #f4f3ee;
+  background: #f6f8fb;
   color: #050505;
 }
 
@@ -21,10 +21,11 @@ body {
   min-height: 100%;
   margin: 0;
   background:
-    linear-gradient(180deg, rgba(5, 5, 5, 0.05) 0%, rgba(244, 243, 238, 0) 260px),
-    #f4f3ee;
+    linear-gradient(180deg, rgba(11, 85, 232, 0.08) 0%, rgba(246, 248, 251, 0) 320px),
+    linear-gradient(90deg, rgba(5, 5, 5, 0.035) 0%, rgba(5, 5, 5, 0) 45%),
+    #f6f8fb;
   font-family:
-    Arial, Helvetica, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Inter, Arial, Helvetica, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
 }
 
@@ -35,24 +36,20 @@ textarea {
   font: inherit;
 }
 
-input[type="date"] {
-  min-height: 42px;
-}
-
 @layer components {
   .page-shell {
-    @apply mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8;
   }
 
   .panel {
-    @apply rounded-md border border-neutral-200 bg-white shadow-soft;
+    @apply rounded-md border border-slate-200/80 bg-white shadow-soft;
   }
 
   .field-label {
-    @apply text-xs font-black uppercase text-neutral-700;
+    @apply text-xs font-black uppercase tracking-wide text-neutral-700;
   }
 
   .field-help {
-    @apply text-xs text-neutral-500;
+    @apply text-xs leading-5 text-neutral-500;
   }
 }

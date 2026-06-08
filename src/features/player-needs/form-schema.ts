@@ -15,6 +15,12 @@ function requiredString(formData: FormData, key: string) {
   return value;
 }
 
+function requiredDateString(formData: FormData, key: string) {
+  const value = requiredString(formData, key);
+  if (!isValidDateString(value)) throw new Error(`${key} must be a valid YYYY-MM-DD date`);
+  return value;
+}
+
 function optionalString(formData: FormData, key: string) {
   const value = String(formData.get(key) || "").trim();
   return value ? value : null;
@@ -38,6 +44,15 @@ function optionalNumber(formData: FormData, key: string) {
   return parsed;
 }
 
+export function isValidDateString(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+
+  const date = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime())) return false;
+
+  return date.toISOString().slice(0, 10) === value;
+}
+
 export function parseClubId(formData: FormData) {
   return requiredString(formData, "club_id");
 }
@@ -53,7 +68,7 @@ export function parseNeedFormData(formData: FormData): Omit<PlayerNeedInsert, "c
   const position = requiredString(formData, "position");
   const priority = requiredString(formData, "priority");
   const status = requiredString(formData, "status");
-  const neededFromDate = requiredString(formData, "needed_from_date");
+  const neededFromDate = requiredDateString(formData, "needed_from_date");
   const budgetAmount = optionalNumber(formData, "budget_amount");
   const budgetCurrency = optionalString(formData, "budget_currency")?.toUpperCase() || null;
 

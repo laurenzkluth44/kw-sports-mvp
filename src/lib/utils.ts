@@ -4,10 +4,17 @@ export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
 
-export function formatDate(value: string | null | undefined) {
+const dateLocales = {
+  de: "de-DE",
+  en: "en-GB",
+  fr: "fr-FR",
+  es: "es-ES"
+} as const;
+
+export function formatDate(value: string | null | undefined, locale: keyof typeof dateLocales = "de") {
   if (!value) return "-";
 
-  return new Intl.DateTimeFormat("de-DE", {
+  return new Intl.DateTimeFormat(dateLocales[locale], {
     day: "2-digit",
     month: "2-digit",
     year: "numeric"

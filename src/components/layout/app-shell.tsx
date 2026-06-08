@@ -2,12 +2,23 @@ import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { Building2, FileDown, LogOut, Plus, Shield, Users } from "lucide-react";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { logoutAction } from "@/features/auth/actions";
 import { ROLE_LABELS } from "@/lib/constants";
+import { clubCopy, type ClubLocale } from "@/lib/club-i18n";
 import type { Profile } from "@/types/domain";
 import { Button } from "@/components/ui/button";
 
-export function AppShell({ profile, children }: { profile: Profile; children: ReactNode }) {
+export function AppShell({
+  profile,
+  locale,
+  children
+}: {
+  profile: Profile;
+  locale: ClubLocale;
+  children: ReactNode;
+}) {
+  const t = clubCopy[locale].app;
   const nav =
     profile.role === "admin"
       ? [
@@ -15,13 +26,13 @@ export function AppShell({ profile, children }: { profile: Profile; children: Re
           { href: "/admin/users", label: "Nutzer", icon: Users }
         ]
       : [
-          { href: "/club", label: "Meine Bedarfe", icon: Building2 },
-          { href: "/club/needs/new", label: "Neuer Bedarf", icon: Plus }
+          { href: "/club", label: t.navNeeds, icon: Building2 },
+          { href: "/club/needs/new", label: t.navNewNeed, icon: Plus }
         ];
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-neutral-900 bg-navy-950 text-white">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-navy-950/95 text-white shadow-sm backdrop-blur">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Link
@@ -41,19 +52,22 @@ export function AppShell({ profile, children }: { profile: Profile; children: Re
               </span>
               <span>
                 <span className="block text-base font-black uppercase">Club Needs</span>
-                <span className="block text-xs text-brand-300">Kaderbedarf Datenbank</span>
+                <span className="block text-xs text-brand-300">
+                  {profile.role === "admin" ? "Kaderbedarf Datenbank" : t.tagline}
+                </span>
               </span>
             </Link>
 
             <div className="flex flex-wrap items-center gap-2 text-sm">
+              {profile.role === "club" ? <LanguageSwitcher locale={locale} label={t.language} /> : null}
               <span className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-slate-100">
                 <Shield className="h-4 w-4 text-brand-300" aria-hidden="true" />
-                {ROLE_LABELS[profile.role]}
+                {profile.role === "club" ? t.role : ROLE_LABELS[profile.role]}
               </span>
               <form action={logoutAction}>
                 <Button variant="ghost" className="text-white hover:bg-white/10" type="submit">
                   <LogOut className="h-4 w-4" aria-hidden="true" />
-                  Logout
+                  {profile.role === "club" ? t.logout : "Logout"}
                 </Button>
               </form>
             </div>

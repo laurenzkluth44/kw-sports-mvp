@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin, requireClubUser } from "@/lib/auth";
-import { parseClubId, parseNeedFormData, parseStatus } from "@/features/player-needs/form-schema";
+import { isValidDateString, parseClubId, parseNeedFormData, parseStatus } from "@/features/player-needs/form-schema";
 
 function readId(formData: FormData) {
   const id = String(formData.get("id") || "").trim();
@@ -19,6 +19,7 @@ function readOptionalNote(formData: FormData, key: string) {
 function readDateIso(formData: FormData, key: string) {
   const value = String(formData.get(key) || "").trim();
   if (!value) return null;
+  if (!isValidDateString(value)) throw new Error(`${key} must be a date`);
 
   const date = new Date(`${value}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) throw new Error(`${key} must be a date`);
