@@ -33,7 +33,7 @@ export function NeedForm({
   const statusLabels = clubs ? STATUS_LABELS : CLUB_STATUS_LABELS[locale];
 
   return (
-    <form action={action} className="panel overflow-hidden">
+    <form action={action} className="panel">
       {need ? <input type="hidden" name="id" value={need.id} /> : null}
 
       <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-4">
