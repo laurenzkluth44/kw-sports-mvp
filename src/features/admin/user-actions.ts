@@ -7,6 +7,14 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSiteUrl } from "@/lib/site-url";
 import type { AppRole } from "@/types/domain";
 
+export type InviteUserActionState = {
+  status: "idle" | "sent" | "manual" | "error";
+  message?: string;
+  detail?: string;
+  actionLink?: string;
+  email?: string;
+};
+
 export async function createUserAction(formData: FormData) {
   await requireAdmin();
 
@@ -59,7 +67,10 @@ export async function createUserAction(formData: FormData) {
   redirect("/admin/users?created=1");
 }
 
-export async function inviteUserAction(formData: FormData) {
+export async function inviteUserAction(
+  _state: InviteUserActionState,
+  formData: FormData
+): Promise<InviteUserActionState> {
   await requireAdmin();
 
   const name = String(formData.get("invite_name") || "").trim();
@@ -68,11 +79,17 @@ export async function inviteUserAction(formData: FormData) {
   const clubId = String(formData.get("invite_club_id") || "").trim() || null;
 
   if (!name || !email || !["admin", "club"].includes(role)) {
-    redirect("/admin/users?error=validation");
+    return {
+      status: "error",
+      message: "Bitte alle Pflichtfelder ausfüllen."
+    };
   }
 
   if (role === "club" && !clubId) {
-    redirect("/admin/users?error=club");
+    return {
+      status: "error",
+      message: "Club User benötigen einen Verein."
+    };
   }
 
   let adminClient: ReturnType<typeof createSupabaseAdminClient>;
@@ -81,28 +98,44 @@ export async function inviteUserAction(formData: FormData) {
     adminClient = createSupabaseAdminClient();
   } catch (error) {
     console.error("Invite configuration error", error);
-    redirect("/admin/users?error=invite_config");
+    return {
+      status: "error",
+      message: "Einladung konnte nicht gesendet werden. Service Role Key oder Supabase URL fehlt.",
+      detail: getInviteErrorMessage(error)
+    };
   }
+
+  const existingProfile = await findExistingProfileByEmail(adminClient, email);
+  if (existingProfile.error) {
+    return {
+      status: "error",
+      message: "Bestehende Nutzer konnten nicht geprüft werden.",
+      detail: getInviteErrorMessage(existingProfile.error)
+    };
+  }
+  if (existingProfile.id) {
+    return {
+      status: "error",
+      message: "Für diese E-Mail existiert bereits ein Nutzer. Bitte Zugang prüfen oder den alten Zugang revoken."
+    };
+  }
+
+  const metadata = {
+    name,
+    role,
+    club_id: role === "club" ? clubId : null
+  };
+  const redirectTo = `${getSiteUrl()}/set-password`;
 
   try {
     const { data, error: authError } = await adminClient.auth.admin.inviteUserByEmail(email, {
-      data: {
-        name,
-        role,
-        club_id: role === "club" ? clubId : null
-      },
-      redirectTo: `${getSiteUrl()}/set-password`
+      data: metadata,
+      redirectTo
     });
 
     if (authError || !data.user) throw authError;
 
-    const { error: profileError } = await adminClient.from("users").insert({
-      id: data.user.id,
-      name,
-      email,
-      role,
-      club_id: role === "club" ? clubId : null
-    });
+    const profileError = await createInvitedProfile(adminClient, data.user.id, name, email, role, clubId);
 
     if (profileError) {
       if (profileError.code === "23505") {
@@ -113,15 +146,122 @@ export async function inviteUserAction(formData: FormData) {
       await adminClient.auth.admin.deleteUser(data.user.id);
       throw profileError;
     }
+
+    revalidatePath("/admin/users");
+    return {
+      status: "sent",
+      email
+    };
   } catch (error) {
     console.error("Invite user error", error);
-    const detail = getInviteErrorMessage(error);
-    const detailParam = detail ? `&detail=${encodeURIComponent(detail.slice(0, 180))}` : "";
-    redirect(`/admin/users?error=${getInviteErrorCode(error)}${detailParam}`);
-  }
+    const fallback = await createManualInviteLink(adminClient, {
+      name,
+      email,
+      role,
+      clubId,
+      metadata,
+      redirectTo,
+      originalError: error
+    });
 
-  revalidatePath("/admin/users");
-  redirect("/admin/users?invited=1");
+    revalidatePath("/admin/users");
+    return fallback;
+  }
+}
+
+async function findExistingProfileByEmail(adminClient: ReturnType<typeof createSupabaseAdminClient>, email: string) {
+  const { data, error } = await adminClient.from("users").select("id").eq("email", email).maybeSingle();
+  return { id: data?.id as string | undefined, error };
+}
+
+async function createInvitedProfile(
+  adminClient: ReturnType<typeof createSupabaseAdminClient>,
+  userId: string,
+  name: string,
+  email: string,
+  role: AppRole,
+  clubId: string | null
+) {
+  const { error } = await adminClient.from("users").insert({
+    id: userId,
+    name,
+    email,
+    role,
+    club_id: role === "club" ? clubId : null
+  });
+
+  return error;
+}
+
+async function createManualInviteLink(
+  adminClient: ReturnType<typeof createSupabaseAdminClient>,
+  input: {
+    name: string;
+    email: string;
+    role: AppRole;
+    clubId: string | null;
+    metadata: { name: string; role: AppRole; club_id: string | null };
+    redirectTo: string;
+    originalError: unknown;
+  }
+): Promise<InviteUserActionState> {
+  const originalDetail = getInviteErrorMessage(input.originalError);
+
+  try {
+    const { data, error } = await adminClient.auth.admin.generateLink({
+      type: "invite",
+      email: input.email,
+      options: {
+        data: input.metadata,
+        redirectTo: input.redirectTo
+      }
+    });
+
+    if (error || !data.user || !data.properties?.action_link) throw error;
+
+    const profileError = await createInvitedProfile(
+      adminClient,
+      data.user.id,
+      input.name,
+      input.email,
+      input.role,
+      input.clubId
+    );
+
+    if (profileError) {
+      await adminClient.auth.admin.deleteUser(data.user.id);
+      throw profileError;
+    }
+
+    return {
+      status: "manual",
+      email: input.email,
+      actionLink: data.properties.action_link,
+      detail: originalDetail
+    };
+  } catch (fallbackError) {
+    console.error("Manual invite link fallback error", fallbackError);
+    const fallbackDetail = getInviteErrorMessage(fallbackError);
+    return {
+      status: "error",
+      message: getInviteErrorMessageForUser(input.originalError),
+      detail: [originalDetail, fallbackDetail].filter(Boolean).join(" | ")
+    };
+  }
+}
+
+function getInviteErrorMessageForUser(error: unknown) {
+  const code = getInviteErrorCode(error);
+  if (code === "invite_exists") {
+    return "Für diese E-Mail existiert bereits ein Nutzer. Bitte Zugang prüfen oder den alten Zugang revoken.";
+  }
+  if (code === "invite_url") {
+    return "Supabase hat die Redirect URL abgelehnt. Bitte Site URL und Redirect URLs prüfen.";
+  }
+  if (code === "invite_smtp") {
+    return "Supabase konnte die E-Mail nicht senden. Bitte SMTP, Sender-Adresse und Rate Limits prüfen.";
+  }
+  return "Einladung konnte nicht gesendet werden. Supabase Auth, SMTP und Site URL prüfen.";
 }
 
 function getInviteErrorCode(error: unknown) {

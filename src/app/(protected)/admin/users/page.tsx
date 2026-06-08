@@ -1,9 +1,9 @@
-import { MailPlus, UserPlus } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
 import { PageHeader } from "@/components/ui/page-header";
-import { SubmitButton } from "@/components/ui/submit-button";
-import { createUserAction, inviteUserAction } from "@/features/admin/user-actions";
+import { InviteUserForm } from "@/features/admin/invite-user-form";
+import { createUserAction } from "@/features/admin/user-actions";
 import { ROLE_LABELS } from "@/lib/constants";
 import { requireAdmin } from "@/lib/auth";
 import type { Club, Profile } from "@/types/domain";
@@ -62,40 +62,7 @@ export default async function AdminUsersPage({
       ) : null}
 
       <section className="space-y-5">
-        <form action={inviteUserAction} className="panel grid gap-5 p-5 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <h2 className="text-lg font-bold text-navy-950">Einladung senden</h2>
-            <p className="mt-1 text-sm text-slate-500">Für den produktiven Betrieb mit Supabase SMTP.</p>
-          </div>
-          <Field label="Name" htmlFor="invite_name">
-            <Input id="invite_name" name="invite_name" required />
-          </Field>
-          <Field label="E-Mail" htmlFor="invite_email">
-            <Input id="invite_email" name="invite_email" type="email" required />
-          </Field>
-          <Field label="Rolle" htmlFor="invite_role">
-            <Select id="invite_role" name="invite_role" defaultValue="club" required>
-              <option value="club">{ROLE_LABELS.club}</option>
-              <option value="admin">{ROLE_LABELS.admin}</option>
-            </Select>
-          </Field>
-          <Field label="Verein" htmlFor="invite_club_id">
-            <Select id="invite_club_id" name="invite_club_id" defaultValue="">
-              <option value="">Kein Verein</option>
-              {clubRows.map((club) => (
-                <option key={club.id} value={club.id}>
-                  {club.name} · {club.league}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <div className="md:col-span-2">
-            <SubmitButton pendingLabel="Einladung wird gesendet...">
-              <MailPlus className="h-4 w-4" aria-hidden="true" />
-              Einladung senden
-            </SubmitButton>
-          </div>
-        </form>
+        <InviteUserForm clubs={clubRows.map((club) => ({ id: club.id, name: club.name, league: club.league }))} />
 
         <details className="panel overflow-hidden">
           <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-navy-950">
