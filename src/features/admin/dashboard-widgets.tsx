@@ -20,8 +20,8 @@ export function AdminQuickFilters({ activeFilters }: { activeFilters: AdminNeedF
     <section className="panel p-5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-lg font-black uppercase text-navy-950">Schnellfilter</h2>
-          <p className="mt-1 text-sm text-neutral-500">Häufige Sichten ohne Umweg öffnen.</p>
+          <h2 className="section-heading">Schnellfilter</h2>
+          <p className="section-subtitle">Häufige Sichten ohne Umweg öffnen.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <QuickLink href="/admin" active={!activeQuery}>
@@ -44,12 +44,14 @@ export function AdminQuickFilters({ activeFilters }: { activeFilters: AdminNeedF
 export function AdminNeedsInbox({ needs }: { needs: PlayerNeedWithClub[] }) {
   return (
     <section className="panel overflow-hidden">
-      <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50/80 px-5 py-4">
         <div>
-          <h2 className="text-lg font-black uppercase text-navy-950">Needs Inbox</h2>
-          <p className="mt-1 text-sm text-neutral-500">Zuletzt angelegte oder aktualisierte Bedarfe.</p>
+          <h2 className="section-heading">Needs Inbox</h2>
+          <p className="section-subtitle">Zuletzt angelegte oder aktualisierte Bedarfe.</p>
         </div>
-        <Activity className="h-5 w-5 text-brand-600" aria-hidden="true" />
+        <span className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-50 text-brand-700">
+          <Activity className="h-5 w-5" aria-hidden="true" />
+        </span>
       </div>
 
       <div className="divide-y divide-slate-200">
@@ -60,7 +62,7 @@ export function AdminNeedsInbox({ needs }: { needs: PlayerNeedWithClub[] }) {
             <Link
               key={need.id}
               href={`/admin/needs/${need.id}`}
-              className="grid gap-3 px-5 py-4 hover:bg-slate-50 sm:grid-cols-[1fr_auto] sm:items-center"
+              className="data-row grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center"
             >
               <span className="min-w-0">
                 <span className="block truncate font-bold text-navy-950">
@@ -93,8 +95,8 @@ function QuickLink({
       href={href}
       className={
         active
-          ? "inline-flex min-h-10 items-center rounded-md bg-navy-950 px-3 py-2 text-sm font-black uppercase text-white"
-          : "inline-flex min-h-10 items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-black uppercase text-navy-900 hover:bg-slate-50"
+          ? "inline-flex min-h-10 items-center rounded-md border border-brand-500 bg-brand-500 px-3 py-2 text-sm font-black uppercase text-white shadow-sm shadow-brand-500/20"
+          : "inline-flex min-h-10 items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-black uppercase text-navy-900 shadow-sm hover:border-brand-100 hover:bg-brand-50"
       }
     >
       {children}

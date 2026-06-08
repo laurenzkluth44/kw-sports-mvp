@@ -48,14 +48,10 @@ export default async function AdminClubDetailPage({
       />
 
       {query.error ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {clubErrorMessage(query.error)}
-        </div>
+        <div className="alert-error">{clubErrorMessage(query.error)}</div>
       ) : null}
       {query.revoked ? (
-        <div className="rounded-md border border-brand-100 bg-brand-100 px-3 py-2 text-sm text-brand-700">
-          Zugang wurde widerrufen.
-        </div>
+        <div className="alert-success">Zugang wurde widerrufen.</div>
       ) : null}
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -69,7 +65,7 @@ export default async function AdminClubDetailPage({
       <section className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
         <div className="space-y-5">
           <div className="panel p-5">
-            <h2 className="text-lg font-bold text-navy-950">Verein</h2>
+            <h2 className="section-heading">Verein</h2>
             <dl className="mt-5 space-y-4">
               <InfoRow label="Liga" value={typedClub.league} />
               <InfoRow label="Stadt" value={typedClub.city} />
@@ -90,13 +86,16 @@ export default async function AdminClubDetailPage({
           </div>
 
           <div className="panel p-5">
-            <h2 className="text-lg font-bold text-navy-950">Vereinsnutzer</h2>
+            <h2 className="section-heading">Vereinsnutzer</h2>
             <div className="mt-4 space-y-3">
               {typedUsers.length === 0 ? (
                 <p className="text-sm text-slate-500">Noch keine Nutzer für diesen Verein.</p>
               ) : (
                 typedUsers.map((user) => (
-                  <div key={user.id} className="grid gap-3 rounded-md border border-slate-200 p-3 sm:grid-cols-[1fr_auto] sm:items-center">
+                  <div
+                    key={user.id}
+                    className="grid gap-3 rounded-md border border-slate-200 bg-slate-50/70 p-3 sm:grid-cols-[1fr_auto] sm:items-center"
+                  >
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-navy-950">{user.name}</p>
                       <p className="break-words text-sm text-slate-500">{user.email}</p>
@@ -117,7 +116,7 @@ export default async function AdminClubDetailPage({
           </div>
 
           <details className="panel overflow-hidden border-red-200">
-            <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-red-700">
+            <summary className="cursor-pointer bg-red-50 px-5 py-4 text-sm font-black uppercase text-red-700 transition hover:bg-red-100">
               Verein löschen
             </summary>
             <form action={deleteClubAction} className="space-y-4 border-t border-red-100 p-5">
@@ -138,15 +137,15 @@ export default async function AdminClubDetailPage({
         </div>
 
         <section className="panel overflow-hidden">
-          <div className="border-b border-slate-200 bg-slate-50 px-5 py-4">
-            <h2 className="text-lg font-bold text-navy-950">Bedarfe</h2>
+          <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-4">
+            <h2 className="section-heading">Bedarfe</h2>
           </div>
           <div className="divide-y divide-slate-200">
             {typedNeeds.length === 0 ? (
               <p className="px-5 py-8 text-sm text-slate-500">Keine Bedarfe gespeichert.</p>
             ) : (
               typedNeeds.map((need) => (
-                <article key={need.id} className="grid gap-4 px-5 py-4 md:grid-cols-[1fr_1fr_1.2fr_0.5fr] md:items-center">
+                <article key={need.id} className="data-row grid gap-4 md:grid-cols-[1fr_1fr_1.2fr_0.5fr] md:items-center">
                   <div>
                     <p className="font-bold text-navy-950">{need.position}</p>
                     <p className="mt-1 text-sm text-slate-500">{need.season}</p>
@@ -188,8 +187,8 @@ function InfoRow({ label, value }: { label: string; value: ReactNode }) {
 
 function Metric({ label, value, compact = false }: { label: string; value: ReactNode; compact?: boolean }) {
   return (
-    <div className="panel px-5 py-4">
-      <p className="text-sm font-medium text-slate-500">{label}</p>
+    <div className="metric-card">
+      <p className="metric-kicker">{label}</p>
       <p className={compact ? "mt-2 text-xl font-black text-navy-950" : "mt-2 text-3xl font-black text-navy-950"}>
         {value}
       </p>

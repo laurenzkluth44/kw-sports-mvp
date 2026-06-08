@@ -60,7 +60,7 @@ export function AppShell({
 
             <div className="flex flex-wrap items-center gap-2 text-sm">
               {profile.role === "club" ? <LanguageSwitcher locale={locale} label={t.language} /> : null}
-              <span className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-slate-100">
+              <span className="inline-flex min-h-10 items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-slate-100">
                 <Shield className="h-4 w-4 text-brand-300" aria-hidden="true" />
                 {profile.role === "club" ? t.role : ROLE_LABELS[profile.role]}
               </span>
@@ -73,7 +73,7 @@ export function AppShell({
             </div>
           </div>
 
-          <nav className="flex gap-2 overflow-x-auto pb-1">
+          <nav className="flex gap-2 overflow-x-auto rounded-md border border-white/10 bg-white/[0.04] p-1">
             {nav.map((item) => {
               const Icon = item.icon;
 
@@ -82,7 +82,7 @@ export function AppShell({
                   key={item.href}
                   href={item.href}
                   prefetch={false}
-                  className="inline-flex min-h-10 items-center gap-2 rounded-md px-3 py-2 text-sm font-black uppercase text-neutral-200 hover:bg-white/10 hover:text-white"
+                  className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm font-black uppercase text-neutral-200 hover:bg-white/10 hover:text-white"
                 >
                   <Icon className="h-4 w-4" aria-hidden="true" />
                   {item.label}

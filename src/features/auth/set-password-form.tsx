@@ -109,11 +109,7 @@ export function SetPasswordForm() {
 
       {loading ? <p className="text-sm text-neutral-500">Einladung wird geprüft...</p> : null}
 
-      {error ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {error}
-        </div>
-      ) : null}
+      {error ? <div className="alert-error">{error}</div> : null}
 
       <Field label="Neues Passwort" htmlFor="password">
         <Input id="password" name="password" type="password" autoComplete="new-password" minLength={8} required />

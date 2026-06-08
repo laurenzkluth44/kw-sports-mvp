@@ -1,5 +1,15 @@
 import Link from "next/link";
-import { Download, Eye, FileSpreadsheet, Search, Users } from "lucide-react";
+import {
+  AlertTriangle,
+  ClipboardList,
+  Download,
+  Eye,
+  FileSpreadsheet,
+  Search,
+  Target,
+  Users,
+  type LucideIcon
+} from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
 import { PageHeader } from "@/components/ui/page-header";
@@ -86,90 +96,99 @@ export default async function AdminDashboardPage({
       />
 
       <section className="grid gap-3 sm:grid-cols-3">
-        <Metric label="Treffer" value={needs.length} />
-        <Metric label="Offen" value={openCount} />
-        <Metric label="Hohe Priorität" value={highCount} />
+        <Metric icon={ClipboardList} label="Treffer" value={needs.length} caption="Bedarfe im aktuellen Filter" />
+        <Metric icon={Target} label="Offen" value={openCount} caption="Aktuell nicht besetzt" />
+        <Metric icon={AlertTriangle} label="Hohe Priorität" value={highCount} caption="Direkter Handlungsbedarf" tone="danger" />
       </section>
 
       <AdminVisualSummary needs={needs} />
 
       <AdminQuickFilters activeFilters={filters} />
 
-      <form action="/admin" className="panel grid gap-4 p-5 md:grid-cols-4 lg:grid-cols-6">
-        <Field label="Verein" htmlFor="q" className="md:col-span-2">
-          <Input id="q" name="q" defaultValue={filters.q || ""} placeholder="Vereinsname" />
-        </Field>
+      <form action="/admin" className="panel overflow-hidden">
+        <div className="flex flex-col gap-2 border-b border-slate-200 bg-slate-50/80 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="section-heading">Filter</h2>
+            <p className="section-subtitle">Schnell finden, welche Vereine nach Position, Liga oder Saison suchen.</p>
+          </div>
+          <p className="text-xs font-black uppercase tracking-wide text-slate-500">{needs.length} Treffer</p>
+        </div>
+        <div className="grid gap-4 p-5 md:grid-cols-4 lg:grid-cols-6">
+          <Field label="Verein" htmlFor="q" className="md:col-span-2">
+            <Input id="q" name="q" defaultValue={filters.q || ""} placeholder="Vereinsname" />
+          </Field>
 
-        <Field label="Liga" htmlFor="league">
-          <Select id="league" name="league" defaultValue={filters.league || ""}>
-            <option value="">Alle</option>
-            {LEAGUES.map((league) => (
-              <option key={league} value={league}>
-                {league}
-              </option>
-            ))}
-          </Select>
-        </Field>
+          <Field label="Liga" htmlFor="league">
+            <Select id="league" name="league" defaultValue={filters.league || ""}>
+              <option value="">Alle</option>
+              {LEAGUES.map((league) => (
+                <option key={league} value={league}>
+                  {league}
+                </option>
+              ))}
+            </Select>
+          </Field>
 
-        <Field label="Saison" htmlFor="season">
-          <Select id="season" name="season" defaultValue={filters.season || ""}>
-            <option value="">Alle</option>
-            {SEASONS.map((season) => (
-              <option key={season} value={season}>
-                {season}
-              </option>
-            ))}
-          </Select>
-        </Field>
+          <Field label="Saison" htmlFor="season">
+            <Select id="season" name="season" defaultValue={filters.season || ""}>
+              <option value="">Alle</option>
+              {SEASONS.map((season) => (
+                <option key={season} value={season}>
+                  {season}
+                </option>
+              ))}
+            </Select>
+          </Field>
 
-        <Field label="Position" htmlFor="position">
-          <Select id="position" name="position" defaultValue={filters.position || ""}>
-            <option value="">Alle</option>
-            {POSITIONS.map((position) => (
-              <option key={position} value={position}>
-                {position}
-              </option>
-            ))}
-          </Select>
-        </Field>
+          <Field label="Position" htmlFor="position">
+            <Select id="position" name="position" defaultValue={filters.position || ""}>
+              <option value="">Alle</option>
+              {POSITIONS.map((position) => (
+                <option key={position} value={position}>
+                  {position}
+                </option>
+              ))}
+            </Select>
+          </Field>
 
-        <Field label="Status" htmlFor="status">
-          <Select id="status" name="status" defaultValue={filters.status || ""}>
-            <option value="">Alle</option>
-            {STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {STATUS_LABELS[status]}
-              </option>
-            ))}
-          </Select>
-        </Field>
+          <Field label="Status" htmlFor="status">
+            <Select id="status" name="status" defaultValue={filters.status || ""}>
+              <option value="">Alle</option>
+              {STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {STATUS_LABELS[status]}
+                </option>
+              ))}
+            </Select>
+          </Field>
 
-        <Field label="Priorität" htmlFor="priority">
-          <Select id="priority" name="priority" defaultValue={filters.priority || ""}>
-            <option value="">Alle</option>
-            {PRIORITIES.map((priority) => (
-              <option key={priority} value={priority}>
-                {PRIORITY_LABELS[priority]}
-              </option>
-            ))}
-          </Select>
-        </Field>
+          <Field label="Priorität" htmlFor="priority">
+            <Select id="priority" name="priority" defaultValue={filters.priority || ""}>
+              <option value="">Alle</option>
+              {PRIORITIES.map((priority) => (
+                <option key={priority} value={priority}>
+                  {PRIORITY_LABELS[priority]}
+                </option>
+              ))}
+            </Select>
+          </Field>
 
-        <div className="flex items-end gap-2 md:col-span-4 lg:col-span-6">
-          <Button type="submit">
-            <Search className="h-4 w-4" aria-hidden="true" />
-            Filtern
-          </Button>
-          <LinkButton href="/admin" variant="secondary">
-            Zurücksetzen
-          </LinkButton>
+          <div className="flex items-end gap-2 md:col-span-4 lg:col-span-6">
+            <Button type="submit">
+              <Search className="h-4 w-4" aria-hidden="true" />
+              Filtern
+            </Button>
+            <LinkButton href="/admin" variant="secondary">
+              Zurücksetzen
+            </LinkButton>
+          </div>
         </div>
       </form>
 
       <AdminNeedsInbox needs={inboxNeeds} />
 
       <section className="panel overflow-hidden">
-        <div className="hidden grid-cols-[1.25fr_0.8fr_0.7fr_0.8fr_1fr_0.5fr] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase text-slate-500 lg:grid">
+        <div className="table-header hidden grid-cols-[1.25fr_0.8fr_0.7fr_0.8fr_1fr_0.5fr] gap-4 lg:grid">
           <span>Verein</span>
           <span>Liga</span>
           <span>Position</span>
@@ -185,7 +204,7 @@ export default async function AdminDashboardPage({
             needs.map((need) => (
               <article
                 key={need.id}
-                className="grid gap-4 px-5 py-4 lg:grid-cols-[1.25fr_0.8fr_0.7fr_0.8fr_1fr_0.5fr] lg:items-center"
+                className="data-row grid gap-4 lg:grid-cols-[1.25fr_0.8fr_0.7fr_0.8fr_1fr_0.5fr] lg:items-center"
               >
                 <div>
                   <Link
@@ -198,9 +217,18 @@ export default async function AdminDashboardPage({
                     {need.clubs.city} · benötigt ab {formatDate(need.needed_from_date)}
                   </p>
                 </div>
-                <p className="text-sm font-medium text-slate-700">{need.clubs.league}</p>
-                <p className="text-base font-bold text-navy-950">{need.position}</p>
-                <p className="text-sm text-slate-700">{need.season}</p>
+                <p className="text-sm font-medium text-slate-700">
+                  <span className="mr-2 text-xs font-black uppercase text-slate-400 lg:hidden">Liga</span>
+                  {need.clubs.league}
+                </p>
+                <p className="text-base font-bold text-navy-950">
+                  <span className="mr-2 text-xs font-black uppercase text-slate-400 lg:hidden">Position</span>
+                  {need.position}
+                </p>
+                <p className="text-sm text-slate-700">
+                  <span className="mr-2 text-xs font-black uppercase text-slate-400 lg:hidden">Saison</span>
+                  {need.season}
+                </p>
                 <NeedBadges need={need} />
                 <div className="flex justify-start lg:justify-end">
                   <Link
@@ -221,11 +249,37 @@ export default async function AdminDashboardPage({
   );
 }
 
-function Metric({ label, value }: { label: string; value: number }) {
+function Metric({
+  icon: Icon,
+  label,
+  value,
+  caption,
+  tone = "default"
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: number;
+  caption: string;
+  tone?: "default" | "danger";
+}) {
   return (
-    <div className="panel px-5 py-4">
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className="mt-2 text-3xl font-bold text-navy-950">{value}</p>
+    <div className="metric-card">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="metric-kicker">{label}</p>
+          <p className="metric-value">{value}</p>
+        </div>
+        <span
+          className={
+            tone === "danger"
+              ? "flex h-10 w-10 items-center justify-center rounded-md bg-red-50 text-red-700"
+              : "flex h-10 w-10 items-center justify-center rounded-md bg-brand-50 text-brand-700"
+          }
+        >
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </span>
+      </div>
+      <p className="mt-3 text-sm leading-5 text-slate-500">{caption}</p>
     </div>
   );
 }

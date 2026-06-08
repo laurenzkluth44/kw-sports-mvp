@@ -19,11 +19,12 @@ type ChartDatum = {
 const chartColors = [
   "#0b55e8",
   "#073aa5",
-  "#7aa8ff",
+  "#16a34a",
+  "#f59e0b",
   "#10100e",
-  "#4b4b45",
   "#9ca3af",
-  "#1f2937",
+  "#7aa8ff",
+  "#4b4b45",
   "#60a5fa",
   "#d1d5db"
 ];
@@ -66,11 +67,18 @@ export function AdminVisualSummary({ needs }: { needs: PlayerNeedWithClub[] }) {
   const recentlyCreatedCount = needs.filter((need) => isWithinDays(need.created_at, 30)).length;
   const staleCount = needs.filter((need) => need.last_confirmed_at && !isWithinDays(need.last_confirmed_at, 30)).length;
   const clubsWithNeedsCount = new Set(needs.map((need) => need.club_id)).size;
-  const topSeason = seasonData.sort((a, b) => b.value - a.value)[0];
-  const topStatus = statusData.sort((a, b) => b.value - a.value)[0];
+  const topSeason = [...seasonData].sort((a, b) => b.value - a.value)[0];
+  const topStatus = [...statusData].filter((item) => item.value > 0).sort((a, b) => b.value - a.value)[0];
 
   return (
     <section className="space-y-4">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="section-heading">Visual Summary</h2>
+          <p className="section-subtitle">Die wichtigsten Muster im aktuellen Admin-Filter auf einen Blick.</p>
+        </div>
+      </div>
+
       <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_0.85fr]">
         <SummaryPanel title="Positionen" subtitle="Gesuchte Positionen im aktuellen Filter">
           <div className="grid gap-5 md:grid-cols-[180px_1fr] md:items-center">
@@ -109,12 +117,12 @@ function SummaryPanel({
   children: ReactNode;
 }) {
   return (
-    <div className="panel p-5">
-      <div className="mb-5">
-        <h2 className="text-lg font-black uppercase text-navy-950">{title}</h2>
-        <p className="mt-1 text-sm text-neutral-500">{subtitle}</p>
+    <div className="panel overflow-hidden">
+      <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-4">
+        <h3 className="section-heading">{title}</h3>
+        <p className="section-subtitle">{subtitle}</p>
       </div>
-      {children}
+      <div className="p-5">{children}</div>
     </div>
   );
 }
@@ -128,14 +136,14 @@ function DonutChart({ data }: { data: ChartDatum[] }) {
 
   if (total === 0) {
     return (
-      <div className="flex h-44 items-center justify-center rounded-md bg-neutral-50 text-sm text-neutral-500">
+      <div className="flex h-44 items-center justify-center rounded-md border border-dashed border-slate-200 bg-slate-50 text-sm text-neutral-500">
         Keine Daten
       </div>
     );
   }
 
   return (
-    <div className="relative flex h-44 items-center justify-center">
+    <div className="relative flex h-44 items-center justify-center rounded-md bg-slate-50/80">
       <svg viewBox="0 0 128 128" className="h-44 w-44 -rotate-90" role="img" aria-label="Positionen Donut Chart">
         <circle cx="64" cy="64" r={radius} fill="none" stroke="#e5e7eb" strokeWidth={stroke} />
         {data.map((item) => {
@@ -171,7 +179,7 @@ function Legend({ data, emptyText }: { data: ChartDatum[]; emptyText: string }) 
   return (
     <div className="space-y-2">
       {data.map((item) => (
-        <div key={item.label} className="flex items-center justify-between gap-3 text-sm">
+        <div key={item.label} className="flex items-center justify-between gap-3 rounded-md px-2 py-1 text-sm hover:bg-slate-50">
           <span className="flex min-w-0 items-center gap-2">
             <span className="h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: item.color }} />
             <span className="truncate font-medium text-neutral-700">{item.label}</span>
@@ -203,12 +211,12 @@ function BarChart({
         const width = max > 0 ? Math.max((item.value / max) * 100, 8) : 0;
 
         return (
-          <div key={item.label} className="space-y-1.5">
+          <div key={item.label} className="space-y-1.5 rounded-md px-2 py-1 hover:bg-slate-50">
             <div className="flex items-center justify-between gap-3 text-sm">
               <span className="truncate font-medium text-neutral-700">{item.label}</span>
               <span className="font-black text-navy-950">{item.value}</span>
             </div>
-            <div className="h-3 overflow-hidden rounded-full bg-neutral-100">
+            <div className="h-3 overflow-hidden rounded-full bg-slate-100">
               <div
                 className="h-full rounded-full"
                 style={{
@@ -234,7 +242,13 @@ function MiniMetric({
   tone?: "default" | "warning";
 }) {
   return (
-    <div className={tone === "warning" ? "rounded-md bg-amber-50 px-4 py-3" : "rounded-md bg-neutral-50 px-4 py-3"}>
+    <div
+      className={
+        tone === "warning"
+          ? "rounded-md border border-amber-200 bg-amber-50 px-4 py-3"
+          : "rounded-md border border-slate-200 bg-white px-4 py-3 shadow-sm"
+      }
+    >
       <p className={tone === "warning" ? "text-xs font-black uppercase text-amber-700" : "text-xs font-black uppercase text-neutral-500"}>
         {label}
       </p>

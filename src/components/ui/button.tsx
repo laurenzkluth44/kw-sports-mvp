@@ -6,10 +6,10 @@ const baseClasses =
   "inline-flex min-h-10 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-black transition focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-55";
 
 const variants = {
-  primary: "bg-navy-950 text-white shadow-sm hover:bg-navy-800",
+  primary: "border border-navy-950 bg-navy-950 text-white shadow-sm hover:bg-navy-800",
   secondary: "border border-slate-200 bg-white text-navy-950 shadow-sm hover:border-brand-100 hover:bg-brand-50",
-  accent: "bg-[#0b55e8] text-white shadow-sm shadow-[#0b55e8]/25 hover:bg-[#074bd3]",
-  ghost: "text-neutral-700 hover:bg-white/10 hover:text-white"
+  accent: "border border-[#0b55e8] bg-[#0b55e8] text-white shadow-sm shadow-[#0b55e8]/25 hover:bg-[#074bd3]",
+  ghost: "border border-transparent text-neutral-700 hover:bg-white/10 hover:text-white"
 } as const;
 
 type Variant = keyof typeof variants;

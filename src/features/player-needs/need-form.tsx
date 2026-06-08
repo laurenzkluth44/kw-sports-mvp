@@ -36,11 +36,14 @@ export function NeedForm({
     <form action={action} className="panel overflow-hidden">
       {need ? <input type="hidden" name="id" value={need.id} /> : null}
 
+      <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-4">
+        <h2 className="section-heading">{t.coreDetails}</h2>
+        <p className="section-subtitle">{t.coreDetailsDescription}</p>
+      </div>
+
       <div className="grid gap-5 p-5 md:grid-cols-2">
         {error ? (
-          <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 md:col-span-2">
-            {t.saveError}
-          </div>
+          <div className="alert-error md:col-span-2">{t.saveError}</div>
         ) : null}
 
         {clubs ? (
@@ -132,7 +135,7 @@ export function NeedForm({
       </div>
 
       <details className="border-t border-slate-200">
-        <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-navy-950">
+        <summary className="cursor-pointer bg-white px-5 py-4 text-sm font-black uppercase text-navy-950 transition hover:bg-brand-50">
           {t.sportDetails}
         </summary>
         <div className="grid gap-5 px-5 pb-5 md:grid-cols-3">
@@ -182,7 +185,7 @@ export function NeedForm({
       </details>
 
       <details className="border-t border-slate-200">
-        <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-navy-950">
+        <summary className="cursor-pointer bg-white px-5 py-4 text-sm font-black uppercase text-navy-950 transition hover:bg-brand-50">
           {t.budget}
         </summary>
         <div className="grid gap-5 px-5 pb-5 md:grid-cols-[1fr_0.5fr]">

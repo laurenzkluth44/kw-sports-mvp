@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { Copy, Edit, Plus } from "lucide-react";
+import { AlertTriangle, Copy, Edit, MessageCircle, Plus, Target, type LucideIcon } from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { NeedBadges } from "@/features/player-needs/need-badges";
 import { NeedStatusForm } from "@/features/player-needs/need-status-form";
 import { duplicateClubNeedAction } from "@/features/player-needs/actions";
-import { CLUB_STATUS_LABELS, clubCopy } from "@/lib/club-i18n";
+import { CLUB_POSITION_LABELS, CLUB_STATUS_LABELS, clubCopy } from "@/lib/club-i18n";
 import { getClubLocale } from "@/lib/club-locale";
 import { requireClubUser } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
@@ -20,6 +20,7 @@ export default async function ClubDashboardPage({
   const { supabase, profile } = await requireClubUser();
   const locale = await getClubLocale();
   const t = clubCopy[locale].dashboard;
+  const positionLabels = CLUB_POSITION_LABELS[locale];
   const params = await searchParams;
 
   const { data: needs = [] } = await supabase
@@ -49,20 +50,16 @@ export default async function ClubDashboardPage({
       />
 
       {params.error === "status" ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {t.statusError}
-        </div>
+        <div className="alert-error">{t.statusError}</div>
       ) : null}
       {params.error === "duplicate" ? (
-        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {t.duplicateError}
-        </div>
+        <div className="alert-error">{t.duplicateError}</div>
       ) : null}
 
       <section className="grid gap-3 sm:grid-cols-3">
-        <Metric label={t.open} value={openCount} />
-        <Metric label={t.talks} value={talksCount} />
-        <Metric label={t.highPriority} value={highCount} />
+        <Metric icon={Target} label={t.open} value={openCount} />
+        <Metric icon={MessageCircle} label={t.talks} value={talksCount} />
+        <Metric icon={AlertTriangle} label={t.highPriority} value={highCount} tone="danger" />
       </section>
 
       {typedNeeds.length === 0 ? (
@@ -78,7 +75,7 @@ export default async function ClubDashboardPage({
         />
       ) : (
         <section className="panel overflow-hidden">
-          <div className="hidden grid-cols-[0.7fr_0.7fr_0.8fr_1.35fr_auto] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase text-slate-500 lg:grid">
+          <div className="table-header hidden grid-cols-[0.7fr_0.7fr_0.8fr_1.35fr_auto] gap-4 lg:grid">
             <span>{t.position}</span>
             <span>{t.season}</span>
             <span>{t.neededFrom}</span>
@@ -93,10 +90,10 @@ export default async function ClubDashboardPage({
               return (
                 <article
                   key={need.id}
-                  className="grid gap-4 px-5 py-4 lg:grid-cols-[0.7fr_0.7fr_0.8fr_1.35fr_auto] lg:items-center"
+                  className="data-row grid gap-4 lg:grid-cols-[0.7fr_0.7fr_0.8fr_1.35fr_auto] lg:items-center"
                 >
                   <div>
-                    <p className="text-base font-bold text-navy-950">{need.position}</p>
+                    <p className="text-base font-bold text-navy-950">{positionLabels[need.position]}</p>
                     <p className="mt-1 text-sm text-slate-500 lg:hidden">{need.season}</p>
                     {stale ? (
                       <p className="mt-2 rounded-md bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700">
@@ -114,7 +111,7 @@ export default async function ClubDashboardPage({
                   <div className="flex flex-wrap justify-start gap-2 lg:justify-end">
                     <form action={duplicateClubNeedAction}>
                       <input type="hidden" name="id" value={need.id} />
-                      <Button type="submit" variant="secondary" className="px-3" title={t.copyTitle}>
+                      <Button type="submit" variant="secondary" className="px-3 shadow-sm" title={t.copyTitle}>
                         <Copy className="h-4 w-4" aria-hidden="true" />
                         {t.copy}
                       </Button>
@@ -135,7 +132,7 @@ export default async function ClubDashboardPage({
         </section>
       )}
 
-      <section className="panel px-5 py-4 text-sm text-slate-600">
+      <section className="panel-muted px-5 py-4 text-sm leading-6 text-slate-600">
         {t.footer} {t.statusFilter}: {CLUB_STATUS_LABELS[locale].offen}, {CLUB_STATUS_LABELS[locale].in_gespraechen},{" "}
         {CLUB_STATUS_LABELS[locale].besetzt}.
       </section>
@@ -151,11 +148,34 @@ function isStaleNeed(lastConfirmedAt: string) {
   return Date.now() - lastConfirmed > thirtyDays;
 }
 
-function Metric({ label, value }: { label: string; value: number }) {
+function Metric({
+  icon: Icon,
+  label,
+  value,
+  tone = "default"
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: number;
+  tone?: "default" | "danger";
+}) {
   return (
-    <div className="panel px-5 py-4">
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className="mt-2 text-3xl font-bold text-navy-950">{value}</p>
+    <div className="metric-card">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="metric-kicker">{label}</p>
+          <p className="metric-value">{value}</p>
+        </div>
+        <span
+          className={
+            tone === "danger"
+              ? "flex h-10 w-10 items-center justify-center rounded-md bg-red-50 text-red-700"
+              : "flex h-10 w-10 items-center justify-center rounded-md bg-brand-50 text-brand-700"
+          }
+        >
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </span>
+      </div>
     </div>
   );
 }

@@ -87,7 +87,7 @@ export default async function AdminNeedDetailPage({
         </div>
 
         <div className="panel p-5">
-          <h2 className="text-lg font-bold text-navy-950">Profil</h2>
+          <h2 className="section-heading">Profil</h2>
           <dl className="mt-5 grid gap-4 sm:grid-cols-2">
             <InfoRow label="Beschreibung" value={need.description || "-"} wide />
             <InfoRow label="Alter" value={formatRange(need.age_min, need.age_max)} />
@@ -103,7 +103,7 @@ export default async function AdminNeedDetailPage({
       </section>
 
       <section className="panel overflow-hidden">
-        <div className="flex gap-2 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase text-slate-500">
+        <div className="flex gap-2 border-b border-slate-200 bg-slate-50/80 px-5 py-3 text-xs font-black uppercase text-slate-500">
           <span className="rounded-md bg-white px-3 py-2 text-navy-950 shadow-sm">Notizen</span>
           <span className="px-3 py-2">Verlauf</span>
         </div>
@@ -115,9 +115,7 @@ export default async function AdminNeedDetailPage({
             </div>
 
             {query.error === "note" ? (
-              <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                Notiz konnte nicht gespeichert werden.
-              </div>
+              <div className="alert-error mt-4">Notiz konnte nicht gespeichert werden.</div>
             ) : null}
 
             <form action={createAdminNoteAction} className="mt-4 space-y-3">
@@ -173,8 +171,8 @@ export default async function AdminNeedDetailPage({
 
 function SummaryItem({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="panel px-4 py-3">
-      <p className="text-xs font-black uppercase text-slate-500">{label}</p>
+    <div className="metric-card px-4 py-3">
+      <p className="metric-kicker">{label}</p>
       <p className="mt-1 truncate text-base font-black text-navy-950">{value}</p>
     </div>
   );
