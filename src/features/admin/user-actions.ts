@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getSiteUrl } from "@/lib/site-url";
 import type { AppRole } from "@/types/domain";
 
 export async function createUserAction(formData: FormData) {
@@ -76,14 +77,13 @@ export async function inviteUserAction(formData: FormData) {
 
   try {
     const adminClient = createSupabaseAdminClient();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
     const { data, error: authError } = await adminClient.auth.admin.inviteUserByEmail(email, {
       data: {
         name,
         role,
         club_id: role === "club" ? clubId : null
       },
-      redirectTo: siteUrl ? `${siteUrl}/login` : undefined
+      redirectTo: `${getSiteUrl()}/set-password`
     });
 
     if (authError || !data.user) throw authError;

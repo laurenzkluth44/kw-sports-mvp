@@ -16,6 +16,8 @@ Interne B2B-Webplattform für KW Sports GmbH. Vereine tragen offene Kaderbedarfe
 ```txt
 src/app
   (auth)/login                  Login
+  (auth)/set-password           Einladung annehmen und Passwort setzen
+  auth/callback                 Supabase Auth Callback
   (protected)/club              Club Dashboard
   (protected)/club/needs        Bedarf erstellen/bearbeiten
   (protected)/admin             Admin Dashboard
@@ -50,7 +52,9 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 SUPABASE_SERVICE_ROLE_KEY=...
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` wird nur serverseitig für `Admin > Nutzer anlegen` und `Einladung senden` verwendet.
+`NEXT_PUBLIC_SITE_URL` ist lokal hilfreich. Auf Vercel kann die App automatisch `VERCEL_PROJECT_PRODUCTION_URL` oder `VERCEL_URL` verwenden, wenn System Environment Variables aktiviert sind.
+
+`SUPABASE_SERVICE_ROLE_KEY` wird nur serverseitig für `Admin > Nutzer anlegen`, `Einladung senden`, `Zugang revoken` und `Verein löschen` verwendet.
 
 ## Supabase Setup
 
@@ -86,10 +90,13 @@ Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3
 - Club Detailseite mit KPIs, Profil-Vollständigkeit und letzter Aktualisierung.
 - Excel Export mit fixierter Kopfzeile, Autofilter und Spaltenbreiten.
 - Supabase-Einladungen für Vereinsnutzer, sofern Auth E-Mail/SMTP konfiguriert ist.
+- Admins können Vereinszugänge widerrufen und Vereine inklusive Zugängen löschen.
 
 ## Wichtige Routen
 
 - `/login`
+- `/set-password`
+- `/auth/callback`
 - `/club`
 - `/club/needs/new`
 - `/club/needs/[id]/edit`
@@ -125,26 +132,27 @@ Für Vercel:
 
 1. Repository importieren.
 2. Supabase-Umgebungsvariablen setzen.
-3. `NEXT_PUBLIC_SITE_URL` auf die finale Produktionsdomain setzen.
-4. Supabase Auth URL Configuration auf die Produktionsdomain setzen.
-5. Build Command: `npm run build`
-6. Output: Next.js Standard
+3. In Vercel `Settings > Environment Variables` die Option `Automatically expose System Environment Variables` aktivieren.
+4. Optional `NEXT_PUBLIC_SITE_URL` auf die finale Produktionsdomain setzen. Ohne diese Variable nutzt die App automatisch Vercel-Systemvariablen.
+5. Supabase Auth URL Configuration auf die Produktionsdomain setzen.
+6. Build Command: `npm run build`
+7. Output: Next.js Standard
 
 Produktionsvariablen:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
-NEXT_PUBLIC_SITE_URL=https://deine-domain.de
+NEXT_PUBLIC_SITE_URL=https://deine-domain.de # optional auf Vercel
 SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 ```
 
 Vor dem Go-live:
 
-- Alle drei Migrationen im Production-Supabase-Projekt ausführen.
+- Alle Migrationen im Production-Supabase-Projekt ausführen.
 - `real-clubs-2025-26.sql` ausführen.
 - Admin-Auth-User erstellen und `bootstrap-admin.sql` ausführen.
-- In Supabase Auth die Produktionsdomain als Site URL und Redirect URL eintragen.
+- In Supabase Auth die Produktionsdomain als Site URL und Redirect URL eintragen, inklusive `/set-password` und `/auth/callback`.
 - Service Role Key nur als Server-Environment-Variable im Hosting speichern.
 
 ## MVP-Grenzen

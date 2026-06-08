@@ -111,9 +111,9 @@ export default async function ClubDashboardPage({
                   <div className="flex flex-wrap justify-start gap-2 lg:justify-end">
                     <form action={duplicateClubNeedAction}>
                       <input type="hidden" name="id" value={need.id} />
-                      <Button type="submit" variant="secondary" className="h-10 w-10 px-0" title="Bedarf kopieren">
+                      <Button type="submit" variant="secondary" className="px-3" title="Bedarf als Vorlage kopieren">
                         <Copy className="h-4 w-4" aria-hidden="true" />
-                        <span className="sr-only">Bedarf kopieren</span>
+                        Als Vorlage kopieren
                       </Button>
                     </form>
                     <Link

@@ -1,16 +1,26 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { Eye } from "lucide-react";
+import { Eye, Trash2, UserX } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Field, Input } from "@/components/ui/form";
 import { PageHeader } from "@/components/ui/page-header";
+import { deleteClubAction, revokeClubUserAction } from "@/features/admin/club-actions";
 import { NeedBadges } from "@/features/player-needs/need-badges";
 import { ROLE_LABELS } from "@/lib/constants";
 import { requireAdmin } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
 import type { Club, PlayerNeed, Profile } from "@/types/domain";
 
-export default async function AdminClubDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AdminClubDetailPage({
+  params,
+  searchParams
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string; revoked?: string }>;
+}) {
   const { id } = await params;
+  const query = await searchParams;
   const { supabase } = await requireAdmin();
 
   const [{ data: club }, { data: needs = [] }, { data: users = [] }] = await Promise.all([
@@ -36,6 +46,17 @@ export default async function AdminClubDetailPage({ params }: { params: Promise<
         title={typedClub.name}
         description={`${typedClub.city}, ${typedClub.country}`}
       />
+
+      {query.error ? (
+        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {clubErrorMessage(query.error)}
+        </div>
+      ) : null}
+      {query.revoked ? (
+        <div className="rounded-md border border-brand-100 bg-brand-100 px-3 py-2 text-sm text-brand-700">
+          Zugang wurde widerrufen.
+        </div>
+      ) : null}
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <Metric label="Aktive Bedarfe" value={activeNeeds} />
@@ -75,15 +96,45 @@ export default async function AdminClubDetailPage({ params }: { params: Promise<
                 <p className="text-sm text-slate-500">Noch keine Nutzer für diesen Verein.</p>
               ) : (
                 typedUsers.map((user) => (
-                  <div key={user.id} className="rounded-md border border-slate-200 p-3">
-                    <p className="font-semibold text-navy-950">{user.name}</p>
-                    <p className="text-sm text-slate-500">{user.email}</p>
-                    <p className="mt-1 text-xs font-semibold uppercase text-slate-500">{ROLE_LABELS[user.role]}</p>
+                  <div key={user.id} className="grid gap-3 rounded-md border border-slate-200 p-3 sm:grid-cols-[1fr_auto] sm:items-center">
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-navy-950">{user.name}</p>
+                      <p className="break-words text-sm text-slate-500">{user.email}</p>
+                      <p className="mt-1 text-xs font-semibold uppercase text-slate-500">{ROLE_LABELS[user.role]}</p>
+                    </div>
+                    <form action={revokeClubUserAction}>
+                      <input type="hidden" name="user_id" value={user.id} />
+                      <input type="hidden" name="club_id" value={typedClub.id} />
+                      <Button type="submit" variant="secondary" className="w-full border-red-200 text-red-700 hover:bg-red-50 sm:w-auto">
+                        <UserX className="h-4 w-4" aria-hidden="true" />
+                        Zugang revoken
+                      </Button>
+                    </form>
                   </div>
                 ))
               )}
             </div>
           </div>
+
+          <details className="panel overflow-hidden border-red-200">
+            <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-red-700">
+              Verein löschen
+            </summary>
+            <form action={deleteClubAction} className="space-y-4 border-t border-red-100 p-5">
+              <input type="hidden" name="club_id" value={typedClub.id} />
+              <input type="hidden" name="club_name" value={typedClub.name} />
+              <p className="text-sm leading-6 text-slate-600">
+                Löscht den Verein, alle Bedarfe und widerruft alle Zugänge dieses Vereins. Zur Bestätigung den Vereinsnamen exakt eingeben.
+              </p>
+              <Field label="Vereinsname bestätigen" htmlFor="confirmation">
+                <Input id="confirmation" name="confirmation" placeholder={typedClub.name} required />
+              </Field>
+              <Button type="submit" className="bg-red-700 hover:bg-red-800">
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
+                Verein endgültig löschen
+              </Button>
+            </form>
+          </details>
         </div>
 
         <section className="panel overflow-hidden">
@@ -117,6 +168,13 @@ export default async function AdminClubDetailPage({ params }: { params: Promise<
       </section>
     </div>
   );
+}
+
+function clubErrorMessage(error: string) {
+  if (error === "confirm") return "Bitte den Vereinsnamen exakt eingeben.";
+  if (error === "revoke") return "Zugang konnte nicht widerrufen werden.";
+  if (error === "delete") return "Verein konnte nicht gelöscht werden.";
+  return "Aktion konnte nicht ausgeführt werden.";
 }
 
 function InfoRow({ label, value }: { label: string; value: ReactNode }) {
