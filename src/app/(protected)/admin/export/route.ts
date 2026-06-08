@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
     .order("created_at", { ascending: false });
 
   if (filters.q) query = query.ilike("clubs.name", `%${filters.q}%`);
+  if (filters.country) query = query.eq("clubs.country", filters.country);
   if (filters.league) query = query.eq("clubs.league", filters.league);
   if (filters.season) query = query.eq("season", filters.season);
   if (filters.position) query = query.eq("position", filters.position);

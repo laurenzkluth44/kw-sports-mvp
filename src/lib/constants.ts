@@ -6,8 +6,14 @@ export const LEAGUES = [
   "3. Liga Nord-Ost",
   "3. Liga Süd-West",
   "3. Liga Süd",
+  "Starligue",
+  "Håndboldligaen",
+  "Liga ASOBAL",
+  "Quickline Handball League",
   "Andere"
 ] as const;
+
+export const COUNTRIES = ["Deutschland", "Frankreich", "Dänemark", "Spanien", "Schweiz"] as const;
 
 export const SEASONS = ["2025/26", "2026/27", "2027/28", "2028/29"] as const;
 

@@ -5,12 +5,14 @@ import { CheckCircle2, Copy, MailPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { ClubCascadeSelect } from "@/features/admin/club-cascade-select";
 import { inviteUserAction, type InviteUserActionState } from "@/features/admin/user-actions";
 import { ROLE_LABELS } from "@/lib/constants";
 
 type InviteClubOption = {
   id: string;
   name: string;
+  country: string;
   league: string;
 };
 
@@ -80,16 +82,13 @@ export function InviteUserForm({ clubs }: { clubs: InviteClubOption[] }) {
             <option value="admin">{ROLE_LABELS.admin}</option>
           </Select>
         </Field>
-        <Field label="Verein" htmlFor="invite_club_id">
-          <Select id="invite_club_id" name="invite_club_id" defaultValue="">
-            <option value="">Kein Verein</option>
-            {clubs.map((club) => (
-              <option key={club.id} value={club.id}>
-                {club.name} · {club.league}
-              </option>
-            ))}
-          </Select>
-        </Field>
+        <ClubCascadeSelect
+          clubs={clubs}
+          fieldName="invite_club_id"
+          idPrefix="invite_club"
+          emptyClubLabel="Kein Verein / Admin"
+          clubClassName="md:col-span-2"
+        />
         <div className="md:col-span-2">
           <SubmitButton pendingLabel="Einladung wird erstellt...">
             <MailPlus className="h-4 w-4" aria-hidden="true" />

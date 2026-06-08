@@ -24,7 +24,8 @@ import {
   SEASONS,
   STATUSES,
   PRIORITY_LABELS,
-  STATUS_LABELS
+  STATUS_LABELS,
+  COUNTRIES
 } from "@/lib/constants";
 import { requireAdmin } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
@@ -46,6 +47,7 @@ export default async function AdminDashboardPage({
     .order("created_at", { ascending: false });
 
   if (filters.q) query = query.ilike("clubs.name", `%${filters.q}%`);
+  if (filters.country) query = query.eq("clubs.country", filters.country);
   if (filters.league) query = query.eq("clubs.league", filters.league);
   if (filters.season) query = query.eq("season", filters.season);
   if (filters.position) query = query.eq("position", filters.position);
@@ -113,9 +115,20 @@ export default async function AdminDashboardPage({
           </div>
           <p className="text-xs font-black uppercase tracking-wide text-slate-500">{needs.length} Treffer</p>
         </div>
-        <div className="grid gap-4 p-5 md:grid-cols-4 lg:grid-cols-6">
+        <div className="grid gap-4 p-5 md:grid-cols-4 lg:grid-cols-8">
           <Field label="Verein" htmlFor="q" className="md:col-span-2">
             <Input id="q" name="q" defaultValue={filters.q || ""} placeholder="Vereinsname" />
+          </Field>
+
+          <Field label="Land" htmlFor="country">
+            <Select id="country" name="country" defaultValue={filters.country || ""}>
+              <option value="">Alle</option>
+              {COUNTRIES.map((country) => (
+                <option key={country} value={country}>
+                  {country}
+                </option>
+              ))}
+            </Select>
           </Field>
 
           <Field label="Liga" htmlFor="league">
@@ -173,7 +186,7 @@ export default async function AdminDashboardPage({
             </Select>
           </Field>
 
-          <div className="flex items-end gap-2 md:col-span-4 lg:col-span-6">
+          <div className="flex items-end gap-2 md:col-span-4 lg:col-span-8">
             <Button type="submit">
               <Search className="h-4 w-4" aria-hidden="true" />
               Filtern

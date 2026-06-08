@@ -32,6 +32,7 @@ src/types                       Domain- und Supabase-Typen
 supabase/migrations             Schema, RLS, Policies
 supabase/seed.sql               Beispielvereine und Beispielbedarfe
 supabase/real-clubs-2025-26.sql Reale Clubs der 1., 2. und 3. Liga 2025/26
+supabase/international-clubs-2025-26.sql Reale Erstliga-Clubs aus FR, DK, ES und CH 2025/26
 supabase/remove-old-demo-clubs.sql Sicheres Entfernen alter Demo-Vereine
 ```
 
@@ -62,14 +63,17 @@ SUPABASE_SERVICE_ROLE_KEY=...
 2. SQL aus `supabase/migrations/0001_init.sql` ausführen.
 3. SQL aus `supabase/migrations/0002_add_third_league_staffeln.sql` ausführen.
 4. SQL aus `supabase/migrations/0003_admin_productivity.sql` ausführen.
-5. Reale Clubs mit `supabase/real-clubs-2025-26.sql` laden.
-6. Optional Beispielbedarfe mit `supabase/seed.sql` laden.
-7. Optional alte Demo-Vereine mit `supabase/remove-old-demo-clubs.sql` entfernen.
-8. Ersten Auth-User in Supabase Auth erstellen.
-9. `supabase/bootstrap-admin.sql` mit der Auth-User-UUID ausführen.
-10. Danach können weitere Club User im Admin-Bereich angelegt oder eingeladen werden.
+5. SQL aus `supabase/migrations/0004_remove_saved_admin_filters.sql` ausführen.
+6. SQL aus `supabase/migrations/0005_add_international_top_leagues.sql` ausführen.
+7. Reale deutsche Clubs mit `supabase/real-clubs-2025-26.sql` laden.
+8. Reale internationale Clubs mit `supabase/international-clubs-2025-26.sql` laden.
+9. Optional Beispielbedarfe mit `supabase/seed.sql` laden.
+10. Optional alte Demo-Vereine mit `supabase/remove-old-demo-clubs.sql` entfernen.
+11. Ersten Auth-User in Supabase Auth erstellen.
+12. `supabase/bootstrap-admin.sql` mit der Auth-User-UUID ausführen.
+13. Danach können weitere Club User im Admin-Bereich angelegt oder eingeladen werden.
 
-Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3.-Liga-Staffeln bereits enthalten. `0002_add_third_league_staffeln.sql` ist vor allem für bestehende Supabase-Projekte gedacht.
+Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3.-Liga-Staffeln und die internationalen Erstliga-Enums bereits enthalten. `0002_add_third_league_staffeln.sql` und `0005_add_international_top_leagues.sql` sind vor allem für bestehende Supabase-Projekte gedacht.
 
 ## Sicherheit
 
@@ -84,6 +88,7 @@ Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3
 ## Produktivitätserweiterungen
 
 - Admin Visual Summary mit Positionen, Ligen, Prioritäten, Saisons, Status und Datenfrische.
+- Admin Filter nach Land, Liga, Saison, Position, Status und Priorität.
 - Interne Admin-Notizen pro Bedarf.
 - Audit Log für Bedarf-Erstellungen, Änderungen und Löschungen.
 - Club Dashboard mit Duplizieren, Statusnotiz und Pflegehinweis.
@@ -119,6 +124,15 @@ Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3
 
 Die Datei ist idempotent: Sie kann erneut ausgeführt werden und aktualisiert vorhandene Club-Zeilen über feste UUIDs.
 
+`supabase/international-clubs-2025-26.sql` enthält:
+
+- 16 Teams der französischen Starligue
+- 14 Teams der dänischen Håndboldligaen
+- 16 Teams der spanischen Liga ASOBAL
+- 10 Teams der Schweizer Quickline Handball League
+
+Auch diese Datei ist idempotent und kann bei Bedarf erneut ausgeführt werden.
+
 ## Deployment
 
 Die App ist für Vercel oder jedes Next.js-kompatible Hosting vorbereitet.
@@ -151,6 +165,7 @@ Vor dem Go-live:
 
 - Alle Migrationen im Production-Supabase-Projekt ausführen.
 - `real-clubs-2025-26.sql` ausführen.
+- `international-clubs-2025-26.sql` ausführen.
 - Admin-Auth-User erstellen und `bootstrap-admin.sql` ausführen.
 - In Supabase Auth die Produktionsdomain als Site URL und Redirect URL eintragen, inklusive `/set-password` und `/auth/callback`.
 - Service Role Key nur als Server-Environment-Variable im Hosting speichern.

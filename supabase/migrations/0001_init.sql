@@ -10,6 +10,10 @@ create type public.club_league as enum (
   '3. Liga Nord-Ost',
   '3. Liga Süd-West',
   '3. Liga Süd',
+  'Starligue',
+  'Håndboldligaen',
+  'Liga ASOBAL',
+  'Quickline Handball League',
   'Andere'
 );
 create type public.season_label as enum ('2025/26', '2026/27', '2027/28', '2028/29');
@@ -85,6 +89,7 @@ create table public.player_needs (
 );
 
 create index clubs_name_idx on public.clubs using gin (to_tsvector('simple', name));
+create index clubs_country_idx on public.clubs (country);
 create index clubs_league_idx on public.clubs (league);
 create index users_club_id_idx on public.users (club_id);
 create index player_needs_club_id_idx on public.player_needs (club_id);

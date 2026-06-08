@@ -1,8 +1,9 @@
-import { LEAGUES, POSITIONS, PRIORITIES, SEASONS, STATUSES } from "@/lib/constants";
-import type { League, PlayerNeedStatus, Position, Priority, Season } from "@/types/domain";
+import { COUNTRIES, LEAGUES, POSITIONS, PRIORITIES, SEASONS, STATUSES } from "@/lib/constants";
+import type { Country, League, PlayerNeedStatus, Position, Priority, Season } from "@/types/domain";
 
 export type AdminNeedFilters = {
   q?: string;
+  country?: Country;
   league?: League;
   season?: Season;
   position?: Position;
@@ -20,6 +21,7 @@ export function normalizeAdminNeedFilters(input: Record<string, string | undefin
 
   return {
     q: q || undefined,
+    country: oneOf(input.country, COUNTRIES) as Country | undefined,
     league: oneOf(input.league, LEAGUES) as League | undefined,
     season: oneOf(input.season, SEASONS) as Season | undefined,
     position: oneOf(input.position, POSITIONS) as Position | undefined,

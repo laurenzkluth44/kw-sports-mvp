@@ -2,6 +2,7 @@ import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
 import { PageHeader } from "@/components/ui/page-header";
+import { ClubCascadeSelect } from "@/features/admin/club-cascade-select";
 import { InviteUserForm } from "@/features/admin/invite-user-form";
 import { createUserAction } from "@/features/admin/user-actions";
 import { ROLE_LABELS } from "@/lib/constants";
@@ -58,7 +59,14 @@ export default async function AdminUsersPage({
       ) : null}
 
       <section className="space-y-5">
-        <InviteUserForm clubs={clubRows.map((club) => ({ id: club.id, name: club.name, league: club.league }))} />
+        <InviteUserForm
+          clubs={clubRows.map((club) => ({
+            id: club.id,
+            name: club.name,
+            country: club.country,
+            league: club.league
+          }))}
+        />
 
         <details className="panel overflow-hidden">
           <summary className="cursor-pointer bg-slate-50/80 px-5 py-4 text-sm font-black uppercase text-navy-950 transition hover:bg-brand-50">
@@ -83,16 +91,18 @@ export default async function AdminUsersPage({
                 <option value="admin">{ROLE_LABELS.admin}</option>
               </Select>
             </Field>
-            <Field label="Verein" htmlFor="club_id" className="md:col-span-2">
-              <Select id="club_id" name="club_id" defaultValue="">
-                <option value="">Kein Verein</option>
-                {clubRows.map((club) => (
-                  <option key={club.id} value={club.id}>
-                    {club.name} · {club.league}
-                  </option>
-                ))}
-              </Select>
-            </Field>
+            <ClubCascadeSelect
+              clubs={clubRows.map((club) => ({
+                id: club.id,
+                name: club.name,
+                country: club.country,
+                league: club.league
+              }))}
+              fieldName="club_id"
+              idPrefix="direct_club"
+              emptyClubLabel="Kein Verein / Admin"
+              clubClassName="md:col-span-2"
+            />
             <div className="md:col-span-2">
               <Button type="submit">
                 <UserPlus className="h-4 w-4" aria-hidden="true" />
