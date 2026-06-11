@@ -154,6 +154,33 @@ export async function duplicateClubNeedAction(formData: FormData) {
   redirect(`/club/needs/${copyId}/edit`);
 }
 
+export async function createAdminNeedAction(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  let needId = "";
+
+  try {
+    const clubId = parseClubId(formData);
+    const payload = parseNeedFormData(formData);
+    const { data, error } = await supabase
+      .from("player_needs")
+      .insert({
+        ...payload,
+        ...statusTimestamps(payload.status, formData),
+        club_id: clubId
+      })
+      .select("id")
+      .single();
+
+    if (error || !data) throw error;
+    needId = data.id;
+  } catch {
+    redirect("/admin/needs/new?error=save");
+  }
+
+  revalidatePath("/admin");
+  redirect(`/admin/needs/${needId}`);
+}
+
 export async function updateAdminNeedAction(formData: FormData) {
   const { supabase } = await requireAdmin();
   const id = readId(formData);

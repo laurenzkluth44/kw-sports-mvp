@@ -5,6 +5,7 @@ import {
   Download,
   Eye,
   FileSpreadsheet,
+  PlusCircle,
   Search,
   Target,
   Users,
@@ -73,6 +74,10 @@ export default async function AdminDashboardPage({
         description="Zentrale Übersicht über offene Positionen, Saison, Liga und Status."
         actions={
           <>
+            <LinkButton href="/admin/needs/new" variant="primary">
+              <PlusCircle className="h-4 w-4" aria-hidden="true" />
+              Bedarf anlegen
+            </LinkButton>
             <LinkButton href="/admin/users" variant="secondary">
               <Users className="h-4 w-4" aria-hidden="true" />
               Nutzer

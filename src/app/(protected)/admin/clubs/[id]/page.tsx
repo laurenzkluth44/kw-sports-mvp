@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { Eye, Trash2, UserX } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Eye, PlusCircle, Trash2, UserX } from "lucide-react";
+import { Button, LinkButton } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form";
 import { PageHeader } from "@/components/ui/page-header";
 import { deleteClubAction, revokeClubUserAction } from "@/features/admin/club-actions";
@@ -45,6 +45,12 @@ export default async function AdminClubDetailPage({
         eyebrow={typedClub.league}
         title={typedClub.name}
         description={`${typedClub.city}, ${typedClub.country}`}
+        actions={
+          <LinkButton href={`/admin/needs/new?club_id=${typedClub.id}`} variant="primary">
+            <PlusCircle className="h-4 w-4" aria-hidden="true" />
+            Bedarf anlegen
+          </LinkButton>
+        }
       />
 
       {query.error ? (

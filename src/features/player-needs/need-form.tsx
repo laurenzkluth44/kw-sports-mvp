@@ -3,6 +3,7 @@ import { POSITIONS, PRIORITIES, SEASONS, STATUSES, PRIORITY_LABELS, STATUS_LABEL
 import { Button } from "@/components/ui/button";
 import { DateTextInput } from "@/components/ui/date-text-input";
 import { Field, Input, Select, Textarea } from "@/components/ui/form";
+import { ClubCascadeSelect } from "@/features/admin/club-cascade-select";
 import {
   CLUB_POSITION_LABELS,
   CLUB_PRIORITY_LABELS,
@@ -16,6 +17,7 @@ export function NeedForm({
   action,
   need,
   clubs,
+  defaultClubId,
   submitLabel = "Speichern",
   error,
   locale = "de"
@@ -23,6 +25,7 @@ export function NeedForm({
   action: (formData: FormData) => void | Promise<void>;
   need?: PlayerNeed;
   clubs?: Club[];
+  defaultClubId?: string | null;
   submitLabel?: string;
   error?: string | null;
   locale?: ClubLocale;
@@ -47,15 +50,15 @@ export function NeedForm({
         ) : null}
 
         {clubs ? (
-          <Field label={t.club} htmlFor="club_id" className="md:col-span-2">
-            <Select id="club_id" name="club_id" defaultValue={need?.club_id} required>
-              {clubs.map((club) => (
-                <option key={club.id} value={club.id}>
-                  {club.name} · {club.league}
-                </option>
-              ))}
-            </Select>
-          </Field>
+          <ClubCascadeSelect
+            clubs={clubs}
+            fieldName="club_id"
+            defaultClubId={need?.club_id || defaultClubId}
+            required
+            idPrefix="need_club"
+            clubLabel={t.club}
+            clubClassName="md:col-span-2"
+          />
         ) : null}
 
         <Field label={t.season} htmlFor="season">
