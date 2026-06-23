@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { ClubInviteLogo } from "@/features/auth/club-invite-logo";
 import { SetPasswordForm } from "@/features/auth/set-password-form";
 
 export default function SetPasswordPage() {
@@ -7,14 +7,7 @@ export default function SetPasswordPage() {
       <div className="w-full max-w-md">
         <div className="mb-8 flex items-center gap-3">
           <span className="flex h-12 w-36 items-center justify-center rounded-md bg-white px-3 py-2 shadow-soft">
-            <Image
-              src="/kw-sports-logo.png"
-              alt="KW Sports"
-              width={1000}
-              height={326}
-              className="h-full w-full object-contain"
-              priority
-            />
+            <ClubInviteLogo />
           </span>
           <span>
             <span className="block font-black uppercase text-navy-950">Club Needs</span>

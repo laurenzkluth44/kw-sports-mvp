@@ -77,6 +77,7 @@ export async function inviteUserAction(
   const email = String(formData.get("invite_email") || "").trim().toLowerCase();
   const role = String(formData.get("invite_role") || "") as AppRole;
   const clubId = String(formData.get("invite_club_id") || "").trim() || null;
+  const logoDataUrl = String(formData.get("invite_logo") || "");
 
   if (!name || !email || !["admin", "club"].includes(role)) {
     return {
@@ -147,6 +148,10 @@ export async function inviteUserAction(
       throw profileError;
     }
 
+    if (role === "club" && clubId) {
+      await uploadClubLogoFromDataUrl(adminClient, clubId, logoDataUrl);
+    }
+
     revalidatePath("/admin/users");
     return {
       status: "sent",
@@ -159,6 +164,7 @@ export async function inviteUserAction(
       email,
       role,
       clubId,
+      logoDataUrl,
       metadata,
       redirectTo,
       originalError: error
@@ -167,6 +173,45 @@ export async function inviteUserAction(
     revalidatePath("/admin/users");
     return fallback;
   }
+}
+
+const CLUB_LOGO_BUCKET = "club-logos";
+const MAX_LOGO_BYTES = 2_000_000;
+
+// Best-effort: store the (already browser-compressed) logo for a club and record its path.
+// Never throws — a logo problem must not undo a successful invite.
+async function uploadClubLogoFromDataUrl(
+  adminClient: ReturnType<typeof createSupabaseAdminClient>,
+  clubId: string,
+  logoDataUrl: string
+) {
+  if (!logoDataUrl) return;
+
+  const match = /^data:(image\/[a-z+]+);base64,(.+)$/i.exec(logoDataUrl);
+  if (!match) return;
+
+  const contentType = match[1];
+  const buffer = Buffer.from(match[2], "base64");
+  if (buffer.byteLength === 0 || buffer.byteLength > MAX_LOGO_BYTES) {
+    console.error("Club logo rejected (empty or too large)", { clubId, bytes: buffer.byteLength });
+    return;
+  }
+
+  const path = `${clubId}/logo.webp`;
+
+  const { error: uploadError } = await adminClient.storage.from(CLUB_LOGO_BUCKET).upload(path, buffer, {
+    contentType,
+    upsert: true,
+    cacheControl: "3600"
+  });
+
+  if (uploadError) {
+    console.error("Club logo upload failed", uploadError);
+    return;
+  }
+
+  const { error: updateError } = await adminClient.from("clubs").update({ logo_path: path }).eq("id", clubId);
+  if (updateError) console.error("Club logo path update failed", updateError);
 }
 
 async function findExistingProfileByEmail(adminClient: ReturnType<typeof createSupabaseAdminClient>, email: string) {
@@ -200,6 +245,7 @@ async function createManualInviteLink(
     email: string;
     role: AppRole;
     clubId: string | null;
+    logoDataUrl: string;
     metadata: { name: string; role: AppRole; club_id: string | null };
     redirectTo: string;
     originalError: unknown;
@@ -231,6 +277,10 @@ async function createManualInviteLink(
     if (profileError) {
       await adminClient.auth.admin.deleteUser(data.user.id);
       throw profileError;
+    }
+
+    if (input.role === "club" && input.clubId) {
+      await uploadClubLogoFromDataUrl(adminClient, input.clubId, input.logoDataUrl);
     }
 
     return {
