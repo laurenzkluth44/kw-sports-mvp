@@ -33,27 +33,28 @@ export function AppShell({
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-navy-950/95 text-white shadow-sm backdrop-blur">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-navy-950/95 text-white backdrop-blur">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Link
               href={profile.role === "admin" ? "/admin" : "/club"}
               prefetch={false}
-              className="flex items-center gap-3"
+              className="group flex items-center gap-3"
             >
-              <span className="flex h-12 w-36 items-center justify-center rounded-md bg-white px-3 py-2">
-                <Image
-                  src="/kw-sports-logo.png"
-                  alt="KW Sports"
-                  width={1000}
-                  height={326}
-                  className="h-full w-full object-contain"
-                  priority
-                />
-              </span>
-              <span>
-                <span className="block text-base font-black uppercase">Club Needs</span>
-                <span className="block text-xs text-brand-300">
+              <Image
+                src="/kw-sports-logo-white.svg"
+                alt="KW Sports"
+                width={2557}
+                height={288}
+                className="h-6 w-auto"
+                priority
+                unoptimized
+              />
+              <span className="border-l border-white/15 pl-3">
+                <span className="block font-display text-2xl uppercase leading-none tracking-[0.02em]">
+                  Club Needs
+                </span>
+                <span className="mt-0.5 block text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-brand-300">
                   {profile.role === "admin" ? "Kaderbedarf Datenbank" : t.tagline}
                 </span>
               </span>
@@ -61,7 +62,7 @@ export function AppShell({
 
             <div className="flex flex-wrap items-center gap-2 text-sm">
               {profile.role === "club" ? <LanguageSwitcher locale={locale} label={t.language} /> : null}
-              <span className="inline-flex min-h-10 items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-slate-100">
+              <span className="inline-flex min-h-10 items-center gap-2 rounded-sm border border-white/10 bg-white/5 px-3 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-100">
                 <Shield className="h-4 w-4 text-brand-300" aria-hidden="true" />
                 {profile.role === "club" ? t.role : ROLE_LABELS[profile.role]}
               </span>
@@ -74,17 +75,12 @@ export function AppShell({
             </div>
           </div>
 
-          <nav className="flex gap-2 overflow-x-auto rounded-md border border-white/10 bg-white/[0.04] p-1">
+          <nav className="-mb-px flex gap-6 overflow-x-auto">
             {nav.map((item) => {
               const Icon = item.icon;
 
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  prefetch={false}
-                  className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm font-black uppercase text-neutral-200 hover:bg-white/10 hover:text-white"
-                >
+                <Link key={item.href} href={item.href} prefetch={false} className="nav-link">
                   <Icon className="h-4 w-4" aria-hidden="true" />
                   {item.label}
                 </Link>

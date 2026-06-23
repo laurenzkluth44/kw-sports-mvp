@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState, type FormEvent } from "react";
-import { KeyRound } from "lucide-react";
+import { KeyRound, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form";
+import { cn } from "@/lib/utils";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 const errorCopy: Record<string, string> = {
@@ -18,9 +20,38 @@ export function SetPasswordForm() {
   const [loading, setLoading] = useState(true);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [personName, setPersonName] = useState<string | null>(null);
+  const [clubName, setClubName] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoFailed, setLogoFailed] = useState(false);
+  const [logoLoaded, setLogoLoaded] = useState(false);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
+    const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    let active = true;
+
+    // Surface who was invited and to which club, from the invite session metadata.
+    async function loadInviteDetails() {
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
+      if (!session) return;
+
+      const meta = (session.user.user_metadata ?? {}) as { name?: string; club_id?: string };
+      if (active && meta.name) setPersonName(meta.name);
+
+      if (meta.club_id) {
+        if (active && base) {
+          setLogoUrl(`${base}/storage/v1/object/public/club-logos/${meta.club_id}/logo.webp`);
+        }
+        const { data: club } = await supabase
+          .from("clubs")
+          .select("name")
+          .eq("id", meta.club_id)
+          .maybeSingle();
+        if (active && club?.name) setClubName(club.name as string);
+      }
+    }
 
     async function prepareInviteSession() {
       const sessionError = await hydrateSessionFromUrl();
@@ -35,6 +66,7 @@ export function SetPasswordForm() {
       setReady(Boolean(data.session));
       setError(data.session ? null : errorCopy.session);
       setLoading(false);
+      if (data.session) await loadInviteDetails();
     }
 
     async function hydrateSessionFromUrl() {
@@ -67,6 +99,9 @@ export function SetPasswordForm() {
     }
 
     prepareInviteSession();
+    return () => {
+      active = false;
+    };
   }, []);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -98,16 +133,61 @@ export function SetPasswordForm() {
     window.location.href = "/";
   }
 
+  const clubTitle = clubName ?? "Club Needs";
+  const hasClubLogo = Boolean(logoUrl) && !logoFailed;
+  // Spinner while the invite session resolves, or while the club logo is still downloading.
+  const showSpinner = loading || (hasClubLogo && !logoLoaded);
+
   return (
-    <form onSubmit={onSubmit} className="panel space-y-5 p-6">
-      <div>
-        <h1 className="text-2xl font-black uppercase text-navy-950">Passwort setzen</h1>
-        <p className="mt-1 text-sm text-neutral-600">
+    <form onSubmit={onSubmit} className="panel space-y-6 border-l-2 border-l-brand-500 p-6 sm:p-8">
+      <div className="flex flex-col items-center text-center">
+        <p className="eyebrow">KW Sports Zugang</p>
+        <span className="relative mt-5 flex h-24 min-w-[6rem] items-center justify-center">
+          {showSpinner ? (
+            <Loader2 className="absolute h-8 w-8 animate-spin text-brand-500" aria-label="Logo wird geladen" />
+          ) : null}
+
+          {hasClubLogo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logoUrl as string}
+              alt={clubTitle}
+              className={cn(
+                "h-24 w-24 object-contain transition-opacity duration-300 ease-out-expo",
+                logoLoaded ? "opacity-100" : "opacity-0"
+              )}
+              onLoad={() => setLogoLoaded(true)}
+              onError={() => setLogoFailed(true)}
+            />
+          ) : !loading ? (
+            <Image
+              src="/kw-sports-logo.svg"
+              alt="KW Sports"
+              width={2557}
+              height={288}
+              className="w-40"
+              unoptimized
+            />
+          ) : null}
+        </span>
+        <h2 className="kw-title mt-4 text-4xl">{clubTitle}</h2>
+        {personName ? (
+          <p className="mt-1.5 text-sm text-neutral-600">
+            Willkommen, <span className="font-semibold text-navy-950">{personName}</span>
+          </p>
+        ) : null}
+      </div>
+
+      <div className="flex flex-col items-center border-t border-slate-200/80 pt-6 text-center">
+        <h1 className="kw-title text-2xl">Passwort setzen</h1>
+        <p className="mt-1.5 max-w-sm text-sm leading-6 text-neutral-600">
           Lege dein Passwort fest, um deinen KW Sports Zugang zu aktivieren.
         </p>
       </div>
 
-      {loading ? <p className="text-sm text-neutral-500">Einladung wird geprüft...</p> : null}
+      {loading ? (
+        <p className="text-center text-sm text-neutral-500">Einladung wird geprüft...</p>
+      ) : null}
 
       {error ? <div className="alert-error">{error}</div> : null}
 
