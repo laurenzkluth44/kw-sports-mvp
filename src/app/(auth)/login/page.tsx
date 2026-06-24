@@ -41,7 +41,7 @@ export default async function LoginPage({
             priority
             unoptimized
           />
-          <p className="eyebrow mt-10 text-brand-300 before:bg-brand-300">KW Sports GmbH · Internal Platform</p>
+          <p className="eyebrow mt-10 text-brand-300 before:bg-brand-300">KW Sports GmbH · Club Platform</p>
           <h1 className="mt-4 max-w-xl font-display text-7xl uppercase leading-[0.9] tracking-[-0.01em]">
             Club Needs Database
           </h1>
@@ -62,7 +62,7 @@ export default async function LoginPage({
           </div>
         </div>
         <p className="relative text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-slate-500">
-          Internes MVP für Club User und KW Sports Admins
+          Plattform für Vereine und KW Sports
         </p>
       </section>
 

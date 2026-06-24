@@ -27,6 +27,7 @@ export default async function AdminUsersPage({
 }) {
   const { supabase } = await requireAdmin();
   const params = await searchParams;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 
   const [{ data: users = [] }, { data: clubs = [] }] = await Promise.all([
     supabase.from("users").select("*, clubs(*)").order("created_at", { ascending: false }),
@@ -126,11 +127,40 @@ export default async function AdminUsersPage({
               <p className="font-semibold text-navy-950">{user.name}</p>
               <p className="break-words text-sm text-slate-600">{user.email}</p>
               <p className="text-sm font-medium text-slate-700">{ROLE_LABELS[user.role]}</p>
-              <p className="text-sm text-slate-600">{user.clubs?.name || "-"}</p>
+              <ClubCell club={user.clubs ?? null} supabaseUrl={supabaseUrl} />
             </article>
           ))}
         </div>
       </section>
+    </div>
+  );
+}
+
+function ClubCell({ club, supabaseUrl }: { club: Club | null; supabaseUrl: string }) {
+  if (!club) {
+    return <p className="text-sm text-slate-400">–</p>;
+  }
+
+  const logoUrl = club.logo_path && supabaseUrl
+    ? `${supabaseUrl}/storage/v1/object/public/club-logos/${club.logo_path}`
+    : null;
+  const initial = club.name.trim().slice(0, 1).toUpperCase();
+
+  return (
+    <div className="flex items-center gap-2.5">
+      {logoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={logoUrl}
+          alt=""
+          className="h-9 w-9 shrink-0 rounded-sm border border-slate-200 bg-white object-contain p-0.5"
+        />
+      ) : (
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-navy-950 font-display text-base leading-none text-white">
+          {initial}
+        </span>
+      )}
+      <span className="min-w-0 truncate text-sm text-slate-700">{club.name}</span>
     </div>
   );
 }
