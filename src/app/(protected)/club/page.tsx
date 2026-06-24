@@ -2,7 +2,6 @@ import Link from "next/link";
 import { AlertTriangle, Copy, Edit, MessageCircle, Plus, Target, type LucideIcon } from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PageHeader } from "@/components/ui/page-header";
 import { NeedBadges } from "@/features/player-needs/need-badges";
 import { NeedStatusForm } from "@/features/player-needs/need-status-form";
 import { duplicateClubNeedAction } from "@/features/player-needs/actions";
@@ -35,19 +34,44 @@ export default async function ClubDashboardPage({
   const talksCount = typedNeeds.filter((need) => need.status === "in_gespraechen").length;
   const highCount = typedNeeds.filter((need) => need.priority === "hoch").length;
 
+  const club = profile.clubs ?? null;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const clubLogoUrl =
+    club?.logo_path && supabaseUrl
+      ? `${supabaseUrl}/storage/v1/object/public/club-logos/${club.logo_path}`
+      : null;
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow={profile.clubs?.name || t.eyebrowFallback}
-        title={t.title}
-        description={t.description}
-        actions={
-          <LinkButton href="/club/needs/new" variant="accent">
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            {t.newNeed}
-          </LinkButton>
-        }
-      />
+      <div className="panel overflow-hidden">
+        <div className="flex flex-col gap-4 border-l-2 border-brand-500 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            {clubLogoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={clubLogoUrl}
+                alt=""
+                className="h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20"
+              />
+            ) : null}
+            <div className="min-w-0">
+              <p className="eyebrow">{club?.name || t.eyebrowFallback}</p>
+              <h1 className="kw-title mt-1.5 text-[2rem] leading-[0.95] sm:text-[2.75rem]">{t.title}</h1>
+              {profile.name ? (
+                <p className="mt-1 text-sm text-neutral-600">
+                  {t.greeting}, <span className="font-semibold text-navy-950">{profile.name}</span>
+                </p>
+              ) : null}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <LinkButton href="/club/needs/new" variant="accent">
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              {t.newNeed}
+            </LinkButton>
+          </div>
+        </div>
+      </div>
 
       {params.error === "status" ? (
         <div className="alert-error">{t.statusError}</div>

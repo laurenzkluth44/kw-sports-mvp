@@ -17,11 +17,11 @@ type ChartDatum = {
 };
 
 const chartColors = [
-  "#0b55e8",
-  "#073aa5",
+  "#0055ff",
+  "#003399",
   "#16a34a",
   "#f59e0b",
-  "#10100e",
+  "#0a0a0a",
   "#9ca3af",
   "#7aa8ff",
   "#4b4b45",
@@ -49,7 +49,7 @@ export function AdminVisualSummary({ needs }: { needs: PlayerNeedWithClub[] }) {
   const priorityData = PRIORITIES.map((priority, index) => ({
     label: PRIORITY_LABELS[priority],
     value: needs.filter((need) => need.priority === priority).length,
-    color: ["#dc2626", "#0b55e8", "#6b7280"][index]
+    color: ["#dc2626", "#0055ff", "#6b7280"][index]
   }));
 
   const seasonData = SEASONS.map((season, index) => ({
@@ -61,7 +61,7 @@ export function AdminVisualSummary({ needs }: { needs: PlayerNeedWithClub[] }) {
   const statusData = STATUSES.map((status, index) => ({
     label: STATUS_LABELS[status],
     value: needs.filter((need) => need.status === status).length,
-    color: ["#0b55e8", "#073aa5", "#10100e", "#9ca3af"][index]
+    color: ["#0055ff", "#003399", "#0a0a0a", "#9ca3af"][index]
   }));
 
   const recentlyCreatedCount = needs.filter((need) => isWithinDays(need.created_at, 30)).length;

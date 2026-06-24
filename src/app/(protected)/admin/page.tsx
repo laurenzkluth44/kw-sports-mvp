@@ -82,19 +82,11 @@ export default async function AdminDashboardPage({
               <Users className="h-4 w-4" aria-hidden="true" />
               Nutzer
             </LinkButton>
-            <LinkButton
-              href={`/admin/export${exportQuery ? `?${exportQuery}` : ""}`}
-              variant="accent"
-              className="border border-[#0b55e8] bg-[#0b55e8] text-white shadow-md shadow-[#0b55e8]/25 hover:bg-[#074bd3]"
-            >
+            <LinkButton href={`/admin/export${exportQuery ? `?${exportQuery}` : ""}`} variant="accent">
               <Download className="h-4 w-4" aria-hidden="true" />
               CSV Export
             </LinkButton>
-            <LinkButton
-              href={`/admin/export/xlsx${exportQuery ? `?${exportQuery}` : ""}`}
-              variant="primary"
-              className="border border-navy-950 bg-navy-950 text-white shadow-md shadow-black/20 hover:bg-navy-800"
-            >
+            <LinkButton href={`/admin/export/xlsx${exportQuery ? `?${exportQuery}` : ""}`} variant="primary">
               <FileSpreadsheet className="h-4 w-4" aria-hidden="true" />
               Excel Export
             </LinkButton>

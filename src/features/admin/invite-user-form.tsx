@@ -1,13 +1,14 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { CheckCircle2, Copy, MailPlus } from "lucide-react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { CheckCircle2, Copy, ImageUp, MailPlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { ClubCascadeSelect } from "@/features/admin/club-cascade-select";
 import { inviteUserAction, type InviteUserActionState } from "@/features/admin/user-actions";
 import { ROLE_LABELS } from "@/lib/constants";
+import { compressImageToWebpDataUrl } from "@/lib/image";
 
 type InviteClubOption = {
   id: string;
@@ -23,12 +24,48 @@ const initialInviteUserState: InviteUserActionState = {
 export function InviteUserForm({ clubs }: { clubs: InviteClubOption[] }) {
   const [state, formAction] = useActionState(inviteUserAction, initialInviteUserState);
   const [copied, setCopied] = useState(false);
+  const [logoDataUrl, setLogoDataUrl] = useState("");
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const [logoBusy, setLogoBusy] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Clear the picked logo once an invite was successfully sent or a link was generated.
+  useEffect(() => {
+    if (state.status === "sent" || state.status === "manual") clearLogo();
+  }, [state.status]);
 
   async function copyInviteLink() {
     if (!state.actionLink) return;
     await navigator.clipboard.writeText(state.actionLink);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
+  }
+
+  function clearLogo() {
+    setLogoDataUrl("");
+    setLogoError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  async function onLogoChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) {
+      clearLogo();
+      return;
+    }
+
+    setLogoBusy(true);
+    setLogoError(null);
+    try {
+      const dataUrl = await compressImageToWebpDataUrl(file);
+      setLogoDataUrl(dataUrl);
+    } catch {
+      setLogoDataUrl("");
+      setLogoError("Logo konnte nicht verarbeitet werden. Bitte PNG, JPG oder WebP verwenden.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } finally {
+      setLogoBusy(false);
+    }
   }
 
   return (
@@ -89,6 +126,43 @@ export function InviteUserForm({ clubs }: { clubs: InviteClubOption[] }) {
           emptyClubLabel="Kein Verein / Admin"
           clubClassName="md:col-span-2"
         />
+
+        <input type="hidden" name="invite_logo" value={logoDataUrl} />
+        <Field label="Vereinslogo (optional)" htmlFor="invite_logo_file" className="md:col-span-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-white">
+              {logoDataUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logoDataUrl} alt="Logo Vorschau" className="h-full w-full object-contain" />
+              ) : (
+                <ImageUp className="h-5 w-5 text-slate-400" aria-hidden="true" />
+              )}
+            </span>
+            <div className="flex flex-col gap-1">
+              <input
+                ref={fileInputRef}
+                id="invite_logo_file"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={onLogoChange}
+                className="text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-navy-950 hover:file:bg-brand-50"
+              />
+              <p className="text-xs text-slate-500">
+                {logoBusy
+                  ? "Logo wird komprimiert..."
+                  : "Wird komprimiert und beim ausgewählten Verein gespeichert. Admin-Einladungen ignorieren das Logo."}
+              </p>
+            </div>
+            {logoDataUrl ? (
+              <Button type="button" variant="secondary" onClick={clearLogo}>
+                <X className="h-4 w-4" aria-hidden="true" />
+                Entfernen
+              </Button>
+            ) : null}
+          </div>
+          {logoError ? <p className="mt-1 text-xs text-red-600">{logoError}</p> : null}
+        </Field>
+
         <div className="md:col-span-2">
           <SubmitButton pendingLabel="Einladung wird erstellt...">
             <MailPlus className="h-4 w-4" aria-hidden="true" />
