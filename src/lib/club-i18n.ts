@@ -28,6 +28,7 @@ export const clubCopy = {
     },
     dashboard: {
       eyebrowFallback: "Club Dashboard",
+      greeting: "Willkommen",
       title: "Eigene Kaderbedarfe",
       description: "Aktive Suchaufträge deines Vereins.",
       newNeed: "Neuer Bedarf",
@@ -101,6 +102,7 @@ export const clubCopy = {
     },
     dashboard: {
       eyebrowFallback: "Club dashboard",
+      greeting: "Welcome",
       title: "Your roster needs",
       description: "Active recruitment needs for your club.",
       newNeed: "New need",
@@ -174,6 +176,7 @@ export const clubCopy = {
     },
     dashboard: {
       eyebrowFallback: "Tableau de bord club",
+      greeting: "Bienvenue",
       title: "Besoins d'effectif du club",
       description: "Besoins de recrutement actifs de votre club.",
       newNeed: "Nouveau besoin",
@@ -247,6 +250,7 @@ export const clubCopy = {
     },
     dashboard: {
       eyebrowFallback: "Panel del club",
+      greeting: "Bienvenido",
       title: "Necesidades de plantilla",
       description: "Necesidades activas de fichaje de tu club.",
       newNeed: "Nueva necesidad",
