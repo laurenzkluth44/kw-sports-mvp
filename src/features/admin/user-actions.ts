@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { getSiteUrl } from "@/lib/site-url";
+import { getAuthConfirmUrl } from "@/lib/site-url";
 import type { AppRole } from "@/types/domain";
 
 const VALID_ROLES: AppRole[] = ["admin", "club", "agency"];
@@ -144,7 +144,7 @@ export async function inviteUserAction(
     club_id: role === "club" ? clubId : null,
     agency_name: role === "agency" ? agencyName : null
   };
-  const redirectTo = `${getSiteUrl()}/set-password`;
+  const redirectTo = getAuthConfirmUrl("/set-password");
 
   try {
     const { data, error: authError } = await adminClient.auth.admin.inviteUserByEmail(email, {

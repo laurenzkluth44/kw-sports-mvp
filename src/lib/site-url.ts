@@ -16,3 +16,8 @@ export function getSiteUrl() {
 
   return "http://localhost:3000";
 }
+
+export function getAuthConfirmUrl(next = "/set-password") {
+  const params = new URLSearchParams({ next });
+  return `${getSiteUrl()}/auth/confirm?${params.toString()}`;
+}

@@ -77,6 +77,8 @@ SUPABASE_SERVICE_ROLE_KEY=...
 
 Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3.-Liga-Staffeln, die internationalen Erstliga-Enums und die Agency-Rolle bereits enthalten. `0002_add_third_league_staffeln.sql`, `0005_add_international_top_leagues.sql` und `0007_agency_access.sql` sind vor allem für bestehende Supabase-Projekte gedacht.
 
+Für Einladungen muss Supabase Auth die App-URLs als Redirect URLs erlauben, inklusive `/auth/confirm`. Für Vercel Previews sollte z.B. `https://*.vercel.app/**` erlaubt sein.
+
 ## Sicherheit
 
 - `public.clubs`, `public.users` und `public.player_needs` haben RLS aktiviert.
@@ -106,6 +108,7 @@ Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3
 
 - `/login`
 - `/set-password`
+- `/auth/confirm`
 - `/auth/callback`
 - `/club`
 - `/club/needs/new`

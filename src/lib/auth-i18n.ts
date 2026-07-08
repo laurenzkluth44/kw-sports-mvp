@@ -57,7 +57,8 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
         session: "Die Sitzung konnte nicht erstellt werden.",
         profile: "Für diesen Account fehlt ein Rollenprofil.",
         "missing-club": "Dieser Club User ist keinem Verein zugeordnet.",
-        "missing-agency": "Dieser Agency User hat keinen Agency-Namen."
+        "missing-agency": "Dieser Agency User hat keinen Agency-Namen.",
+        invite: "Die Einladung konnte nicht geprüft werden. Bitte öffne den neuesten Einladungslink erneut."
       },
       brand: "KW Sports GmbH · Vereinsplattform",
       headline: "Club Needs Database",
@@ -101,7 +102,8 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
         session: "The session could not be created.",
         profile: "This account is missing a role profile.",
         "missing-club": "This club user is not assigned to a club.",
-        "missing-agency": "This agency user is missing an agency name."
+        "missing-agency": "This agency user is missing an agency name.",
+        invite: "The invite could not be verified. Please open the newest invitation link again."
       },
       brand: "KW Sports GmbH · Club Platform",
       headline: "Club Needs Database",
