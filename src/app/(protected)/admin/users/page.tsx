@@ -12,6 +12,7 @@ import type { Club, Profile } from "@/types/domain";
 const errorMessages: Record<string, string> = {
   validation: "Bitte alle Pflichtfelder ausfüllen.",
   club: "Club User benötigen einen Verein.",
+  agency: "Agency User benötigen einen Agency-Namen.",
   service: "Nutzer konnte nicht angelegt werden. Service Role Key und Supabase Auth prüfen.",
   invite: "Einladung konnte nicht gesendet werden. Supabase Auth, SMTP und Site URL prüfen.",
   invite_config: "Einladung konnte nicht gesendet werden. Service Role Key oder Supabase URL fehlt.",
@@ -41,8 +42,8 @@ export default async function AdminUsersPage({
     <div className="space-y-6">
       <PageHeader
         eyebrow="KW Sports Admin"
-        title="Vereinsnutzer verwalten"
-        description="Accounts für Club User und Admins anlegen."
+        title="Nutzer verwalten"
+        description="Accounts für Club User, Agency User und Admins anlegen."
       />
 
       {params.error ? (
@@ -89,8 +90,12 @@ export default async function AdminUsersPage({
             <Field label="Rolle" htmlFor="role">
               <Select id="role" name="role" defaultValue="club" required>
                 <option value="club">{ROLE_LABELS.club}</option>
+                <option value="agency">{ROLE_LABELS.agency}</option>
                 <option value="admin">{ROLE_LABELS.admin}</option>
               </Select>
+            </Field>
+            <Field label="Agency Name" htmlFor="agency_name">
+              <Input id="agency_name" name="agency_name" placeholder="Nur für Agency User" />
             </Field>
             <ClubCascadeSelect
               clubs={clubRows.map((club) => ({
@@ -101,7 +106,7 @@ export default async function AdminUsersPage({
               }))}
               fieldName="club_id"
               idPrefix="direct_club"
-              emptyClubLabel="Kein Verein / Admin"
+              emptyClubLabel="Kein Verein / Admin / Agency"
               clubClassName="md:col-span-2"
             />
             <div className="md:col-span-2">
@@ -119,7 +124,7 @@ export default async function AdminUsersPage({
           <span>Name</span>
           <span>E-Mail</span>
           <span>Rolle</span>
-          <span>Verein</span>
+          <span>Organisation</span>
         </div>
         <div className="divide-y divide-slate-200">
           {profiles.map((user) => (
@@ -127,13 +132,29 @@ export default async function AdminUsersPage({
               <p className="font-semibold text-navy-950">{user.name}</p>
               <p className="break-words text-sm text-slate-600">{user.email}</p>
               <p className="text-sm font-medium text-slate-700">{ROLE_LABELS[user.role]}</p>
-              <ClubCell club={user.clubs ?? null} supabaseUrl={supabaseUrl} />
+              <AccessCell user={user} supabaseUrl={supabaseUrl} />
             </article>
           ))}
         </div>
       </section>
     </div>
   );
+}
+
+function AccessCell({ user, supabaseUrl }: { user: Profile; supabaseUrl: string }) {
+  if (user.role === "agency") {
+    return (
+      <p className="min-w-0 truncate text-sm font-semibold text-navy-950">
+        {user.agency_name || "Agency"}
+      </p>
+    );
+  }
+
+  if (user.role === "admin") {
+    return <p className="text-sm text-slate-400">KW Sports</p>;
+  }
+
+  return <ClubCell club={user.clubs ?? null} supabaseUrl={supabaseUrl} />;
 }
 
 function ClubCell({ club, supabaseUrl }: { club: Club | null; supabaseUrl: string }) {

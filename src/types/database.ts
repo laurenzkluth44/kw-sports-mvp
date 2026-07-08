@@ -48,6 +48,7 @@ export type Database = {
           name: string;
           email: string;
           role: AppRole;
+          agency_name: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -57,6 +58,7 @@ export type Database = {
           name: string;
           email: string;
           role: AppRole;
+          agency_name?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -66,6 +68,7 @@ export type Database = {
           name?: string;
           email?: string;
           role?: AppRole;
+          agency_name?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -274,6 +277,10 @@ export type Database = {
         Returns: AppRole | null;
       };
       is_admin: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
+      is_agency: {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
       };

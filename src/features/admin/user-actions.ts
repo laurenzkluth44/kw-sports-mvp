@@ -7,6 +7,8 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSiteUrl } from "@/lib/site-url";
 import type { AppRole } from "@/types/domain";
 
+const VALID_ROLES: AppRole[] = ["admin", "club", "agency"];
+
 export type InviteUserActionState = {
   status: "idle" | "sent" | "manual" | "error";
   message?: string;
@@ -23,13 +25,18 @@ export async function createUserAction(formData: FormData) {
   const password = String(formData.get("password") || "");
   const role = String(formData.get("role") || "") as AppRole;
   const clubId = String(formData.get("club_id") || "").trim() || null;
+  const agencyName = String(formData.get("agency_name") || "").trim() || null;
 
-  if (!name || !email || !password || !["admin", "club"].includes(role)) {
+  if (!name || !email || !password || !VALID_ROLES.includes(role)) {
     redirect("/admin/users?error=validation");
   }
 
   if (role === "club" && !clubId) {
     redirect("/admin/users?error=club");
+  }
+
+  if (role === "agency" && !agencyName) {
+    redirect("/admin/users?error=agency");
   }
 
   try {
@@ -41,7 +48,8 @@ export async function createUserAction(formData: FormData) {
       user_metadata: {
         name,
         role,
-        club_id: role === "club" ? clubId : null
+        club_id: role === "club" ? clubId : null,
+        agency_name: role === "agency" ? agencyName : null
       }
     });
 
@@ -52,7 +60,8 @@ export async function createUserAction(formData: FormData) {
       name,
       email,
       role,
-      club_id: role === "club" ? clubId : null
+      club_id: role === "club" ? clubId : null,
+      agency_name: role === "agency" ? agencyName : null
     });
 
     if (profileError) {
@@ -77,9 +86,10 @@ export async function inviteUserAction(
   const email = String(formData.get("invite_email") || "").trim().toLowerCase();
   const role = String(formData.get("invite_role") || "") as AppRole;
   const clubId = String(formData.get("invite_club_id") || "").trim() || null;
+  const agencyName = String(formData.get("invite_agency_name") || "").trim() || null;
   const logoDataUrl = String(formData.get("invite_logo") || "");
 
-  if (!name || !email || !["admin", "club"].includes(role)) {
+  if (!name || !email || !VALID_ROLES.includes(role)) {
     return {
       status: "error",
       message: "Bitte alle Pflichtfelder ausfüllen."
@@ -90,6 +100,13 @@ export async function inviteUserAction(
     return {
       status: "error",
       message: "Club User benötigen einen Verein."
+    };
+  }
+
+  if (role === "agency" && !agencyName) {
+    return {
+      status: "error",
+      message: "Agency User benötigen einen Agency-Namen."
     };
   }
 
@@ -124,7 +141,8 @@ export async function inviteUserAction(
   const metadata = {
     name,
     role,
-    club_id: role === "club" ? clubId : null
+    club_id: role === "club" ? clubId : null,
+    agency_name: role === "agency" ? agencyName : null
   };
   const redirectTo = `${getSiteUrl()}/set-password`;
 
@@ -136,7 +154,7 @@ export async function inviteUserAction(
 
     if (authError || !data.user) throw authError;
 
-    const profileError = await createInvitedProfile(adminClient, data.user.id, name, email, role, clubId);
+    const profileError = await createInvitedProfile(adminClient, data.user.id, name, email, role, clubId, agencyName);
 
     if (profileError) {
       if (profileError.code === "23505") {
@@ -164,6 +182,7 @@ export async function inviteUserAction(
       email,
       role,
       clubId,
+      agencyName,
       logoDataUrl,
       metadata,
       redirectTo,
@@ -225,14 +244,16 @@ async function createInvitedProfile(
   name: string,
   email: string,
   role: AppRole,
-  clubId: string | null
+  clubId: string | null,
+  agencyName: string | null
 ) {
   const { error } = await adminClient.from("users").insert({
     id: userId,
     name,
     email,
     role,
-    club_id: role === "club" ? clubId : null
+    club_id: role === "club" ? clubId : null,
+    agency_name: role === "agency" ? agencyName : null
   });
 
   return error;
@@ -245,8 +266,9 @@ async function createManualInviteLink(
     email: string;
     role: AppRole;
     clubId: string | null;
+    agencyName: string | null;
     logoDataUrl: string;
-    metadata: { name: string; role: AppRole; club_id: string | null };
+    metadata: { name: string; role: AppRole; club_id: string | null; agency_name: string | null };
     redirectTo: string;
     originalError: unknown;
   }
@@ -271,7 +293,8 @@ async function createManualInviteLink(
       input.name,
       input.email,
       input.role,
-      input.clubId
+      input.clubId,
+      input.agencyName
     );
 
     if (profileError) {

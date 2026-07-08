@@ -1,6 +1,6 @@
 import type { COUNTRIES, LEAGUES, POSITIONS, PRIORITIES, SEASONS, STATUSES } from "@/lib/constants";
 
-export type AppRole = "admin" | "club";
+export type AppRole = "admin" | "club" | "agency";
 export type Country = (typeof COUNTRIES)[number];
 export type League = (typeof LEAGUES)[number];
 export type Season = (typeof SEASONS)[number];
@@ -26,6 +26,7 @@ export type Profile = {
   name: string;
   email: string;
   role: AppRole;
+  agency_name: string | null;
   created_at: string;
   updated_at: string;
   clubs?: Club | null;

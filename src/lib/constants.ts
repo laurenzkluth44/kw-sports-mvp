@@ -40,7 +40,8 @@ export const STATUSES = [
 
 export const ROLE_LABELS = {
   admin: "KW Sports Admin",
-  club: "Club User"
+  club: "Club User",
+  agency: "Agency User"
 } as const;
 
 export const PRIORITY_LABELS = {

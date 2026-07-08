@@ -56,7 +56,8 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
         invalid: "Die Zugangsdaten stimmen nicht.",
         session: "Die Sitzung konnte nicht erstellt werden.",
         profile: "Für diesen Account fehlt ein Rollenprofil.",
-        "missing-club": "Dieser Club User ist keinem Verein zugeordnet."
+        "missing-club": "Dieser Club User ist keinem Verein zugeordnet.",
+        "missing-agency": "Dieser Agency User hat keinen Agency-Namen."
       },
       brand: "KW Sports GmbH · Vereinsplattform",
       headline: "Club Needs Database",
@@ -64,7 +65,7 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
       card1Title: "Zentrale Datenbasis",
       card1Body: "Alle Club-Bedarfe sauber in Supabase gesichert.",
       card2Title: "Rollenbasiert geschützt",
-      card2Body: "Clubs sehen nur eigene Daten, Admins die Gesamtübersicht.",
+      card2Body: "Clubs sehen eigene Daten, Agencies lesen die Gesamtübersicht, Admins steuern die Plattform.",
       footer: "Plattform für Vereine und KW Sports",
       mobileSubtitle: "Kaderbedarf Datenbank",
       portal: "KW Sports Portal",
@@ -99,7 +100,8 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
         invalid: "Those credentials don't match.",
         session: "The session could not be created.",
         profile: "This account is missing a role profile.",
-        "missing-club": "This club user is not assigned to a club."
+        "missing-club": "This club user is not assigned to a club.",
+        "missing-agency": "This agency user is missing an agency name."
       },
       brand: "KW Sports GmbH · Club Platform",
       headline: "Club Needs Database",
@@ -107,7 +109,7 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
       card1Title: "Central database",
       card1Body: "All club needs stored securely in Supabase.",
       card2Title: "Role-based access",
-      card2Body: "Clubs see only their own data, admins the full overview.",
+      card2Body: "Clubs see their own data, agencies read the full overview, admins control the platform.",
       footer: "Platform for clubs and KW Sports",
       mobileSubtitle: "Club Needs Database",
       portal: "KW Sports Portal",

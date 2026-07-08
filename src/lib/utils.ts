@@ -21,10 +21,14 @@ export function formatDate(value: string | null | undefined, locale: keyof typeo
   }).format(new Date(value));
 }
 
-export function formatCurrency(amount: number | null, currency: string | null) {
+export function formatCurrency(
+  amount: number | null,
+  currency: string | null,
+  locale: keyof typeof dateLocales = "de"
+) {
   if (amount === null || amount === undefined) return "-";
 
-  return new Intl.NumberFormat("de-DE", {
+  return new Intl.NumberFormat(dateLocales[locale], {
     style: "currency",
     currency: currency || "EUR",
     maximumFractionDigits: 0

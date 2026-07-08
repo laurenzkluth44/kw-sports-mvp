@@ -1,7 +1,7 @@
 create extension if not exists pgcrypto;
 create extension if not exists citext;
 
-create type public.app_role as enum ('admin', 'club');
+create type public.app_role as enum ('admin', 'club', 'agency');
 create type public.club_league as enum (
   '1. Bundesliga',
   '2. Bundesliga',
@@ -50,11 +50,16 @@ create table public.users (
   name text not null,
   email citext not null unique,
   role public.app_role not null,
+  agency_name text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint users_name_not_empty check (length(trim(name)) > 0),
-  constraint club_users_need_a_club check (role = 'admin' or club_id is not null),
-  constraint admins_are_not_bound_to_clubs check (role <> 'admin' or club_id is null)
+  constraint club_users_need_a_club check (role <> 'club' or club_id is not null),
+  constraint non_club_users_are_not_bound_to_clubs check (role = 'club' or club_id is null),
+  constraint agency_users_need_agency_name check (
+    role <> 'agency' or (agency_name is not null and length(trim(agency_name)) > 0)
+  ),
+  constraint non_agency_users_have_no_agency_name check (role = 'agency' or agency_name is null)
 );
 
 create table public.player_needs (
@@ -148,9 +153,20 @@ as $$
   select coalesce(public.current_user_role() = 'admin', false);
 $$;
 
+create or replace function public.is_agency()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(public.current_user_role() = 'agency', false);
+$$;
+
 grant execute on function public.current_user_role() to authenticated;
 grant execute on function public.current_user_club_id() to authenticated;
 grant execute on function public.is_admin() to authenticated;
+grant execute on function public.is_agency() to authenticated;
 
 alter table public.clubs enable row level security;
 alter table public.users enable row level security;
@@ -172,6 +188,12 @@ on public.clubs
 for select
 to authenticated
 using (id = public.current_user_club_id());
+
+create policy "Agencies can view clubs"
+on public.clubs
+for select
+to authenticated
+using (public.is_agency());
 
 create policy "Admins can manage users"
 on public.users
@@ -198,6 +220,12 @@ on public.player_needs
 for select
 to authenticated
 using (club_id = public.current_user_club_id());
+
+create policy "Agencies can view player needs"
+on public.player_needs
+for select
+to authenticated
+using (public.is_agency());
 
 create policy "Club users can create own player needs"
 on public.player_needs

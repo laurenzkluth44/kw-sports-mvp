@@ -5,7 +5,7 @@ import { getClubLocale } from "@/lib/club-locale";
 
 export default async function ProtectedLayout({ children }: { children: ReactNode }) {
   const { profile } = await requireUser();
-  const locale = profile.role === "club" ? await getClubLocale() : "de";
+  const locale = profile.role === "admin" ? "de" : await getClubLocale();
 
   return (
     <AppShell profile={profile} locale={locale}>

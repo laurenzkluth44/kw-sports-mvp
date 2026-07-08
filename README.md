@@ -20,10 +20,12 @@ src/app
   auth/callback                 Supabase Auth Callback
   (protected)/club              Club Dashboard
   (protected)/club/needs        Bedarf erstellen/bearbeiten
+  (protected)/agency            Agency Dashboard mit Read-only Zugriff
+  (protected)/agency/needs      Agency Bedarf Detail
   (protected)/admin             Admin Dashboard
   (protected)/admin/needs       Bedarf Detail/Edit
   (protected)/admin/clubs       Vereinsdetail
-  (protected)/admin/users       Vereinsnutzer verwalten
+  (protected)/admin/users       Nutzer und Einladungen verwalten
   (protected)/admin/export      CSV Export
 src/components                  UI und Layout
 src/features                    Auth, Admin, PlayerNeed Logik
@@ -64,14 +66,16 @@ SUPABASE_SERVICE_ROLE_KEY=...
 4. SQL aus `supabase/migrations/0003_admin_productivity.sql` ausführen.
 5. SQL aus `supabase/migrations/0004_remove_saved_admin_filters.sql` ausführen.
 6. SQL aus `supabase/migrations/0005_add_international_top_leagues.sql` ausführen.
-7. Reale Clubs für 2026/27 mit `supabase/clubs-2026-27.sql` laden.
-8. Optional Beispielbedarfe mit `supabase/seed.sql` laden.
-9. Optional alte Demo-Vereine mit `supabase/remove-old-demo-clubs.sql` entfernen.
-10. Ersten Auth-User in Supabase Auth erstellen.
-11. `supabase/bootstrap-admin.sql` mit der Auth-User-UUID ausführen.
-12. Danach können weitere Club User im Admin-Bereich angelegt oder eingeladen werden.
+7. SQL aus `supabase/migrations/0006_club_logos.sql` ausführen.
+8. SQL aus `supabase/migrations/0007_agency_access.sql` ausführen.
+9. Reale Clubs für 2026/27 mit `supabase/clubs-2026-27.sql` laden.
+10. Optional Beispielbedarfe mit `supabase/seed.sql` laden.
+11. Optional alte Demo-Vereine mit `supabase/remove-old-demo-clubs.sql` entfernen.
+12. Ersten Auth-User in Supabase Auth erstellen.
+13. `supabase/bootstrap-admin.sql` mit der Auth-User-UUID ausführen.
+14. Danach können weitere Club, Agency und Admin User im Admin-Bereich angelegt oder eingeladen werden.
 
-Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3.-Liga-Staffeln und die internationalen Erstliga-Enums bereits enthalten. `0002_add_third_league_staffeln.sql` und `0005_add_international_top_leagues.sql` sind vor allem für bestehende Supabase-Projekte gedacht.
+Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3.-Liga-Staffeln, die internationalen Erstliga-Enums und die Agency-Rolle bereits enthalten. `0002_add_third_league_staffeln.sql`, `0005_add_international_top_leagues.sql` und `0007_agency_access.sql` sind vor allem für bestehende Supabase-Projekte gedacht.
 
 ## Sicherheit
 
@@ -79,6 +83,8 @@ Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3
 - `public.admin_notes` und `public.audit_logs` haben ebenfalls RLS aktiviert.
 - Club User sehen nur ihren eigenen Verein.
 - Club User sehen, erstellen und bearbeiten nur `player_needs` mit ihrer eigenen `club_id`.
+- Agency User sehen alle Clubs und alle `player_needs` mit Details nur lesend.
+- Agency User haben keinen Zugriff auf Admin-Notizen, Audit Logs, Exporte, Nutzerverwaltung, Club-Verwaltung oder Bedarf-Erstellung/-Bearbeitung.
 - Admins dürfen alle Clubs, Nutzer, Bedarfe, Notizen und Audit Logs sehen bzw. bearbeiten.
 - Geschützte Next.js-Routen prüfen serverseitig das Profil aus `public.users`.
 - CSV- und Excel-Export prüfen ebenfalls serverseitig die Admin-Rolle.
@@ -87,12 +93,13 @@ Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3
 
 - Admin Visual Summary mit Positionen, Ligen, Prioritäten, Saisons, Status und Datenfrische.
 - Admin Filter nach Land, Liga, Saison, Position, Status und Priorität.
+- Agency Dashboard mit denselben Filtern, Kennzahlen und Detailansichten im Read-only Modus.
 - Interne Admin-Notizen pro Bedarf.
 - Audit Log für Bedarf-Erstellungen, Änderungen und Löschungen.
 - Club Dashboard mit Duplizieren, Statusnotiz und Pflegehinweis.
 - Club Detailseite mit KPIs, Profil-Vollständigkeit und letzter Aktualisierung.
 - Excel Export mit fixierter Kopfzeile, Autofilter und Spaltenbreiten.
-- Supabase-Einladungen für Vereinsnutzer, sofern Auth E-Mail/SMTP konfiguriert ist.
+- Supabase-Einladungen für Club, Agency und Admin User, sofern Auth E-Mail/SMTP konfiguriert ist.
 - Admins können Vereinszugänge widerrufen und Vereine inklusive Zugängen löschen.
 
 ## Wichtige Routen
@@ -103,6 +110,8 @@ Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3
 - `/club`
 - `/club/needs/new`
 - `/club/needs/[id]/edit`
+- `/agency`
+- `/agency/needs/[id]`
 - `/admin`
 - `/admin/needs/[id]`
 - `/admin/needs/[id]/edit`

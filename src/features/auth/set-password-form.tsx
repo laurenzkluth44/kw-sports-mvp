@@ -16,6 +16,7 @@ export function SetPasswordForm({ copy }: { copy: SetPasswordCopy }) {
   const [error, setError] = useState<string | null>(null);
   const [personName, setPersonName] = useState<string | null>(null);
   const [clubName, setClubName] = useState<string | null>(null);
+  const [agencyName, setAgencyName] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoFailed, setLogoFailed] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
@@ -31,8 +32,9 @@ export function SetPasswordForm({ copy }: { copy: SetPasswordCopy }) {
       const session = data.session;
       if (!session) return;
 
-      const meta = (session.user.user_metadata ?? {}) as { name?: string; club_id?: string };
+      const meta = (session.user.user_metadata ?? {}) as { name?: string; club_id?: string; agency_name?: string };
       if (active && meta.name) setPersonName(meta.name);
+      if (active && meta.agency_name) setAgencyName(meta.agency_name);
 
       if (meta.club_id) {
         if (active && base) {
@@ -96,7 +98,7 @@ export function SetPasswordForm({ copy }: { copy: SetPasswordCopy }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [errorCopy.invite, errorCopy.session]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -127,7 +129,7 @@ export function SetPasswordForm({ copy }: { copy: SetPasswordCopy }) {
     window.location.href = "/";
   }
 
-  const clubTitle = clubName ?? "Club Needs";
+  const clubTitle = clubName ?? agencyName ?? "Club Needs";
   const hasClubLogo = Boolean(logoUrl) && !logoFailed;
   // Spinner while the invite session resolves, or while the club logo is still downloading.
   const showSpinner = loading || (hasClubLogo && !logoLoaded);

@@ -8,7 +8,9 @@ export type AuthedContext = {
 };
 
 export function getRoleHome(role: AppRole) {
-  return role === "admin" ? "/admin" : "/club";
+  if (role === "admin") return "/admin";
+  if (role === "agency") return "/agency";
+  return "/club";
 }
 
 export async function getCurrentProfile(): Promise<AuthedContext | null> {
@@ -52,6 +54,16 @@ export async function requireRole(role: AppRole): Promise<AuthedContext> {
 
 export async function requireAdmin() {
   return requireRole("admin");
+}
+
+export async function requireAgency() {
+  const context = await requireRole("agency");
+
+  if (!context.profile.agency_name) {
+    redirect("/login?error=missing-agency");
+  }
+
+  return context;
 }
 
 export async function requireClubUser() {
