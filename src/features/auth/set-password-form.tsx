@@ -8,6 +8,7 @@ import { Field, Input } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { SetPasswordCopy } from "@/lib/auth-i18n";
+import type { AppRole } from "@/types/domain";
 
 export function SetPasswordForm({ copy }: { copy: SetPasswordCopy }) {
   const errorCopy = copy.errors;
@@ -126,7 +127,7 @@ export function SetPasswordForm({ copy }: { copy: SetPasswordCopy }) {
       return;
     }
 
-    window.location.href = "/";
+    window.location.replace(await resolvePostPasswordPath(supabase));
   }
 
   const clubTitle = clubName ?? agencyName ?? "Club Needs";
@@ -206,4 +207,25 @@ export function SetPasswordForm({ copy }: { copy: SetPasswordCopy }) {
       </Button>
     </form>
   );
+}
+
+async function resolvePostPasswordPath(supabase: ReturnType<typeof createSupabaseBrowserClient>) {
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) return "/";
+
+  const { data: profile } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const role = ((profile?.role ?? user.user_metadata?.role) || null) as AppRole | null;
+
+  if (role === "admin") return "/admin";
+  if (role === "agency") return "/agency";
+  if (role === "club") return "/club";
+  return "/";
 }
