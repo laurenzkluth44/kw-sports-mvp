@@ -4,10 +4,11 @@ import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { LinkButton } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { NeedBadges } from "@/features/player-needs/need-badges";
+import { TagList, needHeadline, needProfileLabels } from "@/features/player-needs/need-summary";
 import { agencyCopy } from "@/lib/agency-i18n";
 import { requireAgency } from "@/lib/auth";
 import { getClubLocale } from "@/lib/club-locale";
-import { CLUB_POSITION_LABELS, CLUB_PRIORITY_LABELS, CLUB_STATUS_LABELS } from "@/lib/club-i18n";
+import { CLUB_PRIORITY_LABELS, CLUB_STATUS_LABELS } from "@/lib/club-i18n";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { Country, PlayerNeedWithClub } from "@/types/domain";
 
@@ -16,7 +17,6 @@ export default async function AgencyNeedDetailPage({ params }: { params: Promise
   const { supabase } = await requireAgency();
   const locale = await getClubLocale();
   const t = agencyCopy[locale].detail;
-  const positionLabels = CLUB_POSITION_LABELS[locale];
   const priorityLabels = CLUB_PRIORITY_LABELS[locale];
   const statusLabels = CLUB_STATUS_LABELS[locale];
 
@@ -29,13 +29,15 @@ export default async function AgencyNeedDetailPage({ params }: { params: Promise
   if (!data) redirect("/agency");
 
   const need = data as PlayerNeedWithClub;
+  const labels = needProfileLabels(need, locale);
+  const isCoach = need.need_type === "trainer";
   const countryLabel = agencyCopy[locale].dashboard.countries[need.clubs.country as Country] ?? need.clubs.country;
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow={need.clubs.name}
-        title={`${positionLabels[need.position]} · ${need.season}`}
+        title={`${needHeadline(need, locale)} · ${need.season}`}
         description={`${need.clubs.league} · ${need.clubs.city} · ${t.neededFrom} ${formatDate(need.needed_from_date, locale)}`}
         actions={
           <LinkButton href="/agency" variant="secondary">
@@ -52,7 +54,7 @@ export default async function AgencyNeedDetailPage({ params }: { params: Promise
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <SummaryItem label={t.club} value={need.clubs.name} />
-        <SummaryItem label={t.position} value={positionLabels[need.position]} />
+        <SummaryItem label={t.position} value={needHeadline(need, locale)} />
         <SummaryItem label={t.season} value={need.season} />
         <SummaryItem label={t.status} value={statusLabels[need.status]} />
         <SummaryItem label={t.priority} value={priorityLabels[need.priority]} />
@@ -68,7 +70,15 @@ export default async function AgencyNeedDetailPage({ params }: { params: Promise
             <InfoRow label={t.country} value={countryLabel} />
             <InfoRow label={t.league} value={need.clubs.league} />
             <InfoRow label={t.city} value={need.clubs.city} />
-            <InfoRow label={t.position} value={positionLabels[need.position]} />
+            <InfoRow label={t.needType} value={labels.needType} />
+            {isCoach ? (
+              <InfoRow label={t.coachRole} value={labels.coachRole || "-"} />
+            ) : (
+              <>
+                <InfoRow label={t.attackPositions} value={<TagList items={labels.attackPositions} />} />
+                <InfoRow label={t.defensePositions} value={<TagList items={labels.defensePositions} />} />
+              </>
+            )}
             <InfoRow label={t.season} value={need.season} />
             <InfoRow label={t.neededFrom} value={formatDate(need.needed_from_date, locale)} />
             <InfoRow label={t.budget} value={formatCurrency(need.budget_amount, need.budget_currency, locale)} />
@@ -80,11 +90,18 @@ export default async function AgencyNeedDetailPage({ params }: { params: Promise
           <h2 className="section-heading">{t.profile}</h2>
           <dl className="mt-5 grid gap-4 sm:grid-cols-2">
             <InfoRow label={t.description} value={need.description || "-"} wide />
-            <InfoRow label={t.age} value={formatRange(need.age_min, need.age_max, t)} />
-            <InfoRow label={t.heightMin} value={need.height_min ? `${need.height_min} cm` : "-"} />
+            {isCoach ? null : (
+              <>
+                <InfoRow label={t.playerType} value={<TagList items={labels.playerTypes} />} wide />
+                <InfoRow label={t.targetRoles} value={<TagList items={labels.targetRoles} />} wide />
+                <InfoRow label={t.playerTypeNote} value={need.player_type || "-"} wide />
+                <InfoRow label={t.age} value={formatRange(need.age_min, need.age_max, t)} />
+                <InfoRow label={t.heightMin} value={need.height_min ? `${need.height_min} cm` : "-"} />
+              </>
+            )}
+            <InfoRow label={t.languages} value={<TagList items={labels.languages} />} wide />
             <InfoRow label={t.nationality} value={need.nationality_preference || "-"} />
             <InfoRow label={t.leagueExperience} value={need.league_experience || "-"} />
-            <InfoRow label={t.playerType} value={need.player_type || "-"} />
             <InfoRow label={t.contractStatus} value={need.contract_status_preference || "-"} />
             <InfoRow label={t.statusNote} value={need.status_note || "-"} wide />
             <InfoRow label={t.budgetNote} value={need.budget_note || "-"} wide />

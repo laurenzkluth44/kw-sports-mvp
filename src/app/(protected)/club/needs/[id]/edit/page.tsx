@@ -2,8 +2,10 @@ import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { NeedForm } from "@/features/player-needs/need-form";
 import { updateClubNeedAction } from "@/features/player-needs/actions";
+import { parseNeedFormErrorCode } from "@/features/player-needs/form-schema";
+import { needHeadline } from "@/features/player-needs/need-summary";
 import { requireClubUser } from "@/lib/auth";
-import { CLUB_POSITION_LABELS, clubCopy } from "@/lib/club-i18n";
+import { clubCopy } from "@/lib/club-i18n";
 import { getClubLocale } from "@/lib/club-locale";
 import type { PlayerNeed } from "@/types/domain";
 
@@ -22,7 +24,7 @@ export default async function EditClubNeedPage({
 
   const { data: need } = await supabase
     .from("player_needs")
-    .select("*")
+    .select("*, player_need_confidential(note)")
     .eq("id", id)
     .eq("club_id", profile.club_id!)
     .single();
@@ -34,13 +36,14 @@ export default async function EditClubNeedPage({
     <div className="space-y-6">
       <PageHeader
         title={t.editTitle}
-        description={`${CLUB_POSITION_LABELS[locale][typedNeed.position]} · ${typedNeed.season}`}
+        description={`${needHeadline(typedNeed, locale)} · ${typedNeed.season}`}
       />
       <NeedForm
         action={updateClubNeedAction}
         need={typedNeed}
+        confidentialNote={need.player_need_confidential?.note}
         submitLabel={t.submitUpdate}
-        error={query.error === "save" ? query.error : null}
+        error={parseNeedFormErrorCode(query.error)}
         locale={locale}
       />
     </div>

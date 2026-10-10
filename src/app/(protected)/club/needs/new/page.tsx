@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { NeedForm } from "@/features/player-needs/need-form";
 import { createClubNeedAction } from "@/features/player-needs/actions";
+import { parseNeedFormErrorCode } from "@/features/player-needs/form-schema";
 import { requireClubUser } from "@/lib/auth";
 import { clubCopy } from "@/lib/club-i18n";
 import { getClubLocale } from "@/lib/club-locale";
@@ -24,7 +25,7 @@ export default async function NewClubNeedPage({
       <NeedForm
         action={createClubNeedAction}
         submitLabel={t.submitCreate}
-        error={params.error === "save" ? params.error : null}
+        error={parseNeedFormErrorCode(params.error)}
         locale={locale}
       />
     </div>

@@ -12,12 +12,15 @@ import { Field, Input, Select } from "@/components/ui/form";
 import { PageHeader } from "@/components/ui/page-header";
 import { AdminNeedsInbox, AdminQuickFilters } from "@/features/admin/dashboard-widgets";
 import { AdminVisualSummary } from "@/features/admin/visual-summary";
-import { normalizeAdminNeedFilters } from "@/features/admin/filters";
+import { applyNeedFilters, normalizeAdminNeedFilters } from "@/features/admin/filters";
 import { NeedBadges } from "@/features/player-needs/need-badges";
+import { NeedPositionCell } from "@/features/player-needs/need-summary";
 import {
+  ATTACK_POSITIONS,
   COUNTRIES,
+  DEFENSE_GROUPS,
   LEAGUES,
-  POSITIONS,
+  NEED_TYPES,
   PRIORITIES,
   SEASONS,
   STATUSES
@@ -25,7 +28,13 @@ import {
 import { agencyCopy } from "@/lib/agency-i18n";
 import { requireAgency } from "@/lib/auth";
 import { getClubLocale } from "@/lib/club-locale";
-import { CLUB_POSITION_LABELS, CLUB_PRIORITY_LABELS, CLUB_STATUS_LABELS } from "@/lib/club-i18n";
+import {
+  CLUB_DEFENSE_GROUP_LABELS,
+  CLUB_NEED_TYPE_LABELS,
+  CLUB_POSITION_LABELS,
+  CLUB_PRIORITY_LABELS,
+  CLUB_STATUS_LABELS
+} from "@/lib/club-i18n";
 import { formatDate } from "@/lib/utils";
 import type { PlayerNeedWithClub } from "@/types/domain";
 
@@ -43,20 +52,12 @@ export default async function AgencyDashboardPage({
   const params = await searchParams;
   const filters = normalizeAdminNeedFilters(params);
 
-  let query = supabase
+  const query = supabase
     .from("player_needs")
     .select("*, clubs!inner(id,name,country,league,city,website,logo_path,created_at,updated_at)")
     .order("created_at", { ascending: false });
 
-  if (filters.q) query = query.ilike("clubs.name", `%${filters.q}%`);
-  if (filters.country) query = query.eq("clubs.country", filters.country);
-  if (filters.league) query = query.eq("clubs.league", filters.league);
-  if (filters.season) query = query.eq("season", filters.season);
-  if (filters.position) query = query.eq("position", filters.position);
-  if (filters.status) query = query.eq("status", filters.status);
-  if (filters.priority) query = query.eq("priority", filters.priority);
-
-  const { data = [] } = await query;
+  const { data = [] } = await applyNeedFilters(query, filters);
   const needs = data as PlayerNeedWithClub[];
   const { data: inboxRows = [] } = await supabase
     .from("player_needs")
@@ -107,7 +108,7 @@ export default async function AgencyDashboardPage({
             {needs.length} {t.filters.resultCount}
           </p>
         </div>
-        <div className="grid gap-4 p-5 md:grid-cols-4 lg:grid-cols-8">
+        <div className="grid gap-4 p-5 md:grid-cols-4 lg:grid-cols-5">
           <Field label={t.filters.club} htmlFor="q" className="md:col-span-2">
             <Input id="q" name="q" defaultValue={filters.q || ""} placeholder={t.filters.clubPlaceholder} />
           </Field>
@@ -145,12 +146,34 @@ export default async function AgencyDashboardPage({
             </Select>
           </Field>
 
+          <Field label={t.filters.type} htmlFor="type">
+            <Select id="type" name="type" defaultValue={filters.type || ""}>
+              <option value="">{t.filters.all}</option>
+              {NEED_TYPES.map((needType) => (
+                <option key={needType} value={needType}>
+                  {CLUB_NEED_TYPE_LABELS[locale][needType]}
+                </option>
+              ))}
+            </Select>
+          </Field>
+
           <Field label={t.filters.position} htmlFor="position">
             <Select id="position" name="position" defaultValue={filters.position || ""}>
               <option value="">{t.filters.all}</option>
-              {POSITIONS.map((position) => (
+              {ATTACK_POSITIONS.map((position) => (
                 <option key={position} value={position}>
                   {positionLabels[position]}
+                </option>
+              ))}
+            </Select>
+          </Field>
+
+          <Field label={t.filters.defense} htmlFor="defense">
+            <Select id="defense" name="defense" defaultValue={filters.defense || ""}>
+              <option value="">{t.filters.all}</option>
+              {DEFENSE_GROUPS.map((group) => (
+                <option key={group} value={group}>
+                  {CLUB_DEFENSE_GROUP_LABELS[locale][group]}
                 </option>
               ))}
             </Select>
@@ -178,7 +201,7 @@ export default async function AgencyDashboardPage({
             </Select>
           </Field>
 
-          <div className="flex items-end gap-2 md:col-span-4 lg:col-span-8">
+          <div className="flex items-end gap-2 md:col-span-4 lg:col-span-5">
             <Button type="submit">
               <Search className="h-4 w-4" aria-hidden="true" />
               {t.filters.submit}
@@ -221,10 +244,7 @@ export default async function AgencyDashboardPage({
                   <span className="mr-2 text-xs font-black uppercase text-slate-400 lg:hidden">{t.table.league}</span>
                   {need.clubs.league}
                 </p>
-                <p className="text-base font-bold text-navy-950">
-                  <span className="mr-2 text-xs font-black uppercase text-slate-400 lg:hidden">{t.table.position}</span>
-                  {positionLabels[need.position]}
-                </p>
+                <NeedPositionCell need={need} locale={locale} />
                 <p className="text-sm text-slate-700">
                   <span className="mr-2 text-xs font-black uppercase text-slate-400 lg:hidden">{t.table.season}</span>
                   {need.season}

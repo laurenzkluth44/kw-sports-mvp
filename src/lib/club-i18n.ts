@@ -1,4 +1,16 @@
-import type { PlayerNeedStatus, Position, Priority } from "@/types/domain";
+import { defenseGroupOf } from "@/lib/constants";
+import type {
+  AttackPosition,
+  CoachRole,
+  DefenseGroup,
+  DefensePosition,
+  Language,
+  NeedType,
+  PlayerNeedStatus,
+  PlayerType,
+  Priority,
+  TargetRole
+} from "@/types/domain";
 
 export const CLUB_LOCALE_COOKIE = "kw_club_locale";
 export const CLUB_LOCALES = ["de", "en", "fr", "es"] as const;
@@ -39,7 +51,7 @@ export const clubCopy = {
       emptyBody: "Aktive Suchaufträge erscheinen hier, sobald ein Bedarf angelegt wurde.",
       statusError: "Status konnte nicht geändert werden.",
       duplicateError: "Bedarf konnte nicht dupliziert werden.",
-      position: "Position",
+      position: "Bedarf",
       season: "Saison",
       neededFrom: "Benötigt ab",
       status: "Status",
@@ -52,11 +64,14 @@ export const clubCopy = {
       editTitle: "Bedarf bearbeiten",
       editSr: "Bedarf bearbeiten",
       footer: "Archivierte und besetzte Suchaufträge bleiben gespeichert. Besetzte Bedarfe erscheinen weiterhin, archivierte nicht.",
+      agencies: "Agenturen mit Zugriff",
+      noPosition: "Position fehlt",
+      defense: "Abwehr",
       statusFilter: "Aktueller Statusfilter"
     },
     form: {
       newTitle: "Neuen Bedarf anlegen",
-      newDescription: "Pflichtfelder ausfüllen, optionales Spielerprofil ergänzen und speichern.",
+      newDescription: "Spieler oder Trainer wählen, Pflichtfelder ausfüllen, optionales Profil ergänzen und speichern.",
       editTitle: "Bedarf bearbeiten",
       submitCreate: "Bedarf anlegen",
       submitUpdate: "Änderungen speichern",
@@ -75,7 +90,7 @@ export const clubCopy = {
       statusNote: "Statusnotiz",
       statusNotePlaceholder: "Optional: z.B. besetzt seit Datum, Grund für Archivierung oder aktueller Stand",
       description: "Kurzbeschreibung",
-      descriptionPlaceholder: "Sportliches Profil, Kaderkontext oder interne Hinweise",
+      descriptionPlaceholder: "Sportliches Profil oder Kaderkontext. Für Agenturen sichtbar.",
       sportDetails: "Optionale sportliche Details",
       ageMin: "Alter min.",
       ageMax: "Alter max.",
@@ -88,6 +103,24 @@ export const clubCopy = {
       budgetAmount: "Budgetbetrag",
       currency: "Währung",
       budgetNote: "Budgetnotiz",
+      needType: "Art des Bedarfs",
+      attackPositions: "Angriffspositionen",
+      defensePositions: "Abwehrpositionen",
+      positionsHelp: "Mehrfachauswahl möglich. Mindestens eine Angriffs- oder Abwehrposition wählen.",
+      defenseHelp: "1/6 Außen · 2/5 Halb · 3/4 Innenblock",
+      positionsError: "Bitte mindestens eine Angriffs- oder Abwehrposition wählen.",
+      legacyPositionHint: "Für diesen Bedarf ist noch keine Position hinterlegt. Bitte Positionen auswählen.",
+      coachRole: "Trainerrolle",
+      coachRolePlaceholder: "Rolle wählen",
+      coachRoleError: "Bitte eine Trainerrolle wählen.",
+      age: "Alter",
+      any: "Beliebig",
+      playerTypeNote: "Weitere Merkmale",
+      targetRoles: "Anvisierte Rolle",
+      languages: "Sprachkenntnisse",
+      confidential: "Vertraulich · nur KW Sports",
+      confidentialHelp: "Nur für KW Sports und deinen Verein sichtbar. Agenturen sehen dieses Feld nicht.",
+      confidentialPlaceholder: "z.B. Gehaltsrahmen, interne Gründe oder Wunschkandidaten",
       save: "Speichern"
     }
   },
@@ -113,7 +146,7 @@ export const clubCopy = {
       emptyBody: "Active recruitment needs will appear here once a roster need has been created.",
       statusError: "Status could not be updated.",
       duplicateError: "Need could not be duplicated.",
-      position: "Position",
+      position: "Need",
       season: "Season",
       neededFrom: "Needed from",
       status: "Status",
@@ -126,11 +159,14 @@ export const clubCopy = {
       editTitle: "Edit need",
       editSr: "Edit need",
       footer: "Archived and filled needs remain stored. Filled needs stay visible; archived needs are hidden.",
+      agencies: "Agencies with access",
+      noPosition: "Position missing",
+      defense: "Defence",
       statusFilter: "Current status filter"
     },
     form: {
       newTitle: "Create new roster need",
-      newDescription: "Fill the required fields, add an optional player profile and save.",
+      newDescription: "Choose player or coach, fill the required fields, add an optional profile and save.",
       editTitle: "Edit roster need",
       submitCreate: "Create need",
       submitUpdate: "Save changes",
@@ -149,7 +185,7 @@ export const clubCopy = {
       statusNote: "Status note",
       statusNotePlaceholder: "Optional: e.g. filled since date, reason for archiving or current state",
       description: "Short brief",
-      descriptionPlaceholder: "Player profile, squad context or internal notes",
+      descriptionPlaceholder: "Sporting profile or squad context. Visible to agencies.",
       sportDetails: "Optional sporting details",
       ageMin: "Min. age",
       ageMax: "Max. age",
@@ -162,6 +198,24 @@ export const clubCopy = {
       budgetAmount: "Budget amount",
       currency: "Currency",
       budgetNote: "Budget note",
+      needType: "Need type",
+      attackPositions: "Attacking positions",
+      defensePositions: "Defensive positions",
+      positionsHelp: "Select as many as needed. Choose at least one attacking or defensive position.",
+      defenseHelp: "1/6 wide · 2/5 half · 3/4 centre block",
+      positionsError: "Please choose at least one attacking or defensive position.",
+      legacyPositionHint: "No position is stored for this need yet. Please select positions.",
+      coachRole: "Coaching role",
+      coachRolePlaceholder: "Choose role",
+      coachRoleError: "Please choose a coaching role.",
+      age: "Age",
+      any: "Any",
+      playerTypeNote: "Other traits",
+      targetRoles: "Intended role",
+      languages: "Languages",
+      confidential: "Confidential · KW Sports only",
+      confidentialHelp: "Only visible to KW Sports and your club. Agencies cannot see this field.",
+      confidentialPlaceholder: "e.g. salary range, internal reasons or preferred candidates",
       save: "Save"
     }
   },
@@ -187,7 +241,7 @@ export const clubCopy = {
       emptyBody: "Les besoins de recrutement actifs apparaîtront ici dès qu'un besoin sera créé.",
       statusError: "Le statut n'a pas pu être modifié.",
       duplicateError: "Le besoin n'a pas pu être dupliqué.",
-      position: "Poste",
+      position: "Besoin",
       season: "Saison",
       neededFrom: "Disponible à partir du",
       status: "Statut",
@@ -200,11 +254,14 @@ export const clubCopy = {
       editTitle: "Modifier le besoin",
       editSr: "Modifier le besoin",
       footer: "Les besoins archivés et pourvus restent enregistrés. Les besoins pourvus restent visibles; les besoins archivés sont masqués.",
+      agencies: "Agences ayant accès",
+      noPosition: "Poste manquant",
+      defense: "Défense",
       statusFilter: "Filtre de statut actuel"
     },
     form: {
       newTitle: "Créer un besoin d'effectif",
-      newDescription: "Renseignez les champs obligatoires, ajoutez le profil joueur optionnel et enregistrez.",
+      newDescription: "Choisissez joueur ou entraîneur, renseignez les champs obligatoires, ajoutez le profil optionnel et enregistrez.",
       editTitle: "Modifier le besoin d'effectif",
       submitCreate: "Créer le besoin",
       submitUpdate: "Enregistrer",
@@ -223,7 +280,7 @@ export const clubCopy = {
       statusNote: "Note de statut",
       statusNotePlaceholder: "Optionnel : date de recrutement, raison de l'archivage ou situation actuelle",
       description: "Brief court",
-      descriptionPlaceholder: "Profil joueur, contexte d'effectif ou notes internes",
+      descriptionPlaceholder: "Profil sportif ou contexte d'effectif. Visible par les agences.",
       sportDetails: "Détails sportifs optionnels",
       ageMin: "Âge min.",
       ageMax: "Âge max.",
@@ -236,6 +293,24 @@ export const clubCopy = {
       budgetAmount: "Montant du budget",
       currency: "Devise",
       budgetNote: "Note budget",
+      needType: "Type de besoin",
+      attackPositions: "Postes en attaque",
+      defensePositions: "Postes en défense",
+      positionsHelp: "Plusieurs choix possibles. Choisissez au moins un poste en attaque ou en défense.",
+      defenseHelp: "1/6 extérieur · 2/5 arrière · 3/4 central",
+      positionsError: "Veuillez choisir au moins un poste en attaque ou en défense.",
+      legacyPositionHint: "Aucun poste n'est encore enregistré pour ce besoin. Veuillez sélectionner des postes.",
+      coachRole: "Rôle d'entraîneur",
+      coachRolePlaceholder: "Choisir un rôle",
+      coachRoleError: "Veuillez choisir un rôle d'entraîneur.",
+      age: "Âge",
+      any: "Indifférent",
+      playerTypeNote: "Autres caractéristiques",
+      targetRoles: "Rôle visé",
+      languages: "Langues parlées",
+      confidential: "Confidentiel · KW Sports uniquement",
+      confidentialHelp: "Visible uniquement par KW Sports et votre club. Les agences ne voient pas ce champ.",
+      confidentialPlaceholder: "p. ex. fourchette salariale, raisons internes ou candidats souhaités",
       save: "Enregistrer"
     }
   },
@@ -261,7 +336,7 @@ export const clubCopy = {
       emptyBody: "Las necesidades activas de fichaje aparecerán aquí cuando se cree una necesidad de plantilla.",
       statusError: "No se pudo actualizar el estado.",
       duplicateError: "No se pudo duplicar la necesidad.",
-      position: "Puesto",
+      position: "Necesidad",
       season: "Temporada",
       neededFrom: "Necesario desde",
       status: "Estado",
@@ -274,11 +349,14 @@ export const clubCopy = {
       editTitle: "Editar necesidad",
       editSr: "Editar necesidad",
       footer: "Las necesidades archivadas y cubiertas permanecen guardadas. Las cubiertas siguen visibles; las archivadas se ocultan.",
+      agencies: "Agencias con acceso",
+      noPosition: "Puesto sin definir",
+      defense: "Defensa",
       statusFilter: "Filtro de estado actual"
     },
     form: {
       newTitle: "Crear necesidad de plantilla",
-      newDescription: "Completa los campos obligatorios, añade un perfil de jugador opcional y guarda.",
+      newDescription: "Elige jugador o entrenador, completa los campos obligatorios, añade un perfil opcional y guarda.",
       editTitle: "Editar necesidad de plantilla",
       submitCreate: "Crear necesidad",
       submitUpdate: "Guardar cambios",
@@ -297,7 +375,7 @@ export const clubCopy = {
       statusNote: "Nota de estado",
       statusNotePlaceholder: "Opcional: fecha de cobertura, motivo de archivo o estado actual",
       description: "Breve descripción",
-      descriptionPlaceholder: "Perfil del jugador, contexto de plantilla o notas internas",
+      descriptionPlaceholder: "Perfil deportivo o contexto de plantilla. Visible para las agencias.",
       sportDetails: "Detalles deportivos opcionales",
       ageMin: "Edad mín.",
       ageMax: "Edad máx.",
@@ -310,57 +388,178 @@ export const clubCopy = {
       budgetAmount: "Importe del presupuesto",
       currency: "Moneda",
       budgetNote: "Nota de presupuesto",
+      needType: "Tipo de necesidad",
+      attackPositions: "Puestos en ataque",
+      defensePositions: "Puestos en defensa",
+      positionsHelp: "Selección múltiple posible. Elige al menos un puesto en ataque o en defensa.",
+      defenseHelp: "1/6 exterior · 2/5 lateral · 3/4 central",
+      positionsError: "Elige al menos un puesto en ataque o en defensa.",
+      legacyPositionHint: "Esta necesidad todavía no tiene puesto. Selecciona los puestos.",
+      coachRole: "Función de entrenador",
+      coachRolePlaceholder: "Elegir función",
+      coachRoleError: "Elige una función de entrenador.",
+      age: "Edad",
+      any: "Indiferente",
+      playerTypeNote: "Otras características",
+      targetRoles: "Rol previsto",
+      languages: "Idiomas",
+      confidential: "Confidencial · solo KW Sports",
+      confidentialHelp: "Solo visible para KW Sports y tu club. Las agencias no ven este campo.",
+      confidentialPlaceholder: "p. ej. rango salarial, motivos internos o candidatos preferidos",
       save: "Guardar"
     }
   }
 } as const;
 
-export const CLUB_POSITION_LABELS: Record<ClubLocale, Record<Position, string>> = {
+export const CLUB_POSITION_LABELS: Record<ClubLocale, Record<AttackPosition, string>> = {
   de: {
     TW: "TW · Torwart",
     LA: "LA · Linksaußen",
-    RA: "RA · Rechtsaußen",
     RL: "RL · Rückraum links",
-    RR: "RR · Rückraum rechts",
     RM: "RM · Rückraum Mitte",
-    KM: "KM · Kreisläufer",
-    Abwehrspezialist: "Abwehrspezialist",
-    Universalspieler: "Universalspieler"
+    RR: "RR · Rückraum rechts",
+    RA: "RA · Rechtsaußen",
+    KM: "KM · Kreisläufer"
   },
   en: {
     TW: "GK · Goalkeeper",
     LA: "LW · Left wing",
-    RA: "RW · Right wing",
     RL: "LB · Left back",
-    RR: "RB · Right back",
     RM: "CB · Centre back",
-    KM: "P · Pivot",
-    Abwehrspezialist: "Defensive specialist",
-    Universalspieler: "All-round player"
+    RR: "RB · Right back",
+    RA: "RW · Right wing",
+    KM: "P · Pivot"
   },
   fr: {
     TW: "GB · Gardien",
     LA: "ALG · Ailier gauche",
-    RA: "ALD · Ailier droit",
     RL: "ARG · Arrière gauche",
-    RR: "ARD · Arrière droit",
     RM: "DC · Demi-centre",
-    KM: "PVT · Pivot",
-    Abwehrspezialist: "Spécialiste défensif",
-    Universalspieler: "Joueur polyvalent"
+    RR: "ARD · Arrière droit",
+    RA: "ALD · Ailier droit",
+    KM: "PVT · Pivot"
   },
   es: {
     TW: "POR · Portero",
     LA: "EI · Extremo izquierdo",
-    RA: "ED · Extremo derecho",
     RL: "LI · Lateral izquierdo",
-    RR: "LD · Lateral derecho",
     RM: "C · Central",
-    KM: "PIV · Pivote",
-    Abwehrspezialist: "Especialista defensivo",
-    Universalspieler: "Jugador polivalente"
+    RR: "LD · Lateral derecho",
+    RA: "ED · Extremo derecho",
+    KM: "PIV · Pivote"
   }
 };
+
+export const CLUB_POSITION_SHORT_LABELS: Record<ClubLocale, Record<AttackPosition, string>> = {
+  de: { TW: "TW", LA: "LA", RL: "RL", RM: "RM", RR: "RR", RA: "RA", KM: "KM" },
+  en: { TW: "GK", LA: "LW", RL: "LB", RM: "CB", RR: "RB", RA: "RW", KM: "P" },
+  fr: { TW: "GB", LA: "ALG", RL: "ARG", RM: "DC", RR: "ARD", RA: "ALD", KM: "PVT" },
+  es: { TW: "POR", LA: "EI", RL: "LI", RM: "C", RR: "LD", RA: "ED", KM: "PIV" }
+};
+
+export const CLUB_DEFENSE_GROUP_LABELS: Record<ClubLocale, Record<DefenseGroup, string>> = {
+  de: { aussen: "Außen (1/6)", halb: "Halb (2/5)", innen: "Innenblock (3/4)" },
+  en: { aussen: "Wide (1/6)", halb: "Half (2/5)", innen: "Centre block (3/4)" },
+  fr: { aussen: "Extérieur (1/6)", halb: "Arrière (2/5)", innen: "Central (3/4)" },
+  es: { aussen: "Exterior (1/6)", halb: "Lateral (2/5)", innen: "Central (3/4)" }
+};
+
+const defenseGroupNames: Record<ClubLocale, Record<DefenseGroup, string>> = {
+  de: { aussen: "Außen", halb: "Halb", innen: "Innenblock" },
+  en: { aussen: "Wide", halb: "Half", innen: "Centre block" },
+  fr: { aussen: "Extérieur", halb: "Arrière", innen: "Central" },
+  es: { aussen: "Exterior", halb: "Lateral", innen: "Central" }
+};
+
+export function defensePositionLabel(position: DefensePosition, locale: ClubLocale) {
+  return `${position} · ${defenseGroupNames[locale][defenseGroupOf(position)]}`;
+}
+
+export const CLUB_NEED_TYPE_LABELS: Record<ClubLocale, Record<NeedType, string>> = {
+  de: { spieler: "Spieler", trainer: "Trainer" },
+  en: { spieler: "Player", trainer: "Coach" },
+  fr: { spieler: "Joueur", trainer: "Entraîneur" },
+  es: { spieler: "Jugador", trainer: "Entrenador" }
+};
+
+export const CLUB_COACH_ROLE_LABELS: Record<ClubLocale, Record<CoachRole, string>> = {
+  de: {
+    cheftrainer: "Cheftrainer",
+    co_trainer: "Co-Trainer",
+    torwarttrainer: "Torwarttrainer",
+    athletiktrainer: "Athletiktrainer",
+    jugendtrainer: "Jugendtrainer"
+  },
+  en: {
+    cheftrainer: "Head coach",
+    co_trainer: "Assistant coach",
+    torwarttrainer: "Goalkeeper coach",
+    athletiktrainer: "Athletic coach",
+    jugendtrainer: "Youth coach"
+  },
+  fr: {
+    cheftrainer: "Entraîneur principal",
+    co_trainer: "Entraîneur adjoint",
+    torwarttrainer: "Entraîneur des gardiens",
+    athletiktrainer: "Préparateur physique",
+    jugendtrainer: "Entraîneur des jeunes"
+  },
+  es: {
+    cheftrainer: "Primer entrenador",
+    co_trainer: "Segundo entrenador",
+    torwarttrainer: "Entrenador de porteros",
+    athletiktrainer: "Preparador físico",
+    jugendtrainer: "Entrenador de cantera"
+  }
+};
+
+export const CLUB_PLAYER_TYPE_LABELS: Record<ClubLocale, Record<PlayerType, string>> = {
+  de: { eins_gegen_eins: "1-gegen-1-stark (Iso)", spielstark: "Spielstark", wurfstark: "Wurfstark", abwehrstark: "Abwehrstark" },
+  en: { eins_gegen_eins: "Strong 1-on-1 (iso)", spielstark: "Playmaker", wurfstark: "Strong shooter", abwehrstark: "Strong defender" },
+  fr: { eins_gegen_eins: "Fort en 1 contre 1", spielstark: "Créateur de jeu", wurfstark: "Bon tireur", abwehrstark: "Bon défenseur" },
+  es: { eins_gegen_eins: "Fuerte en 1x1", spielstark: "Creador de juego", wurfstark: "Buen lanzador", abwehrstark: "Buen defensor" }
+};
+
+export const CLUB_TARGET_ROLE_LABELS: Record<ClubLocale, Record<TargetRole, string>> = {
+  de: {
+    fuehrungsrolle: "Führungsrolle",
+    stammspieler: "Stammspieler",
+    rotationsspieler: "Rotationsspieler",
+    perspektivspieler: "Perspektivspieler"
+  },
+  en: {
+    fuehrungsrolle: "Leadership role",
+    stammspieler: "Starter",
+    rotationsspieler: "Rotation player",
+    perspektivspieler: "Prospect"
+  },
+  fr: {
+    fuehrungsrolle: "Rôle de leader",
+    stammspieler: "Titulaire",
+    rotationsspieler: "Joueur de rotation",
+    perspektivspieler: "Joueur à potentiel"
+  },
+  es: {
+    fuehrungsrolle: "Rol de líder",
+    stammspieler: "Titular",
+    rotationsspieler: "Jugador de rotación",
+    perspektivspieler: "Jugador con proyección"
+  }
+};
+
+export const CLUB_CONTRACT_STATUS_SUGGESTIONS: Record<ClubLocale, readonly string[]> = {
+  de: ["Vertragslos", "Vertrag läuft aus", "Unter Vertrag (Ablöse)", "Leihe"],
+  en: ["Free agent", "Contract expiring", "Under contract (transfer fee)", "Loan"],
+  fr: ["Libre", "Fin de contrat", "Sous contrat (indemnité)", "Prêt"],
+  es: ["Libre", "Fin de contrato", "Con contrato (traspaso)", "Cesión"]
+};
+
+const languageDisplayLocales: Record<ClubLocale, string> = { de: "de-DE", en: "en-GB", fr: "fr-FR", es: "es-ES" };
+
+export function languageLabel(language: Language, locale: ClubLocale) {
+  const name = new Intl.DisplayNames([languageDisplayLocales[locale]], { type: "language" }).of(language) ?? language;
+  return name.charAt(0).toLocaleUpperCase(languageDisplayLocales[locale]) + name.slice(1);
+}
 
 export const CLUB_PRIORITY_LABELS: Record<ClubLocale, Record<Priority, string>> = {
   de: { hoch: "Hoch", mittel: "Mittel", niedrig: "Niedrig" },

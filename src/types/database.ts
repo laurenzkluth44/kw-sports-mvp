@@ -1,4 +1,17 @@
-import type { AppRole, League, PlayerNeedStatus, Position, Priority, Season } from "./domain";
+import type {
+  AppRole,
+  AttackPosition,
+  CoachRole,
+  DefensePosition,
+  Language,
+  League,
+  NeedType,
+  PlayerNeedStatus,
+  PlayerType,
+  Priority,
+  Season,
+  TargetRole
+} from "./domain";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -87,7 +100,10 @@ export type Database = {
           id: string;
           club_id: string;
           season: Season;
-          position: Position;
+          need_type: NeedType;
+          attack_positions: AttackPosition[];
+          defense_positions: DefensePosition[];
+          coach_role: CoachRole | null;
           needed_from_date: string;
           priority: Priority;
           status: PlayerNeedStatus;
@@ -98,6 +114,9 @@ export type Database = {
           nationality_preference: string | null;
           league_experience: string | null;
           player_type: string | null;
+          player_types: PlayerType[];
+          target_roles: TargetRole[];
+          languages: Language[];
           contract_status_preference: string | null;
           budget_amount: number | null;
           budget_currency: string | null;
@@ -112,7 +131,10 @@ export type Database = {
           id?: string;
           club_id: string;
           season: Season;
-          position: Position;
+          need_type?: NeedType;
+          attack_positions?: AttackPosition[];
+          defense_positions?: DefensePosition[];
+          coach_role?: CoachRole | null;
           needed_from_date: string;
           priority: Priority;
           status?: PlayerNeedStatus;
@@ -123,6 +145,9 @@ export type Database = {
           nationality_preference?: string | null;
           league_experience?: string | null;
           player_type?: string | null;
+          player_types?: PlayerType[];
+          target_roles?: TargetRole[];
+          languages?: Language[];
           contract_status_preference?: string | null;
           budget_amount?: number | null;
           budget_currency?: string | null;
@@ -137,7 +162,10 @@ export type Database = {
           id?: string;
           club_id?: string;
           season?: Season;
-          position?: Position;
+          need_type?: NeedType;
+          attack_positions?: AttackPosition[];
+          defense_positions?: DefensePosition[];
+          coach_role?: CoachRole | null;
           needed_from_date?: string;
           priority?: Priority;
           status?: PlayerNeedStatus;
@@ -148,6 +176,9 @@ export type Database = {
           nationality_preference?: string | null;
           league_experience?: string | null;
           player_type?: string | null;
+          player_types?: PlayerType[];
+          target_roles?: TargetRole[];
+          languages?: Language[];
           contract_status_preference?: string | null;
           budget_amount?: number | null;
           budget_currency?: string | null;
@@ -164,6 +195,35 @@ export type Database = {
             columns: ["club_id"];
             isOneToOne: false;
             referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      player_need_confidential: {
+        Row: {
+          player_need_id: string;
+          note: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          player_need_id: string;
+          note: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          player_need_id?: string;
+          note?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "player_need_confidential_player_need_id_fkey";
+            columns: ["player_need_id"];
+            isOneToOne: true;
+            referencedRelation: "player_needs";
             referencedColumns: ["id"];
           }
         ];
@@ -268,6 +328,10 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      agency_count: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       current_user_club_id: {
         Args: Record<PropertyKey, never>;
         Returns: string | null;
@@ -288,7 +352,8 @@ export type Database = {
     Enums: {
       app_role: AppRole;
       club_league: League;
-      player_need_position: Position;
+      attack_position: AttackPosition;
+      need_type: NeedType;
       player_need_priority: Priority;
       player_need_status: PlayerNeedStatus;
       season_label: Season;

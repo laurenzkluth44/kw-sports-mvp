@@ -1,3 +1,5 @@
+import type { DefenseGroup, DefensePosition } from "@/types/domain";
+
 export const LEAGUES = [
   "1. Bundesliga",
   "2. Bundesliga",
@@ -17,16 +19,40 @@ export const COUNTRIES = ["Deutschland", "Frankreich", "Dänemark", "Spanien", "
 
 export const SEASONS = ["2025/26", "2026/27", "2027/28", "2028/29"] as const;
 
-export const POSITIONS = [
-  "TW",
-  "LA",
-  "RA",
-  "RL",
-  "RR",
-  "RM",
-  "KM",
-  "Abwehrspezialist",
-  "Universalspieler"
+export const NEED_TYPES = ["spieler", "trainer"] as const;
+
+export const ATTACK_POSITIONS = ["TW", "LA", "RL", "RM", "RR", "RA", "KM"] as const;
+
+// Abwehr 6:0 von außen nach außen: 1/6 Außen, 2/5 Halb, 3/4 Innenblock.
+export const DEFENSE_POSITIONS = [1, 2, 3, 4, 5, 6] as const;
+
+export const DEFENSE_GROUPS = ["aussen", "halb", "innen"] as const;
+
+export const DEFENSE_GROUP_POSITIONS = {
+  aussen: [1, 6],
+  halb: [2, 5],
+  innen: [3, 4]
+} as const;
+
+export function defenseGroupOf(position: DefensePosition): DefenseGroup {
+  if (position === 1 || position === 6) return "aussen";
+  if (position === 2 || position === 5) return "halb";
+  return "innen";
+}
+
+export const COACH_ROLES = ["cheftrainer", "co_trainer", "torwarttrainer", "athletiktrainer", "jugendtrainer"] as const;
+
+export const PLAYER_TYPES = ["eins_gegen_eins", "spielstark", "wurfstark", "abwehrstark"] as const;
+
+export const TARGET_ROLES = ["fuehrungsrolle", "stammspieler", "rotationsspieler", "perspektivspieler"] as const;
+
+// ISO 639-1; Anzeigenamen kommen lokalisiert aus Intl.DisplayNames.
+export const LANGUAGES = ["de", "en", "fr", "es", "da", "sv", "no", "nl", "pl", "hr", "sr", "sl", "hu", "pt", "is"] as const;
+
+export const LEAGUE_EXPERIENCE_SUGGESTIONS = [
+  ...LEAGUES.filter((league) => league !== "Andere"),
+  "EHF Champions League",
+  "EHF European League"
 ] as const;
 
 export const PRIORITIES = ["hoch", "mittel", "niedrig"] as const;

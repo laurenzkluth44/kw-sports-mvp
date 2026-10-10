@@ -2,8 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAdmin, requireClubUser } from "@/lib/auth";
-import { isValidDateString, parseClubId, parseNeedFormData, parseStatus } from "@/features/player-needs/form-schema";
+import { requireAdmin, requireClubUser, type AuthedContext } from "@/lib/auth";
+import {
+  isValidDateString,
+  needFormErrorCode,
+  parseClubId,
+  parseConfidentialNote,
+  parseNeedFormData,
+  parseStatus
+} from "@/features/player-needs/form-schema";
 
 function readId(formData: FormData) {
   const id = String(formData.get("id") || "").trim();
@@ -26,6 +33,17 @@ function readDateIso(formData: FormData, key: string) {
   return date.toISOString();
 }
 
+// Kept in its own table so agencies never receive it (RLS: admins + owning club only).
+async function saveConfidentialNote(supabase: AuthedContext["supabase"], needId: string, note: string | null) {
+  const { error } = note
+    ? await supabase
+        .from("player_need_confidential")
+        .upsert({ player_need_id: needId, note }, { onConflict: "player_need_id" })
+    : await supabase.from("player_need_confidential").delete().eq("player_need_id", needId);
+
+  if (error) throw error;
+}
+
 function statusTimestamps(status: string | undefined, formData?: FormData) {
   const now = new Date().toISOString();
   const isClosedStatus = status === "besetzt" || status === "archiviert";
@@ -41,15 +59,21 @@ export async function createClubNeedAction(formData: FormData) {
 
   try {
     const payload = parseNeedFormData(formData);
-    const { error } = await supabase.from("player_needs").insert({
-      ...payload,
-      ...statusTimestamps(payload.status, formData),
-      club_id: profile.club_id!
-    });
+    const confidentialNote = parseConfidentialNote(formData);
+    const { data, error } = await supabase
+      .from("player_needs")
+      .insert({
+        ...payload,
+        ...statusTimestamps(payload.status, formData),
+        club_id: profile.club_id!
+      })
+      .select("id")
+      .single();
 
-    if (error) throw error;
-  } catch {
-    redirect("/club/needs/new?error=save");
+    if (error || !data) throw error;
+    if (confidentialNote) await saveConfidentialNote(supabase, data.id, confidentialNote);
+  } catch (error) {
+    redirect(`/club/needs/new?error=${needFormErrorCode(error)}`);
   }
 
   revalidatePath("/club");
@@ -72,8 +96,9 @@ export async function updateClubNeedAction(formData: FormData) {
       .eq("club_id", profile.club_id!);
 
     if (error) throw error;
-  } catch {
-    redirect(`/club/needs/${id}/edit?error=save`);
+    await saveConfidentialNote(supabase, id, parseConfidentialNote(formData));
+  } catch (error) {
+    redirect(`/club/needs/${id}/edit?error=${needFormErrorCode(error)}`);
   }
 
   revalidatePath("/club");
@@ -113,7 +138,7 @@ export async function duplicateClubNeedAction(formData: FormData) {
   try {
     const { data: source, error: sourceError } = await supabase
       .from("player_needs")
-      .select("*")
+      .select("*, player_need_confidential(note)")
       .eq("id", id)
       .eq("club_id", profile.club_id!)
       .single();
@@ -125,7 +150,10 @@ export async function duplicateClubNeedAction(formData: FormData) {
       .insert({
         club_id: profile.club_id!,
         season: source.season,
-        position: source.position,
+        need_type: source.need_type,
+        attack_positions: source.attack_positions,
+        defense_positions: source.defense_positions,
+        coach_role: source.coach_role,
         needed_from_date: source.needed_from_date,
         priority: source.priority,
         status: "offen",
@@ -134,8 +162,11 @@ export async function duplicateClubNeedAction(formData: FormData) {
         age_max: source.age_max,
         height_min: source.height_min,
         nationality_preference: source.nationality_preference,
+        languages: source.languages,
         league_experience: source.league_experience,
         player_type: source.player_type,
+        player_types: source.player_types,
+        target_roles: source.target_roles,
         contract_status_preference: source.contract_status_preference,
         budget_amount: source.budget_amount,
         budget_currency: source.budget_currency,
@@ -146,6 +177,9 @@ export async function duplicateClubNeedAction(formData: FormData) {
 
     if (insertError || !copy) throw insertError;
     copyId = copy.id;
+
+    const sourceNote = source.player_need_confidential?.note ?? null;
+    if (sourceNote) await saveConfidentialNote(supabase, copy.id, sourceNote);
   } catch {
     redirect("/club?error=duplicate");
   }
@@ -161,6 +195,7 @@ export async function createAdminNeedAction(formData: FormData) {
   try {
     const clubId = parseClubId(formData);
     const payload = parseNeedFormData(formData);
+    const confidentialNote = parseConfidentialNote(formData);
     const { data, error } = await supabase
       .from("player_needs")
       .insert({
@@ -173,8 +208,9 @@ export async function createAdminNeedAction(formData: FormData) {
 
     if (error || !data) throw error;
     needId = data.id;
-  } catch {
-    redirect("/admin/needs/new?error=save");
+    if (confidentialNote) await saveConfidentialNote(supabase, needId, confidentialNote);
+  } catch (error) {
+    redirect(`/admin/needs/new?error=${needFormErrorCode(error)}`);
   }
 
   revalidatePath("/admin");
@@ -198,8 +234,9 @@ export async function updateAdminNeedAction(formData: FormData) {
       .eq("id", id);
 
     if (error) throw error;
-  } catch {
-    redirect(`/admin/needs/${id}/edit?error=save`);
+    await saveConfidentialNote(supabase, id, parseConfidentialNote(formData));
+  } catch (error) {
+    redirect(`/admin/needs/${id}/edit?error=${needFormErrorCode(error)}`);
   }
 
   revalidatePath("/admin");
