@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { NeedForm } from "@/features/player-needs/need-form";
 import { createAdminNeedAction } from "@/features/player-needs/actions";
+import { parseNeedFormErrorCode } from "@/features/player-needs/form-schema";
 import { requireAdmin } from "@/lib/auth";
 import type { Club } from "@/types/domain";
 
@@ -30,7 +31,7 @@ export default async function NewAdminNeedPage({
         clubs={clubs as Club[]}
         defaultClubId={params.club_id}
         submitLabel="Bedarf anlegen"
-        error={params.error === "save" ? params.error : null}
+        error={parseNeedFormErrorCode(params.error)}
       />
     </div>
   );

@@ -1,12 +1,13 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { Edit, History, MessageSquarePlus } from "lucide-react";
+import { Edit, History, Lock, MessageSquarePlus } from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/form";
 import { PageHeader } from "@/components/ui/page-header";
 import { createAdminNoteAction } from "@/features/admin/productivity-actions";
 import { NeedBadges } from "@/features/player-needs/need-badges";
+import { TagList, needHeadline, needProfileLabels } from "@/features/player-needs/need-summary";
 import { PRIORITY_LABELS, STATUS_LABELS } from "@/lib/constants";
 import { requireAdmin } from "@/lib/auth";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -26,7 +27,7 @@ export default async function AdminNeedDetailPage({
   const [{ data }, { data: noteRows }, { data: auditLogRows }] = await Promise.all([
     supabase
       .from("player_needs")
-      .select("*, clubs!inner(id,name,country,league,city,website,created_at,updated_at)")
+      .select("*, clubs!inner(id,name,country,league,city,website,created_at,updated_at), player_need_confidential(note)")
       .eq("id", id)
       .single(),
     supabase
@@ -45,6 +46,9 @@ export default async function AdminNeedDetailPage({
   if (!data) redirect("/admin");
 
   const need = data as PlayerNeedWithClub;
+  const confidentialNote = data.player_need_confidential?.note ?? null;
+  const labels = needProfileLabels(need);
+  const isCoach = need.need_type === "trainer";
   const typedNotes = (noteRows || []) as AdminNote[];
   const typedAuditLogs = (auditLogRows || []) as AuditLog[];
 
@@ -52,7 +56,7 @@ export default async function AdminNeedDetailPage({
     <div className="space-y-6">
       <PageHeader
         eyebrow={need.clubs.name}
-        title={`${need.position} · ${need.season}`}
+        title={`${needHeadline(need)} · ${need.season}`}
         description={`${need.clubs.league} · ${need.clubs.city} · benötigt ab ${formatDate(need.needed_from_date)}`}
         actions={
           <LinkButton href={`/admin/needs/${need.id}/edit`} variant="accent">
@@ -64,7 +68,7 @@ export default async function AdminNeedDetailPage({
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <SummaryItem label="Verein" value={need.clubs.name} />
-        <SummaryItem label="Position" value={need.position} />
+        <SummaryItem label="Bedarf" value={needHeadline(need)} />
         <SummaryItem label="Saison" value={need.season} />
         <SummaryItem label="Status" value={STATUS_LABELS[need.status]} />
         <SummaryItem label="Priorität" value={PRIORITY_LABELS[need.priority]} />
@@ -78,7 +82,15 @@ export default async function AdminNeedDetailPage({
           <dl className="mt-5 space-y-4">
             <InfoRow label="Verein" value={<Link href={`/admin/clubs/${need.clubs.id}`}>{need.clubs.name}</Link>} />
             <InfoRow label="Liga" value={need.clubs.league} />
-            <InfoRow label="Position" value={need.position} />
+            <InfoRow label="Art" value={labels.needType} />
+            {isCoach ? (
+              <InfoRow label="Trainerrolle" value={labels.coachRole || "-"} />
+            ) : (
+              <>
+                <InfoRow label="Angriffspositionen" value={<TagList items={labels.attackPositions} />} />
+                <InfoRow label="Abwehrpositionen" value={<TagList items={labels.defensePositions} />} />
+              </>
+            )}
             <InfoRow label="Saison" value={need.season} />
             <InfoRow label="Benötigt ab" value={formatDate(need.needed_from_date)} />
             <InfoRow label="Budget" value={formatCurrency(need.budget_amount, need.budget_currency)} />
@@ -90,15 +102,32 @@ export default async function AdminNeedDetailPage({
           <h2 className="section-heading">Profil</h2>
           <dl className="mt-5 grid gap-4 sm:grid-cols-2">
             <InfoRow label="Beschreibung" value={need.description || "-"} wide />
-            <InfoRow label="Alter" value={formatRange(need.age_min, need.age_max)} />
-            <InfoRow label="Größe min." value={need.height_min ? `${need.height_min} cm` : "-"} />
+            {isCoach ? null : (
+              <>
+                <InfoRow label="Spielertyp" value={<TagList items={labels.playerTypes} />} wide />
+                <InfoRow label="Anvisierte Rolle" value={<TagList items={labels.targetRoles} />} wide />
+                <InfoRow label="Weitere Merkmale" value={need.player_type || "-"} wide />
+                <InfoRow label="Alter" value={formatRange(need.age_min, need.age_max)} />
+                <InfoRow label="Größe min." value={need.height_min ? `${need.height_min} cm` : "-"} />
+              </>
+            )}
+            <InfoRow label="Sprachkenntnisse" value={<TagList items={labels.languages} />} wide />
             <InfoRow label="Nationalität" value={need.nationality_preference || "-"} />
             <InfoRow label="Liga-Erfahrung" value={need.league_experience || "-"} />
-            <InfoRow label="Spielertyp" value={need.player_type || "-"} />
             <InfoRow label="Vertragsstatus" value={need.contract_status_preference || "-"} />
             <InfoRow label="Statusnotiz" value={need.status_note || "-"} wide />
             <InfoRow label="Budgetnotiz" value={need.budget_note || "-"} wide />
           </dl>
+        </div>
+      </section>
+
+      <section className="panel flex items-start gap-3 p-5">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-navy-950 text-white">
+          <Lock className="h-4 w-4" aria-hidden="true" />
+        </span>
+        <div className="min-w-0">
+          <h2 className="section-heading">Vertraulich · nur KW Sports &amp; Verein</h2>
+          <p className="mt-2 whitespace-pre-wrap text-sm text-navy-950">{confidentialNote || "-"}</p>
         </div>
       </section>
 
@@ -201,7 +230,10 @@ function describeAuditEntry(entry: AuditLog) {
   const oldData = entry.old_data || {};
   const newData = entry.new_data || {};
   const changedLabels = [
-    ["position", "Position"],
+    ["need_type", "Art"],
+    ["attack_positions", "Angriffspositionen"],
+    ["defense_positions", "Abwehrpositionen"],
+    ["coach_role", "Trainerrolle"],
     ["season", "Saison"],
     ["needed_from_date", "Benötigt ab"],
     ["priority", "Priorität"],
@@ -210,7 +242,8 @@ function describeAuditEntry(entry: AuditLog) {
     ["budget_amount", "Budget"],
     ["club_id", "Verein"]
   ]
-    .filter(([key]) => oldData[key] !== newData[key])
+    // Array columns arrive as fresh objects, so compare serialized values.
+    .filter(([key]) => JSON.stringify(oldData[key]) !== JSON.stringify(newData[key]))
     .map(([, label]) => label);
 
   if (changedLabels.length === 0) return "Bedarf wurde aktualisiert";

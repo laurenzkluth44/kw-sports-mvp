@@ -1,10 +1,31 @@
-import type { COUNTRIES, LEAGUES, POSITIONS, PRIORITIES, SEASONS, STATUSES } from "@/lib/constants";
+import type {
+  ATTACK_POSITIONS,
+  COACH_ROLES,
+  COUNTRIES,
+  DEFENSE_GROUPS,
+  DEFENSE_POSITIONS,
+  LANGUAGES,
+  LEAGUES,
+  NEED_TYPES,
+  PLAYER_TYPES,
+  PRIORITIES,
+  SEASONS,
+  STATUSES,
+  TARGET_ROLES
+} from "@/lib/constants";
 
 export type AppRole = "admin" | "club" | "agency";
 export type Country = (typeof COUNTRIES)[number];
 export type League = (typeof LEAGUES)[number];
 export type Season = (typeof SEASONS)[number];
-export type Position = (typeof POSITIONS)[number];
+export type NeedType = (typeof NEED_TYPES)[number];
+export type AttackPosition = (typeof ATTACK_POSITIONS)[number];
+export type DefensePosition = (typeof DEFENSE_POSITIONS)[number];
+export type DefenseGroup = (typeof DEFENSE_GROUPS)[number];
+export type CoachRole = (typeof COACH_ROLES)[number];
+export type PlayerType = (typeof PLAYER_TYPES)[number];
+export type TargetRole = (typeof TARGET_ROLES)[number];
+export type Language = (typeof LANGUAGES)[number];
 export type Priority = (typeof PRIORITIES)[number];
 export type PlayerNeedStatus = (typeof STATUSES)[number];
 
@@ -36,7 +57,10 @@ export type PlayerNeed = {
   id: string;
   club_id: string;
   season: Season;
-  position: Position;
+  need_type: NeedType;
+  attack_positions: AttackPosition[];
+  defense_positions: DefensePosition[];
+  coach_role: CoachRole | null;
   needed_from_date: string;
   priority: Priority;
   status: PlayerNeedStatus;
@@ -47,6 +71,9 @@ export type PlayerNeed = {
   nationality_preference: string | null;
   league_experience: string | null;
   player_type: string | null;
+  player_types: PlayerType[];
+  target_roles: TargetRole[];
+  languages: Language[];
   contract_status_preference: string | null;
   budget_amount: number | null;
   budget_currency: string | null;
@@ -61,6 +88,13 @@ export type PlayerNeed = {
 
 export type PlayerNeedWithClub = PlayerNeed & {
   clubs: Club;
+};
+
+export type PlayerNeedConfidential = {
+  player_need_id: string;
+  note: string;
+  created_at: string;
+  updated_at: string;
 };
 
 export type AdminNote = {

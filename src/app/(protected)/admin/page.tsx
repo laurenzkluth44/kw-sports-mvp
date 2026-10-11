@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   AlertTriangle,
+  Building2,
   ClipboardList,
   Download,
   Eye,
@@ -17,10 +18,13 @@ import { PageHeader } from "@/components/ui/page-header";
 import { AdminNeedsInbox, AdminQuickFilters } from "@/features/admin/dashboard-widgets";
 import { AdminVisualSummary } from "@/features/admin/visual-summary";
 import { NeedBadges } from "@/features/player-needs/need-badges";
-import { normalizeAdminNeedFilters, filtersToQuery } from "@/features/admin/filters";
+import { NeedPositionCell } from "@/features/player-needs/need-summary";
+import { applyNeedFilters, normalizeAdminNeedFilters, filtersToQuery } from "@/features/admin/filters";
 import {
+  ATTACK_POSITIONS,
+  DEFENSE_GROUPS,
   LEAGUES,
-  POSITIONS,
+  NEED_TYPES,
   PRIORITIES,
   SEASONS,
   STATUSES,
@@ -28,6 +32,7 @@ import {
   STATUS_LABELS,
   COUNTRIES
 } from "@/lib/constants";
+import { CLUB_DEFENSE_GROUP_LABELS, CLUB_NEED_TYPE_LABELS, CLUB_POSITION_LABELS } from "@/lib/club-i18n";
 import { requireAdmin } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
 import type { PlayerNeedWithClub } from "@/types/domain";
@@ -42,20 +47,12 @@ export default async function AdminDashboardPage({
   const filters = normalizeAdminNeedFilters(params);
   const exportQuery = filtersToQuery(filters);
 
-  let query = supabase
+  const query = supabase
     .from("player_needs")
     .select("*, clubs!inner(id,name,country,league,city,website,created_at,updated_at)")
     .order("created_at", { ascending: false });
 
-  if (filters.q) query = query.ilike("clubs.name", `%${filters.q}%`);
-  if (filters.country) query = query.eq("clubs.country", filters.country);
-  if (filters.league) query = query.eq("clubs.league", filters.league);
-  if (filters.season) query = query.eq("season", filters.season);
-  if (filters.position) query = query.eq("position", filters.position);
-  if (filters.status) query = query.eq("status", filters.status);
-  if (filters.priority) query = query.eq("priority", filters.priority);
-
-  const { data = [] } = await query;
+  const { data = [] } = await applyNeedFilters(query, filters);
   const needs = data as PlayerNeedWithClub[];
   const { data: inboxRows = [] } = await supabase
     .from("player_needs")
@@ -63,6 +60,7 @@ export default async function AdminDashboardPage({
     .order("updated_at", { ascending: false })
     .limit(5);
   const inboxNeeds = inboxRows as PlayerNeedWithClub[];
+  const { data: agencyCount } = await supabase.rpc("agency_count");
   const openCount = needs.filter((need) => need.status === "offen").length;
   const highCount = needs.filter((need) => need.priority === "hoch").length;
 
@@ -94,10 +92,11 @@ export default async function AdminDashboardPage({
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Metric icon={ClipboardList} label="Treffer" value={needs.length} caption="Bedarfe im aktuellen Filter" />
         <Metric icon={Target} label="Offen" value={openCount} caption="Aktuell nicht besetzt" />
         <Metric icon={AlertTriangle} label="Hohe Priorität" value={highCount} caption="Direkter Handlungsbedarf" tone="danger" />
+        <Metric icon={Building2} label="Agenturen" value={agencyCount ?? 0} caption="Mit Lesezugriff auf alle Bedarfe" />
       </section>
 
       <AdminVisualSummary needs={needs} />
@@ -112,7 +111,7 @@ export default async function AdminDashboardPage({
           </div>
           <p className="text-xs font-black uppercase tracking-wide text-slate-500">{needs.length} Treffer</p>
         </div>
-        <div className="grid gap-4 p-5 md:grid-cols-4 lg:grid-cols-8">
+        <div className="grid gap-4 p-5 md:grid-cols-4 lg:grid-cols-5">
           <Field label="Verein" htmlFor="q" className="md:col-span-2">
             <Input id="q" name="q" defaultValue={filters.q || ""} placeholder="Vereinsname" />
           </Field>
@@ -150,12 +149,34 @@ export default async function AdminDashboardPage({
             </Select>
           </Field>
 
-          <Field label="Position" htmlFor="position">
+          <Field label="Art" htmlFor="type">
+            <Select id="type" name="type" defaultValue={filters.type || ""}>
+              <option value="">Alle</option>
+              {NEED_TYPES.map((needType) => (
+                <option key={needType} value={needType}>
+                  {CLUB_NEED_TYPE_LABELS.de[needType]}
+                </option>
+              ))}
+            </Select>
+          </Field>
+
+          <Field label="Angriff" htmlFor="position">
             <Select id="position" name="position" defaultValue={filters.position || ""}>
               <option value="">Alle</option>
-              {POSITIONS.map((position) => (
+              {ATTACK_POSITIONS.map((position) => (
                 <option key={position} value={position}>
-                  {position}
+                  {CLUB_POSITION_LABELS.de[position]}
+                </option>
+              ))}
+            </Select>
+          </Field>
+
+          <Field label="Abwehr" htmlFor="defense">
+            <Select id="defense" name="defense" defaultValue={filters.defense || ""}>
+              <option value="">Alle</option>
+              {DEFENSE_GROUPS.map((group) => (
+                <option key={group} value={group}>
+                  {CLUB_DEFENSE_GROUP_LABELS.de[group]}
                 </option>
               ))}
             </Select>
@@ -183,7 +204,7 @@ export default async function AdminDashboardPage({
             </Select>
           </Field>
 
-          <div className="flex items-end gap-2 md:col-span-4 lg:col-span-8">
+          <div className="flex items-end gap-2 md:col-span-4 lg:col-span-5">
             <Button type="submit">
               <Search className="h-4 w-4" aria-hidden="true" />
               Filtern
@@ -201,7 +222,7 @@ export default async function AdminDashboardPage({
         <div className="table-header hidden grid-cols-[1.25fr_0.8fr_0.7fr_0.8fr_1fr_0.5fr] gap-4 lg:grid">
           <span>Verein</span>
           <span>Liga</span>
-          <span>Position</span>
+          <span>Bedarf</span>
           <span>Saison</span>
           <span>Status</span>
           <span className="text-right">Detail</span>
@@ -231,10 +252,7 @@ export default async function AdminDashboardPage({
                   <span className="mr-2 text-xs font-black uppercase text-slate-400 lg:hidden">Liga</span>
                   {need.clubs.league}
                 </p>
-                <p className="text-base font-bold text-navy-950">
-                  <span className="mr-2 text-xs font-black uppercase text-slate-400 lg:hidden">Position</span>
-                  {need.position}
-                </p>
+                <NeedPositionCell need={need} />
                 <p className="text-sm text-slate-700">
                   <span className="mr-2 text-xs font-black uppercase text-slate-400 lg:hidden">Saison</span>
                   {need.season}

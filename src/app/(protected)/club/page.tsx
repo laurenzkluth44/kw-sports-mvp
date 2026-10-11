@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { AlertTriangle, Copy, Edit, MessageCircle, Plus, Target, type LucideIcon } from "lucide-react";
+import { AlertTriangle, Building2, Copy, Edit, MessageCircle, Plus, Target, type LucideIcon } from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NeedBadges } from "@/features/player-needs/need-badges";
 import { NeedStatusForm } from "@/features/player-needs/need-status-form";
+import { NeedPositionCell } from "@/features/player-needs/need-summary";
 import { duplicateClubNeedAction } from "@/features/player-needs/actions";
-import { CLUB_POSITION_LABELS, CLUB_STATUS_LABELS, clubCopy } from "@/lib/club-i18n";
+import { CLUB_STATUS_LABELS, clubCopy } from "@/lib/club-i18n";
 import { getClubLocale } from "@/lib/club-locale";
 import { requireClubUser } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
@@ -19,7 +20,6 @@ export default async function ClubDashboardPage({
   const { supabase, profile } = await requireClubUser();
   const locale = await getClubLocale();
   const t = clubCopy[locale].dashboard;
-  const positionLabels = CLUB_POSITION_LABELS[locale];
   const params = await searchParams;
 
   const { data: needs = [] } = await supabase
@@ -28,6 +28,8 @@ export default async function ClubDashboardPage({
     .eq("club_id", profile.club_id!)
     .neq("status", "archiviert")
     .order("needed_from_date", { ascending: true });
+
+  const { data: agencyCount } = await supabase.rpc("agency_count");
 
   const typedNeeds = needs as PlayerNeed[];
   const openCount = typedNeeds.filter((need) => need.status === "offen").length;
@@ -80,10 +82,11 @@ export default async function ClubDashboardPage({
         <div className="alert-error">{t.duplicateError}</div>
       ) : null}
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Metric icon={Target} label={t.open} value={openCount} />
         <Metric icon={MessageCircle} label={t.talks} value={talksCount} />
         <Metric icon={AlertTriangle} label={t.highPriority} value={highCount} tone="danger" />
+        <Metric icon={Building2} label={t.agencies} value={agencyCount ?? 0} />
       </section>
 
       {typedNeeds.length === 0 ? (
@@ -117,7 +120,7 @@ export default async function ClubDashboardPage({
                   className="data-row grid gap-4 lg:grid-cols-[0.7fr_0.7fr_0.8fr_1.35fr_auto] lg:items-center"
                 >
                   <div>
-                    <p className="text-base font-bold text-navy-950">{positionLabels[need.position]}</p>
+                    <NeedPositionCell need={need} locale={locale} />
                     <p className="mt-1 text-sm text-slate-500 lg:hidden">{need.season}</p>
                     {stale ? (
                       <p className="mt-2 rounded-md bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700">

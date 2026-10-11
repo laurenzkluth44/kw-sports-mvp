@@ -68,14 +68,22 @@ SUPABASE_SERVICE_ROLE_KEY=...
 6. SQL aus `supabase/migrations/0005_add_international_top_leagues.sql` ausführen.
 7. SQL aus `supabase/migrations/0006_club_logos.sql` ausführen.
 8. SQL aus `supabase/migrations/0007_agency_access.sql` ausführen.
-9. Reale Clubs für 2026/27 mit `supabase/clubs-2026-27.sql` laden.
-10. Optional Beispielbedarfe mit `supabase/seed.sql` laden.
-11. Optional alte Demo-Vereine mit `supabase/remove-old-demo-clubs.sql` entfernen.
-12. Ersten Auth-User in Supabase Auth erstellen.
-13. `supabase/bootstrap-admin.sql` mit der Auth-User-UUID ausführen.
-14. Danach können weitere Club, Agency und Admin User im Admin-Bereich angelegt oder eingeladen werden.
+9. SQL aus `supabase/migrations/0008_need_profile_v2.sql` ausführen.
+10. SQL aus `supabase/migrations/0009_drop_legacy_position.sql` ausführen.
+11. Reale Clubs für 2026/27 mit `supabase/clubs-2026-27.sql` laden.
+12. Optional Beispielbedarfe mit `supabase/seed.sql` laden.
+13. Optional alte Demo-Vereine mit `supabase/remove-old-demo-clubs.sql` entfernen.
+14. Ersten Auth-User in Supabase Auth erstellen.
+15. `supabase/bootstrap-admin.sql` mit der Auth-User-UUID ausführen.
+16. Danach können weitere Club, Agency und Admin User im Admin-Bereich angelegt oder eingeladen werden.
 
-Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3.-Liga-Staffeln, die internationalen Erstliga-Enums und die Agency-Rolle bereits enthalten. `0002_add_third_league_staffeln.sql`, `0005_add_international_top_leagues.sql` und `0007_agency_access.sql` sind vor allem für bestehende Supabase-Projekte gedacht.
+Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3.-Liga-Staffeln, die internationalen Erstliga-Enums und die Agency-Rolle bereits enthalten. `0002_add_third_league_staffeln.sql`, `0005_add_international_top_leagues.sql` und `0007_agency_access.sql` sind vor allem für bestehende Supabase-Projekte gedacht. `0008` und `0009` sind für alle Projekte nötig.
+
+`0008_need_profile_v2.sql` und `0009_drop_legacy_position.sql` ersetzen die Einzelposition durch Angriffspositionen und Abwehrpositionen 1–6 und werden in zwei Schritten ausgerollt:
+
+1. `0008` vor dem Deployment ausführen. Die Migration ist rückwärtskompatibel: Die alte Spalte `position` bleibt bestehen und wird per Trigger mit den neuen Spalten synchron gehalten, sodass der bisher deployte App-Stand weiterläuft. Bestehende Bedarfe mit TW/LA/RL/RM/RR/RA/KM werden übernommen. Bedarfe mit `Universalspieler` oder `Abwehrspezialist` haben danach keine Position und werden in der App als „Position fehlt“ markiert; Abwehrspezialisten erhalten den Spielertyp „Abwehrstark“.
+2. Den neuen App-Stand deployen.
+3. Erst danach `0009` ausführen. Sie entfernt `position` und den Sync-Trigger; ältere App-Stände laufen danach nicht mehr.
 
 Für Einladungen muss Supabase Auth die App-URLs als Redirect URLs erlauben, inklusive `/auth/confirm`. Für Vercel Previews sollte z.B. `https://*.vercel.app/**` erlaubt sein.
 
@@ -83,6 +91,8 @@ Für Einladungen muss Supabase Auth die App-URLs als Redirect URLs erlauben, ink
 
 - `public.clubs`, `public.users` und `public.player_needs` haben RLS aktiviert.
 - `public.admin_notes` und `public.audit_logs` haben ebenfalls RLS aktiviert.
+- `public.player_need_confidential` (vertrauliche Info pro Bedarf) ist nur für Admins und den eigenen Verein lesbar und schreibbar. Agency User haben keine Policy und sehen das Feld nicht.
+- `public.agency_count()` liefert Clubs und Admins nur die aggregierte Anzahl der Agenturen, ohne Zugriff auf `public.users`.
 - Club User sehen nur ihren eigenen Verein.
 - Club User sehen, erstellen und bearbeiten nur `player_needs` mit ihrer eigenen `club_id`.
 - Agency User sehen alle Clubs und alle `player_needs` mit Details nur lesend.
@@ -93,8 +103,10 @@ Für Einladungen muss Supabase Auth die App-URLs als Redirect URLs erlauben, ink
 
 ## Produktivitätserweiterungen
 
-- Admin Visual Summary mit Positionen, Ligen, Prioritäten, Saisons, Status und Datenfrische.
-- Admin Filter nach Land, Liga, Saison, Position, Status und Priorität.
+- Bedarfe für Spieler oder Trainer, mit mehreren Angriffspositionen, Abwehrpositionen 1–6, Spielertyp, anvisierter Rolle und Sprachkenntnissen.
+- Admin Visual Summary mit Angriffs- und Abwehrpositionen, Ligen, Prioritäten, Saisons, Status und Datenfrische.
+- Admin Filter nach Land, Liga, Saison, Art, Angriffsposition, Abwehrbereich, Status und Priorität.
+- Anzahl Agenturen mit Zugriff im Club- und Admin-Dashboard.
 - Agency Dashboard mit denselben Filtern, Kennzahlen und Detailansichten im Read-only Modus.
 - Interne Admin-Notizen pro Bedarf.
 - Audit Log für Bedarf-Erstellungen, Änderungen und Löschungen.

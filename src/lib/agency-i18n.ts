@@ -27,7 +27,9 @@ type AgencyCopy = {
       country: string;
       league: string;
       season: string;
+      type: string;
       position: string;
+      defense: string;
       status: string;
       priority: string;
       all: string;
@@ -54,6 +56,7 @@ type AgencyCopy = {
       season2026: string;
       bundesliga: string;
       filled: string;
+      coaches: string;
     };
     inbox: {
       title: string;
@@ -68,12 +71,15 @@ type AgencyCopy = {
     subtitle: string;
     positions: string;
     positionsSubtitle: string;
+    defense: string;
+    defenseSubtitle: string;
     leagues: string;
     leaguesSubtitle: string;
     priority: string;
     prioritySubtitle: string;
     noData: string;
     noPositions: string;
+    noDefense: string;
     noLeagues: string;
     noPriorities: string;
     needs: string;
@@ -81,6 +87,7 @@ type AgencyCopy = {
     topStatus: string;
     new30Days: string;
     clubsWithNeeds: string;
+    coachNeeds: string;
     stale: string;
   };
   detail: {
@@ -103,7 +110,14 @@ type AgencyCopy = {
     heightMin: string;
     nationality: string;
     leagueExperience: string;
+    needType: string;
+    attackPositions: string;
+    defensePositions: string;
+    coachRole: string;
+    languages: string;
     playerType: string;
+    playerTypeNote: string;
+    targetRoles: string;
     contractStatus: string;
     statusNote: string;
     budgetNote: string;
@@ -123,7 +137,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
     },
     dashboard: {
       title: "Kaderbedarfe",
-      description: "Read-only Zugriff auf alle gesuchten Spielerprofile und Bedarfsdetails.",
+      description: "Read-only Zugriff auf alle gesuchten Spieler- und Trainerprofile und Bedarfsdetails.",
       readOnly: "Nur Ansicht",
       metrics: {
         hits: { label: "Treffer", caption: "Bedarfe im aktuellen Filter" },
@@ -139,7 +153,9 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
         country: "Land",
         league: "Liga",
         season: "Saison",
-        position: "Position",
+        type: "Art",
+        position: "Angriff",
+        defense: "Abwehr",
         status: "Status",
         priority: "Priorität",
         all: "Alle",
@@ -149,7 +165,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       table: {
         club: "Verein",
         league: "Liga",
-        position: "Position",
+        position: "Bedarf",
         season: "Saison",
         status: "Status",
         detail: "Detail",
@@ -165,7 +181,8 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
         highPriority: "Hohe Priorität",
         season2026: "2026/27",
         bundesliga: "1. Bundesliga",
-        filled: "Besetzt"
+        filled: "Besetzt",
+        coaches: "Trainer"
       },
       inbox: {
         title: "Needs Inbox",
@@ -184,14 +201,17 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
     visualSummary: {
       title: "Visual Summary",
       subtitle: "Die wichtigsten Muster im aktuellen Filter auf einen Blick.",
-      positions: "Positionen",
-      positionsSubtitle: "Gesuchte Positionen im aktuellen Filter",
+      positions: "Angriffspositionen",
+      positionsSubtitle: "Gesuchte Angriffspositionen im aktuellen Filter",
+      defense: "Abwehrpositionen",
+      defenseSubtitle: "Gesuchte Abwehrbereiche im aktuellen Filter",
       leagues: "Ligen",
       leaguesSubtitle: "Verteilung der Bedarfe nach Liga",
       priority: "Priorität",
       prioritySubtitle: "Dringlichkeit der Suchaufträge",
       noData: "Keine Daten",
-      noPositions: "Keine Positionen im aktuellen Filter.",
+      noPositions: "Keine Angriffspositionen im aktuellen Filter.",
+      noDefense: "Keine Abwehrpositionen im aktuellen Filter.",
       noLeagues: "Keine Liga-Daten im aktuellen Filter.",
       noPriorities: "Keine Prioritäten im aktuellen Filter.",
       needs: "Bedarfe",
@@ -199,6 +219,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       topStatus: "Top Status",
       new30Days: "Neue Bedarfe 30T",
       clubsWithNeeds: "Vereine mit Bedarf",
+      coachNeeds: "Trainer-Bedarfe",
       stale: "Bitte aktualisieren"
     },
     detail: {
@@ -208,7 +229,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       country: "Land",
       league: "Liga",
       city: "Stadt",
-      position: "Position",
+      position: "Bedarf",
       season: "Saison",
       status: "Status",
       priority: "Priorität",
@@ -221,7 +242,14 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       heightMin: "Größe min.",
       nationality: "Nationalität",
       leagueExperience: "Liga-Erfahrung",
+      needType: "Art",
+      attackPositions: "Angriffspositionen",
+      defensePositions: "Abwehrpositionen",
+      coachRole: "Trainerrolle",
+      languages: "Sprachkenntnisse",
       playerType: "Spielertyp",
+      playerTypeNote: "Weitere Merkmale",
+      targetRoles: "Anvisierte Rolle",
       contractStatus: "Vertragsstatus",
       statusNote: "Statusnotiz",
       budgetNote: "Budgetnotiz",
@@ -239,7 +267,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
     },
     dashboard: {
       title: "Roster needs",
-      description: "Read-only access to all requested player profiles and need details.",
+      description: "Read-only access to all requested player and coach profiles and need details.",
       readOnly: "View only",
       metrics: {
         hits: { label: "Results", caption: "Needs in the current filter" },
@@ -255,7 +283,9 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
         country: "Country",
         league: "League",
         season: "Season",
-        position: "Position",
+        type: "Type",
+        position: "Attack",
+        defense: "Defence",
         status: "Status",
         priority: "Priority",
         all: "All",
@@ -265,7 +295,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       table: {
         club: "Club",
         league: "League",
-        position: "Position",
+        position: "Need",
         season: "Season",
         status: "Status",
         detail: "Detail",
@@ -281,7 +311,8 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
         highPriority: "High priority",
         season2026: "2026/27",
         bundesliga: "1. Bundesliga",
-        filled: "Filled"
+        filled: "Filled",
+        coaches: "Coaches"
       },
       inbox: {
         title: "Needs inbox",
@@ -300,14 +331,17 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
     visualSummary: {
       title: "Visual summary",
       subtitle: "The key patterns in the current filter at a glance.",
-      positions: "Positions",
-      positionsSubtitle: "Requested positions in the current filter",
+      positions: "Attacking positions",
+      positionsSubtitle: "Requested attacking positions in the current filter",
+      defense: "Defensive positions",
+      defenseSubtitle: "Requested defensive areas in the current filter",
       leagues: "Leagues",
       leaguesSubtitle: "Needs by league",
       priority: "Priority",
       prioritySubtitle: "Urgency of the searches",
       noData: "No data",
-      noPositions: "No positions in the current filter.",
+      noPositions: "No attacking positions in the current filter.",
+      noDefense: "No defensive positions in the current filter.",
       noLeagues: "No league data in the current filter.",
       noPriorities: "No priorities in the current filter.",
       needs: "Needs",
@@ -315,6 +349,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       topStatus: "Top status",
       new30Days: "New needs 30d",
       clubsWithNeeds: "Clubs with needs",
+      coachNeeds: "Coach needs",
       stale: "Needs update"
     },
     detail: {
@@ -324,7 +359,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       country: "Country",
       league: "League",
       city: "City",
-      position: "Position",
+      position: "Need",
       season: "Season",
       status: "Status",
       priority: "Priority",
@@ -337,7 +372,14 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       heightMin: "Min. height",
       nationality: "Nationality",
       leagueExperience: "League experience",
+      needType: "Type",
+      attackPositions: "Attacking positions",
+      defensePositions: "Defensive positions",
+      coachRole: "Coaching role",
+      languages: "Languages",
       playerType: "Player type",
+      playerTypeNote: "Other traits",
+      targetRoles: "Intended role",
       contractStatus: "Contract status",
       statusNote: "Status note",
       budgetNote: "Budget note",
@@ -355,7 +397,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
     },
     dashboard: {
       title: "Besoins d'effectif",
-      description: "Accès en lecture seule à tous les profils recherchés et aux détails des besoins.",
+      description: "Accès en lecture seule à tous les profils de joueurs et d'entraîneurs recherchés et aux détails des besoins.",
       readOnly: "Lecture seule",
       metrics: {
         hits: { label: "Résultats", caption: "Besoins dans le filtre actuel" },
@@ -371,7 +413,9 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
         country: "Pays",
         league: "Championnat",
         season: "Saison",
-        position: "Poste",
+        type: "Type",
+        position: "Attaque",
+        defense: "Défense",
         status: "Statut",
         priority: "Priorité",
         all: "Tous",
@@ -381,7 +425,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       table: {
         club: "Club",
         league: "Championnat",
-        position: "Poste",
+        position: "Besoin",
         season: "Saison",
         status: "Statut",
         detail: "Détail",
@@ -397,7 +441,8 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
         highPriority: "Priorité haute",
         season2026: "2026/27",
         bundesliga: "1. Bundesliga",
-        filled: "Pourvus"
+        filled: "Pourvus",
+        coaches: "Entraîneurs"
       },
       inbox: {
         title: "Boîte des besoins",
@@ -416,14 +461,17 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
     visualSummary: {
       title: "Résumé visuel",
       subtitle: "Les principaux motifs du filtre actuel en un coup d'oeil.",
-      positions: "Postes",
-      positionsSubtitle: "Postes recherchés dans le filtre actuel",
+      positions: "Postes en attaque",
+      positionsSubtitle: "Postes en attaque recherchés dans le filtre actuel",
+      defense: "Postes en défense",
+      defenseSubtitle: "Zones défensives recherchées dans le filtre actuel",
       leagues: "Championnats",
       leaguesSubtitle: "Répartition des besoins par championnat",
       priority: "Priorité",
       prioritySubtitle: "Urgence des recherches",
       noData: "Aucune donnée",
-      noPositions: "Aucun poste dans le filtre actuel.",
+      noPositions: "Aucun poste en attaque dans le filtre actuel.",
+      noDefense: "Aucun poste en défense dans le filtre actuel.",
       noLeagues: "Aucune donnée de championnat dans le filtre actuel.",
       noPriorities: "Aucune priorité dans le filtre actuel.",
       needs: "Besoins",
@@ -431,6 +479,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       topStatus: "Statut principal",
       new30Days: "Nouveaux besoins 30 j",
       clubsWithNeeds: "Clubs avec besoins",
+      coachNeeds: "Besoins entraîneur",
       stale: "À actualiser"
     },
     detail: {
@@ -440,7 +489,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       country: "Pays",
       league: "Championnat",
       city: "Ville",
-      position: "Poste",
+      position: "Besoin",
       season: "Saison",
       status: "Statut",
       priority: "Priorité",
@@ -453,7 +502,14 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       heightMin: "Taille min.",
       nationality: "Nationalité",
       leagueExperience: "Expérience de championnat",
+      needType: "Type",
+      attackPositions: "Postes en attaque",
+      defensePositions: "Postes en défense",
+      coachRole: "Rôle d'entraîneur",
+      languages: "Langues parlées",
       playerType: "Profil de joueur",
+      playerTypeNote: "Autres caractéristiques",
+      targetRoles: "Rôle visé",
       contractStatus: "Situation contractuelle",
       statusNote: "Note de statut",
       budgetNote: "Note budget",
@@ -471,7 +527,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
     },
     dashboard: {
       title: "Necesidades de plantilla",
-      description: "Acceso de solo lectura a todos los perfiles buscados y detalles de necesidades.",
+      description: "Acceso de solo lectura a todos los perfiles de jugadores y entrenadores buscados y detalles de necesidades.",
       readOnly: "Solo lectura",
       metrics: {
         hits: { label: "Resultados", caption: "Necesidades en el filtro actual" },
@@ -487,7 +543,9 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
         country: "País",
         league: "Liga",
         season: "Temporada",
-        position: "Puesto",
+        type: "Tipo",
+        position: "Ataque",
+        defense: "Defensa",
         status: "Estado",
         priority: "Prioridad",
         all: "Todos",
@@ -497,7 +555,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       table: {
         club: "Club",
         league: "Liga",
-        position: "Puesto",
+        position: "Necesidad",
         season: "Temporada",
         status: "Estado",
         detail: "Detalle",
@@ -513,7 +571,8 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
         highPriority: "Prioridad alta",
         season2026: "2026/27",
         bundesliga: "1. Bundesliga",
-        filled: "Cubiertas"
+        filled: "Cubiertas",
+        coaches: "Entrenadores"
       },
       inbox: {
         title: "Bandeja de necesidades",
@@ -532,14 +591,17 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
     visualSummary: {
       title: "Resumen visual",
       subtitle: "Los patrones clave del filtro actual de un vistazo.",
-      positions: "Puestos",
-      positionsSubtitle: "Puestos buscados en el filtro actual",
+      positions: "Puestos en ataque",
+      positionsSubtitle: "Puestos en ataque buscados en el filtro actual",
+      defense: "Puestos en defensa",
+      defenseSubtitle: "Zonas defensivas buscadas en el filtro actual",
       leagues: "Ligas",
       leaguesSubtitle: "Distribución de necesidades por liga",
       priority: "Prioridad",
       prioritySubtitle: "Urgencia de las búsquedas",
       noData: "Sin datos",
-      noPositions: "No hay puestos en el filtro actual.",
+      noPositions: "No hay puestos en ataque en el filtro actual.",
+      noDefense: "No hay puestos en defensa en el filtro actual.",
       noLeagues: "No hay datos de liga en el filtro actual.",
       noPriorities: "No hay prioridades en el filtro actual.",
       needs: "Necesidades",
@@ -547,6 +609,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       topStatus: "Estado principal",
       new30Days: "Nuevas 30d",
       clubsWithNeeds: "Clubes con necesidades",
+      coachNeeds: "Necesidades de entrenador",
       stale: "Actualizar"
     },
     detail: {
@@ -556,7 +619,7 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       country: "País",
       league: "Liga",
       city: "Ciudad",
-      position: "Puesto",
+      position: "Necesidad",
       season: "Temporada",
       status: "Estado",
       priority: "Prioridad",
@@ -569,7 +632,14 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       heightMin: "Altura mín.",
       nationality: "Nacionalidad",
       leagueExperience: "Experiencia en liga",
+      needType: "Tipo",
+      attackPositions: "Puestos en ataque",
+      defensePositions: "Puestos en defensa",
+      coachRole: "Función de entrenador",
+      languages: "Idiomas",
       playerType: "Tipo de jugador",
+      playerTypeNote: "Otras características",
+      targetRoles: "Rol previsto",
       contractStatus: "Situación contractual",
       statusNote: "Nota de estado",
       budgetNote: "Nota de presupuesto",

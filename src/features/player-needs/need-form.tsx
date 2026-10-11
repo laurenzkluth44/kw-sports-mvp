@@ -1,14 +1,40 @@
-import { Save } from "lucide-react";
-import { POSITIONS, PRIORITIES, SEASONS, STATUSES, PRIORITY_LABELS, STATUS_LABELS } from "@/lib/constants";
+import { Lock, Save } from "lucide-react";
+import {
+  ATTACK_POSITIONS,
+  COACH_ROLES,
+  DEFENSE_POSITIONS,
+  LANGUAGES,
+  LEAGUE_EXPERIENCE_SUGGESTIONS,
+  NEED_TYPES,
+  PLAYER_TYPES,
+  PRIORITIES,
+  SEASONS,
+  STATUSES,
+  PRIORITY_LABELS,
+  STATUS_LABELS,
+  TARGET_ROLES
+} from "@/lib/constants";
 import { Button } from "@/components/ui/button";
+import { ChipGroup } from "@/components/ui/chip-group";
 import { DateTextInput } from "@/components/ui/date-text-input";
 import { Field, Input, Select, Textarea } from "@/components/ui/form";
+import { MinSlider, RangeSlider } from "@/components/ui/range-slider";
 import { ClubCascadeSelect } from "@/features/admin/club-cascade-select";
+import type { NeedFormErrorCode } from "@/features/player-needs/form-schema";
+import { NeedFormGuard } from "@/features/player-needs/need-form-guard";
+import { hasNeedPosition } from "@/features/player-needs/need-summary";
 import {
+  CLUB_COACH_ROLE_LABELS,
+  CLUB_CONTRACT_STATUS_SUGGESTIONS,
+  CLUB_NEED_TYPE_LABELS,
+  CLUB_PLAYER_TYPE_LABELS,
   CLUB_POSITION_LABELS,
   CLUB_PRIORITY_LABELS,
   CLUB_STATUS_LABELS,
+  CLUB_TARGET_ROLE_LABELS,
   clubCopy,
+  defensePositionLabel,
+  languageLabel,
   type ClubLocale
 } from "@/lib/club-i18n";
 import type { Club, PlayerNeed } from "@/types/domain";
@@ -16,6 +42,7 @@ import type { Club, PlayerNeed } from "@/types/domain";
 export function NeedForm({
   action,
   need,
+  confidentialNote,
   clubs,
   defaultClubId,
   submitLabel = "Speichern",
@@ -24,19 +51,24 @@ export function NeedForm({
 }: {
   action: (formData: FormData) => void | Promise<void>;
   need?: PlayerNeed;
+  confidentialNote?: string | null;
   clubs?: Club[];
   defaultClubId?: string | null;
   submitLabel?: string;
-  error?: string | null;
+  error?: NeedFormErrorCode | null;
   locale?: ClubLocale;
 }) {
   const t = clubCopy[locale].form;
-  const positionLabels = CLUB_POSITION_LABELS[locale];
   const priorityLabels = clubs ? PRIORITY_LABELS : CLUB_PRIORITY_LABELS[locale];
   const statusLabels = clubs ? STATUS_LABELS : CLUB_STATUS_LABELS[locale];
+  const errorMessages: Record<NeedFormErrorCode, string> = {
+    save: t.saveError,
+    positions: t.positionsError,
+    coach_role: t.coachRoleError
+  };
 
   return (
-    <form action={action} className="panel">
+    <form action={action} className="panel need-form">
       {need ? <input type="hidden" name="id" value={need.id} /> : null}
 
       <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-4">
@@ -45,9 +77,8 @@ export function NeedForm({
       </div>
 
       <div className="grid gap-5 p-5 md:grid-cols-2">
-        {error ? (
-          <div className="alert-error md:col-span-2">{t.saveError}</div>
-        ) : null}
+        {error ? <div className="alert-error md:col-span-2">{errorMessages[error]}</div> : null}
+        <NeedFormGuard positionsError={t.positionsError} coachRoleError={t.coachRoleError} />
 
         {clubs ? (
           <ClubCascadeSelect
@@ -61,21 +92,54 @@ export function NeedForm({
           />
         ) : null}
 
+        <ChipGroup
+          legend={t.needType}
+          name="need_type"
+          type="radio"
+          options={NEED_TYPES.map((needType) => ({ value: needType, label: CLUB_NEED_TYPE_LABELS[locale][needType] }))}
+          defaultValues={[need?.need_type || "spieler"]}
+          className="md:col-span-2"
+        />
+
+        {need && need.need_type === "spieler" && !hasNeedPosition(need) ? (
+          <div className="alert-warning player-only md:col-span-2">{t.legacyPositionHint}</div>
+        ) : null}
+
+        <ChipGroup
+          legend={t.attackPositions}
+          name="attack_positions"
+          options={ATTACK_POSITIONS.map((position) => ({ value: position, label: CLUB_POSITION_LABELS[locale][position] }))}
+          defaultValues={need?.attack_positions}
+          help={t.positionsHelp}
+          className="player-only md:col-span-2"
+        />
+
+        <ChipGroup
+          legend={t.defensePositions}
+          name="defense_positions"
+          options={DEFENSE_POSITIONS.map((position) => ({
+            value: String(position),
+            label: defensePositionLabel(position, locale)
+          }))}
+          defaultValues={need?.defense_positions}
+          help={t.defenseHelp}
+          className="player-only md:col-span-2"
+        />
+
+        <ChipGroup
+          legend={t.coachRole}
+          name="coach_role"
+          type="radio"
+          options={COACH_ROLES.map((role) => ({ value: role, label: CLUB_COACH_ROLE_LABELS[locale][role] }))}
+          defaultValues={need?.coach_role ? [need.coach_role] : []}
+          className="coach-only md:col-span-2"
+        />
+
         <Field label={t.season} htmlFor="season">
           <Select id="season" name="season" defaultValue={need?.season || "2026/27"} required>
             {SEASONS.map((season) => (
               <option key={season} value={season}>
                 {season}
-              </option>
-            ))}
-          </Select>
-        </Field>
-
-        <Field label={t.position} htmlFor="position">
-          <Select id="position" name="position" defaultValue={need?.position || "RL"} required>
-            {POSITIONS.map((position) => (
-              <option key={position} value={position}>
-                {clubs ? position : positionLabels[position]}
               </option>
             ))}
           </Select>
@@ -137,29 +201,63 @@ export function NeedForm({
         </Field>
       </div>
 
-      <details className="border-t border-slate-200">
+      <details className="border-t border-slate-200" open>
         <summary className="cursor-pointer bg-white px-5 py-4 text-sm font-black uppercase text-navy-950 transition hover:bg-brand-50">
           {t.sportDetails}
         </summary>
-        <div className="grid gap-5 px-5 pb-5 md:grid-cols-3">
-          <Field label={t.ageMin} htmlFor="age_min">
-            <Input id="age_min" name="age_min" type="number" min="15" max="60" defaultValue={need?.age_min ?? ""} />
-          </Field>
-
-          <Field label={t.ageMax} htmlFor="age_max">
-            <Input id="age_max" name="age_max" type="number" min="15" max="60" defaultValue={need?.age_max ?? ""} />
-          </Field>
-
-          <Field label={t.heightMin} htmlFor="height_min">
-            <Input
-              id="height_min"
-              name="height_min"
-              type="number"
-              min="140"
-              max="230"
-              defaultValue={need?.height_min ?? ""}
+        <div className="grid gap-5 px-5 pb-5 md:grid-cols-2">
+          <div className="player-only">
+            <RangeSlider
+              label={t.age}
+              nameMin="age_min"
+              nameMax="age_max"
+              min={15}
+              max={45}
+              defaultMin={need?.age_min}
+              defaultMax={need?.age_max}
+              anyLabel={t.any}
             />
+          </div>
+
+          <div className="player-only">
+            <MinSlider
+              label={t.heightMin}
+              name="height_min"
+              min={165}
+              max={215}
+              defaultValue={need?.height_min}
+              anyLabel={t.any}
+              unit=" cm"
+            />
+          </div>
+
+          <ChipGroup
+            legend={t.playerType}
+            name="player_types"
+            options={PLAYER_TYPES.map((type) => ({ value: type, label: CLUB_PLAYER_TYPE_LABELS[locale][type] }))}
+            defaultValues={need?.player_types}
+            className="player-only md:col-span-2"
+          />
+
+          <ChipGroup
+            legend={t.targetRoles}
+            name="target_roles"
+            options={TARGET_ROLES.map((role) => ({ value: role, label: CLUB_TARGET_ROLE_LABELS[locale][role] }))}
+            defaultValues={need?.target_roles}
+            className="player-only md:col-span-2"
+          />
+
+          <Field label={t.playerTypeNote} htmlFor="player_type" className="player-only md:col-span-2">
+            <Input id="player_type" name="player_type" defaultValue={need?.player_type || ""} />
           </Field>
+
+          <ChipGroup
+            legend={t.languages}
+            name="languages"
+            options={LANGUAGES.map((language) => ({ value: language, label: languageLabel(language, locale) }))}
+            defaultValues={need?.languages}
+            className="md:col-span-2"
+          />
 
           <Field label={t.nationality} htmlFor="nationality_preference">
             <Input
@@ -170,19 +268,31 @@ export function NeedForm({
           </Field>
 
           <Field label={t.leagueExperience} htmlFor="league_experience">
-            <Input id="league_experience" name="league_experience" defaultValue={need?.league_experience || ""} />
+            <Input
+              id="league_experience"
+              name="league_experience"
+              list="league_experience_suggestions"
+              defaultValue={need?.league_experience || ""}
+            />
+            <datalist id="league_experience_suggestions">
+              {LEAGUE_EXPERIENCE_SUGGESTIONS.map((league) => (
+                <option key={league} value={league} />
+              ))}
+            </datalist>
           </Field>
 
-          <Field label={t.playerType} htmlFor="player_type">
-            <Input id="player_type" name="player_type" defaultValue={need?.player_type || ""} />
-          </Field>
-
-          <Field label={t.contractStatus} htmlFor="contract_status_preference" className="md:col-span-3">
+          <Field label={t.contractStatus} htmlFor="contract_status_preference" className="md:col-span-2">
             <Input
               id="contract_status_preference"
               name="contract_status_preference"
+              list="contract_status_suggestions"
               defaultValue={need?.contract_status_preference || ""}
             />
+            <datalist id="contract_status_suggestions">
+              {CLUB_CONTRACT_STATUS_SUGGESTIONS[locale].map((status) => (
+                <option key={status} value={status} />
+              ))}
+            </datalist>
           </Field>
         </div>
       </details>
@@ -212,6 +322,27 @@ export function NeedForm({
           </Field>
         </div>
       </details>
+
+      <section className="border-t border-slate-200 px-5 py-5">
+        <div className="flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-navy-950 text-white">
+            <Lock className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <div>
+            <label htmlFor="confidential_note" className="section-heading">
+              {t.confidential}
+            </label>
+            <p className="section-subtitle">{t.confidentialHelp}</p>
+          </div>
+        </div>
+        <Textarea
+          id="confidential_note"
+          name="confidential_note"
+          className="mt-4"
+          defaultValue={confidentialNote || ""}
+          placeholder={t.confidentialPlaceholder}
+        />
+      </section>
 
       <div className="flex flex-col gap-2 border-t border-slate-200 bg-slate-50 p-5 sm:flex-row sm:justify-end">
         <Button type="submit">

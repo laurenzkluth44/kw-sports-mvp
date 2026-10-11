@@ -7,6 +7,7 @@ import { Field, Input } from "@/components/ui/form";
 import { PageHeader } from "@/components/ui/page-header";
 import { deleteClubAction, revokeClubUserAction } from "@/features/admin/club-actions";
 import { NeedBadges } from "@/features/player-needs/need-badges";
+import { NeedPositionCell } from "@/features/player-needs/need-summary";
 import { ROLE_LABELS } from "@/lib/constants";
 import { requireAdmin } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
@@ -153,7 +154,7 @@ export default async function AdminClubDetailPage({
               typedNeeds.map((need) => (
                 <article key={need.id} className="data-row grid gap-4 md:grid-cols-[1fr_1fr_1.2fr_0.5fr] md:items-center">
                   <div>
-                    <p className="font-bold text-navy-950">{need.position}</p>
+                    <NeedPositionCell need={need} />
                     <p className="mt-1 text-sm text-slate-500">{need.season}</p>
                   </div>
                   <p className="text-sm text-slate-700">{formatDate(need.needed_from_date)}</p>

@@ -1,13 +1,21 @@
 import {
+  ATTACK_POSITIONS,
+  DEFENSE_GROUPS,
+  DEFENSE_GROUP_POSITIONS,
   LEAGUES,
-  POSITIONS,
   PRIORITIES,
   PRIORITY_LABELS,
   SEASONS,
   STATUSES,
   STATUS_LABELS
 } from "@/lib/constants";
-import { CLUB_POSITION_LABELS, CLUB_PRIORITY_LABELS, CLUB_STATUS_LABELS, type ClubLocale } from "@/lib/club-i18n";
+import {
+  CLUB_DEFENSE_GROUP_LABELS,
+  CLUB_POSITION_LABELS,
+  CLUB_PRIORITY_LABELS,
+  CLUB_STATUS_LABELS,
+  type ClubLocale
+} from "@/lib/club-i18n";
 import type { PlayerNeedWithClub } from "@/types/domain";
 import type { ReactNode } from "react";
 
@@ -22,12 +30,15 @@ type VisualSummaryCopy = {
   subtitle: string;
   positions: string;
   positionsSubtitle: string;
+  defense: string;
+  defenseSubtitle: string;
   leagues: string;
   leaguesSubtitle: string;
   priority: string;
   prioritySubtitle: string;
   noData: string;
   noPositions: string;
+  noDefense: string;
   noLeagues: string;
   noPriorities: string;
   needs: string;
@@ -35,20 +46,24 @@ type VisualSummaryCopy = {
   topStatus: string;
   new30Days: string;
   clubsWithNeeds: string;
+  coachNeeds: string;
   stale: string;
 };
 
 const defaultCopy: VisualSummaryCopy = {
   title: "Visual Summary",
   subtitle: "Die wichtigsten Muster im aktuellen Admin-Filter auf einen Blick.",
-  positions: "Positionen",
-  positionsSubtitle: "Gesuchte Positionen im aktuellen Filter",
+  positions: "Angriffspositionen",
+  positionsSubtitle: "Gesuchte Angriffspositionen im aktuellen Filter",
+  defense: "Abwehrpositionen",
+  defenseSubtitle: "Gesuchte Abwehrbereiche im aktuellen Filter",
   leagues: "Ligen",
   leaguesSubtitle: "Verteilung der Bedarfe nach Liga",
   priority: "Priorität",
   prioritySubtitle: "Dringlichkeit der Suchaufträge",
   noData: "Keine Daten",
-  noPositions: "Keine Positionen im aktuellen Filter.",
+  noPositions: "Keine Angriffspositionen im aktuellen Filter.",
+  noDefense: "Keine Abwehrpositionen im aktuellen Filter.",
   noLeagues: "Keine Liga-Daten im aktuellen Filter.",
   noPriorities: "Keine Prioritäten im aktuellen Filter.",
   needs: "Bedarfe",
@@ -56,6 +71,7 @@ const defaultCopy: VisualSummaryCopy = {
   topStatus: "Top Status",
   new30Days: "Neue Bedarfe 30T",
   clubsWithNeeds: "Vereine mit Bedarf",
+  coachNeeds: "Trainer-Bedarfe",
   stale: "Bitte aktualisieren"
 };
 
@@ -81,17 +97,27 @@ export function AdminVisualSummary({
   copy?: VisualSummaryCopy;
   locale?: ClubLocale;
 }) {
-  const positionLabels = locale ? CLUB_POSITION_LABELS[locale] : null;
+  const positionLabels = CLUB_POSITION_LABELS[locale ?? "de"];
+  const defenseGroupLabels = CLUB_DEFENSE_GROUP_LABELS[locale ?? "de"];
   const priorityLabels = locale ? CLUB_PRIORITY_LABELS[locale] : PRIORITY_LABELS;
   const statusLabels = locale ? CLUB_STATUS_LABELS[locale] : STATUS_LABELS;
 
-  const positionData = POSITIONS.map((position, index) => ({
-    label: positionLabels?.[position] ?? position,
-    value: needs.filter((need) => need.position === position).length,
+  // A need with several positions counts once for each of them.
+  const positionData = ATTACK_POSITIONS.map((position, index) => ({
+    label: positionLabels[position],
+    value: needs.filter((need) => need.attack_positions.includes(position)).length,
     color: chartColors[index % chartColors.length]
   }))
     .filter((item) => item.value > 0)
     .sort((a, b) => b.value - a.value);
+
+  const defenseData = DEFENSE_GROUPS.map((group, index) => ({
+    label: defenseGroupLabels[group],
+    value: needs.filter((need) =>
+      need.defense_positions.some((position) => (DEFENSE_GROUP_POSITIONS[group] as readonly number[]).includes(position))
+    ).length,
+    color: ["#0055ff", "#003399", "#0a0a0a"][index]
+  }));
 
   const leagueData = LEAGUES.map((league, index) => ({
     label: league,
@@ -122,6 +148,7 @@ export function AdminVisualSummary({
   const recentlyCreatedCount = needs.filter((need) => isWithinDays(need.created_at, 30)).length;
   const staleCount = needs.filter((need) => need.last_confirmed_at && !isWithinDays(need.last_confirmed_at, 30)).length;
   const clubsWithNeedsCount = new Set(needs.map((need) => need.club_id)).size;
+  const coachNeedsCount = needs.filter((need) => need.need_type === "trainer").length;
   const topSeason = [...seasonData].sort((a, b) => b.value - a.value)[0];
   const topStatus = [...statusData].filter((item) => item.value > 0).sort((a, b) => b.value - a.value)[0];
 
@@ -134,12 +161,20 @@ export function AdminVisualSummary({
         </div>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_0.85fr]">
+      <div className="grid gap-4 lg:grid-cols-2">
         <SummaryPanel title={copy.positions} subtitle={copy.positionsSubtitle}>
           <div className="grid gap-5 md:grid-cols-[180px_1fr] md:items-center">
-            <DonutChart data={positionData} copy={copy} />
+            <DonutChart
+              data={positionData}
+              copy={copy}
+              centerValue={needs.filter((need) => need.attack_positions.length > 0).length}
+            />
             <Legend data={positionData} emptyText={copy.noPositions} />
           </div>
+        </SummaryPanel>
+
+        <SummaryPanel title={copy.defense} subtitle={copy.defenseSubtitle}>
+          <BarChart data={defenseData} emptyText={copy.noDefense} compact />
         </SummaryPanel>
 
         <SummaryPanel title={copy.leagues} subtitle={copy.leaguesSubtitle}>
@@ -151,11 +186,12 @@ export function AdminVisualSummary({
         </SummaryPanel>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-6">
         <MiniMetric label={copy.topSeason} value={topSeason?.label || "-"} />
         <MiniMetric label={copy.topStatus} value={topStatus?.label || "-"} />
         <MiniMetric label={copy.new30Days} value={recentlyCreatedCount} />
         <MiniMetric label={copy.clubsWithNeeds} value={clubsWithNeedsCount} />
+        <MiniMetric label={copy.coachNeeds} value={coachNeedsCount} />
         <MiniMetric label={copy.stale} value={staleCount} tone={staleCount > 0 ? "warning" : "default"} />
       </div>
     </section>
@@ -182,7 +218,8 @@ function SummaryPanel({
   );
 }
 
-function DonutChart({ data, copy }: { data: ChartDatum[]; copy: VisualSummaryCopy }) {
+// centerValue: number of needs behind the chart; segments can add up to more when needs have several positions.
+function DonutChart({ data, copy, centerValue }: { data: ChartDatum[]; copy: VisualSummaryCopy; centerValue: number }) {
   const total = data.reduce((sum, item) => sum + item.value, 0);
   const radius = 44;
   const stroke = 18;
@@ -221,7 +258,7 @@ function DonutChart({ data, copy }: { data: ChartDatum[]; copy: VisualSummaryCop
         })}
       </svg>
       <div className="absolute text-center">
-        <p className="text-3xl font-black text-navy-950">{total}</p>
+        <p className="text-3xl font-black text-navy-950">{centerValue}</p>
         <p className="text-xs font-black uppercase text-neutral-500">{copy.needs}</p>
       </div>
     </div>

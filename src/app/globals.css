@@ -151,6 +151,47 @@ textarea {
     @apply text-[0.7rem] font-extrabold uppercase tracking-[0.12em] text-neutral-700;
   }
 
+  /* Selectable chip: a visually hidden checkbox/radio (.peer) followed by .chip */
+  .chip {
+    @apply inline-flex min-h-10 cursor-pointer select-none items-center rounded-sm border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-navy-900 transition-colors duration-200 ease-out-expo hover:border-brand-100 hover:bg-brand-50;
+  }
+  .peer:checked + .chip {
+    @apply border-brand-500 bg-brand-500 text-white hover:bg-brand-600;
+  }
+  .peer:focus-visible + .chip {
+    @apply ring-2 ring-brand-100 ring-offset-1;
+  }
+
+  /* Need form: player and coach fields stay in the DOM, CSS shows the matching set */
+  .need-form:has(#need_type_trainer:checked) .player-only,
+  .need-form:not(:has(#need_type_trainer:checked)) .coach-only {
+    display: none;
+  }
+
+  /* Range slider: transparent native inputs stacked over a custom track */
+  .range-input {
+    @apply pointer-events-none absolute inset-0 m-0 h-full w-full appearance-none bg-transparent;
+  }
+  .range-input::-webkit-slider-runnable-track {
+    @apply bg-transparent;
+  }
+  .range-input::-moz-range-track {
+    @apply bg-transparent;
+  }
+  /* Preflight's border-style reset doesn't reach thumb pseudo-elements, hence border-solid. */
+  .range-input::-webkit-slider-thumb {
+    @apply pointer-events-auto h-5 w-5 cursor-grab appearance-none rounded-full border-2 border-solid border-brand-500 bg-white shadow-card;
+  }
+  .range-input::-moz-range-thumb {
+    @apply pointer-events-auto h-5 w-5 cursor-grab rounded-full border-2 border-solid border-brand-500 bg-white shadow-card;
+  }
+  .range-input:focus-visible::-webkit-slider-thumb {
+    @apply ring-4 ring-brand-100;
+  }
+  .range-input:focus-visible::-moz-range-thumb {
+    @apply ring-4 ring-brand-100;
+  }
+
   .field-help {
     @apply text-xs leading-5 text-neutral-500;
   }

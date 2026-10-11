@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Activity, ArrowRight } from "lucide-react";
 import { STATUS_LABELS, PRIORITY_LABELS } from "@/lib/constants";
-import { CLUB_POSITION_LABELS, CLUB_PRIORITY_LABELS, CLUB_STATUS_LABELS, type ClubLocale } from "@/lib/club-i18n";
+import { CLUB_PRIORITY_LABELS, CLUB_STATUS_LABELS, type ClubLocale } from "@/lib/club-i18n";
 import { formatDate } from "@/lib/utils";
 import { filtersToQuery, type AdminNeedFilters } from "@/features/admin/filters";
+import { needHeadline } from "@/features/player-needs/need-summary";
 import type { PlayerNeedWithClub } from "@/types/domain";
 
 type QuickFilterCopy = {
@@ -15,6 +16,7 @@ type QuickFilterCopy = {
   season2026: string;
   bundesliga: string;
   filled: string;
+  coaches: string;
 };
 
 type InboxCopy = {
@@ -32,7 +34,8 @@ const defaultQuickFilterCopy: QuickFilterCopy = {
   highPriority: "Hohe Priorität",
   season2026: "2026/27",
   bundesliga: "1. Bundesliga",
-  filled: "Besetzt"
+  filled: "Besetzt",
+  coaches: "Trainer"
 };
 
 const defaultInboxCopy: InboxCopy = {
@@ -47,7 +50,8 @@ const quickFilters: Array<{ copyKey: keyof Omit<QuickFilterCopy, "title" | "subt
   { copyKey: "highPriority", filters: { priority: "hoch" } },
   { copyKey: "season2026", filters: { season: "2026/27" } },
   { copyKey: "bundesliga", filters: { league: "1. Bundesliga" } },
-  { copyKey: "filled", filters: { status: "besetzt" } }
+  { copyKey: "filled", filters: { status: "besetzt" } },
+  { copyKey: "coaches", filters: { type: "trainer" } }
 ];
 
 export function AdminQuickFilters({
@@ -99,7 +103,6 @@ export function AdminNeedsInbox({
 }) {
   const statusLabels = locale ? CLUB_STATUS_LABELS[locale] : STATUS_LABELS;
   const priorityLabels = locale ? CLUB_PRIORITY_LABELS[locale] : PRIORITY_LABELS;
-  const positionLabels = locale ? CLUB_POSITION_LABELS[locale] : null;
 
   return (
     <section className="panel overflow-hidden">
@@ -125,7 +128,7 @@ export function AdminNeedsInbox({
             >
               <span className="min-w-0">
                 <span className="block truncate font-bold text-navy-950">
-                  {need.clubs.name} · {positionLabels?.[need.position] ?? need.position} · {need.season}
+                  {need.clubs.name} · {needHeadline(need, locale)} · {need.season}
                 </span>
                 <span className="mt-1 block text-sm text-slate-500">
                   {statusLabels[need.status]} · {priorityLabels[need.priority]} · {copy.updated}{" "}
