@@ -7,12 +7,13 @@ import type { CoverageStatus } from "@/features/squad/squad-model";
  * Court coordinates: 1 unit = 10 cm, x 0–200 (20 m wide), y 0 = goal line, y 200 = centre line.
  * Markers are HTML elements positioned in % on top of the SVG so text stays crisp and accessible.
  */
-const VIEW = { x: -12, y: -16, size: 224 };
+// The lower part of the half court stays out of view: nobody is placed there.
+const VIEW = { x: -12, y: -16, width: 224, height: 196 };
 
 export function courtToPercent(x: number, y: number) {
   return {
-    left: `${((x - VIEW.x) / VIEW.size) * 100}%`,
-    top: `${((y - VIEW.y) / VIEW.size) * 100}%`
+    left: `${((x - VIEW.x) / VIEW.width) * 100}%`,
+    top: `${((y - VIEW.y) / VIEW.height) * 100}%`
   };
 }
 
@@ -46,7 +47,7 @@ export function TacticsBoard({
 }) {
   return (
     <div
-      className="relative mx-auto aspect-square w-full max-w-[640px] overflow-hidden rounded-sm bg-navy-950"
+      className="relative mx-auto aspect-[224/196] w-full max-w-[640px] overflow-hidden rounded-sm bg-navy-950"
       role="group"
       aria-label={ariaLabel}
     >
@@ -106,7 +107,7 @@ function Court() {
   // 9 m arcs leave the court at the side lines: y = sqrt(90² - 85²) ≈ 29.6
   return (
     <svg
-      viewBox={`${VIEW.x} ${VIEW.y} ${VIEW.size} ${VIEW.size}`}
+      viewBox={`${VIEW.x} ${VIEW.y} ${VIEW.width} ${VIEW.height}`}
       className="absolute inset-0 h-full w-full"
       aria-hidden="true"
     >
@@ -119,7 +120,7 @@ function Court() {
           <stop offset="0.55" stopColor="#0055ff" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <rect x={VIEW.x} y={VIEW.y} width={VIEW.size} height={VIEW.size} fill="url(#court-stripes)" />
+      <rect x={VIEW.x} y={VIEW.y} width={VIEW.width} height={VIEW.height} fill="url(#court-stripes)" />
       {/* 6 m goal area */}
       <path d="M 25 0 A 60 60 0 0 0 85 60 L 115 60 A 60 60 0 0 0 175 0 Z" fill="url(#court-glow)" />
       <path d="M 25 0 A 60 60 0 0 0 85 60 L 115 60 A 60 60 0 0 0 175 0" fill="none" stroke={line} strokeWidth="1.2" />
@@ -134,12 +135,10 @@ function Court() {
       {/* 7 m line and 4 m goalkeeper line */}
       <line x1="95" y1="70" x2="105" y2="70" stroke={line} strokeWidth="1.2" />
       <line x1="98" y1="40" x2="102" y2="40" stroke={faint} strokeWidth="1.2" />
-      {/* court outline: side lines, goal line, centre line */}
+      {/* court outline: side lines and goal line (the centre line is out of view) */}
       <rect x="0" y="0" width="200" height="200" fill="none" stroke={line} strokeWidth="1.4" />
       {/* goal */}
       <rect x="85" y="-8" width="30" height="8" fill="rgba(0,85,255,0.25)" stroke="#ffffff" strokeWidth="1.4" />
-      {/* centre circle hint */}
-      <path d="M 70 200 A 30 30 0 0 1 130 200" fill="none" stroke={faint} strokeWidth="1.2" />
     </svg>
   );
 }

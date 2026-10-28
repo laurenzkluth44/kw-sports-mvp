@@ -135,17 +135,18 @@ export function SquadScreen({
               </div>
             </div>
 
-            <GapsPanel
-              t={t}
-              locale={locale}
-              season={season}
-              view={view}
-              players={inSeason}
-              attackGapsList={gaps}
-            />
+            <div className="flex flex-col gap-5">
+              <GapsPanel
+                t={t}
+                locale={locale}
+                season={season}
+                view={view}
+                players={inSeason}
+                attackGapsList={gaps}
+              />
+              <PlanningMatrix t={t} locale={locale} players={players} seasons={seasons} selected={season} view={view} />
+            </div>
           </section>
-
-          <PlanningMatrix t={t} locale={locale} players={players} seasons={seasons} selected={season} view={view} />
 
           <PlayerList t={t} locale={locale} players={players} highlight={attack} />
         </>
@@ -348,7 +349,7 @@ function PlanningMatrix({
         <p className="section-subtitle">{t.planning.subtitle}</p>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[420px] border-separate border-spacing-0 text-sm">
+        <table className="w-full min-w-[360px] border-separate border-spacing-0 text-sm">
           <thead>
             <tr>
               <th className="table-header text-left">{t.planning.position}</th>
@@ -364,13 +365,13 @@ function PlanningMatrix({
           <tbody>
             {COURT_ORDER.map((position) => (
               <tr key={position}>
-                <th scope="row" className="border-b border-slate-100 px-5 py-2.5 text-left font-semibold text-navy-950">
+                <th scope="row" className="border-b border-slate-100 px-5 py-2 text-left font-semibold text-navy-950">
                   {CLUB_POSITION_LABELS[locale][position]}
                 </th>
                 {coverageBySeason.map((coverage, index) => {
                   const slot = coverage[position];
                   return (
-                    <td key={seasons[index]} className="border-b border-slate-100 px-3 py-2 text-center">
+                    <td key={seasons[index]} className="border-b border-slate-100 px-2 py-1.5 text-center">
                       <span
                         className={cn(
                           "inline-flex min-w-12 items-center justify-center gap-1 rounded-sm px-2 py-1 font-display text-xl leading-none",

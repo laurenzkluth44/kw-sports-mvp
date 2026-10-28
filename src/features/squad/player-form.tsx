@@ -38,7 +38,7 @@ export function PlayerForm({
   }));
 
   return (
-    <form action={action} className="panel overflow-hidden">
+    <form action={action} className="panel player-form overflow-hidden">
       {player ? <input type="hidden" name="id" value={player.id} /> : null}
       {error ? <div className="alert-error m-5 mb-0">{f.saveError}</div> : null}
 

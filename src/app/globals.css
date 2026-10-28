@@ -162,6 +162,29 @@ textarea {
     @apply ring-2 ring-brand-100 ring-offset-1;
   }
 
+  /* Player form: the main position is not offered again under "can also play" */
+  .player-form:has(#position_TW:checked) label[for="secondary_positions_TW"] {
+    @apply hidden;
+  }
+  .player-form:has(#position_LA:checked) label[for="secondary_positions_LA"] {
+    @apply hidden;
+  }
+  .player-form:has(#position_RL:checked) label[for="secondary_positions_RL"] {
+    @apply hidden;
+  }
+  .player-form:has(#position_RM:checked) label[for="secondary_positions_RM"] {
+    @apply hidden;
+  }
+  .player-form:has(#position_RR:checked) label[for="secondary_positions_RR"] {
+    @apply hidden;
+  }
+  .player-form:has(#position_RA:checked) label[for="secondary_positions_RA"] {
+    @apply hidden;
+  }
+  .player-form:has(#position_KM:checked) label[for="secondary_positions_KM"] {
+    @apply hidden;
+  }
+
   /* Need form: player and coach fields stay in the DOM, CSS shows the matching set */
   .need-form:has(#need_type_trainer:checked) .player-only,
   .need-form:not(:has(#need_type_trainer:checked)) .coach-only {
