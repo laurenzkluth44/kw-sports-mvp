@@ -92,9 +92,10 @@ export function defenseCoverage(players: RosterPlayer[]): Record<DefensePosition
   return Object.fromEntries(
     DEFENSE_POSITIONS.map((position) => {
       const main = players.filter((player) => player.defense_positions.includes(position)).sort(byJerseyThenName);
-      return [position, { main, secondary: [], status: coverageStatus(main.length, 0) }];
+      const slot: SlotCoverage = { main, secondary: [], status: coverageStatus(main.length, 0) };
+      return [position, slot];
     })
-  ) as Record<DefensePosition, SlotCoverage>;
+  ) as unknown as Record<DefensePosition, SlotCoverage>;
 }
 
 export function attackGaps(players: RosterPlayer[], season: string) {
