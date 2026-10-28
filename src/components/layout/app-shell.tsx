@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { Building2, Eye, FileDown, LogOut, Plus, Shield, Users } from "lucide-react";
+import { Building2, Eye, FileDown, LogOut, Plus, Shield, Shirt, Users } from "lucide-react";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { logoutAction } from "@/features/auth/actions";
 import { ROLE_LABELS } from "@/lib/constants";
@@ -117,6 +117,7 @@ function getNav(profile: Profile, locale: ClubLocale) {
 
   return [
     { href: "/club", label: t.navNeeds, icon: Building2 },
+    { href: "/club/squad", label: t.navSquad, icon: Shirt },
     { href: "/club/needs/new", label: t.navNewNeed, icon: Plus }
   ];
 }

@@ -6,3 +6,7 @@ node_modules
 dist
 coverage
 *.log
+
+# OS / build caches
+.DS_Store
+*.tsbuildinfo

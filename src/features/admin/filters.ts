@@ -6,8 +6,8 @@ import {
   LEAGUES,
   NEED_TYPES,
   PRIORITIES,
-  SEASONS,
-  STATUSES
+  STATUSES,
+  isValidSeason
 } from "@/lib/constants";
 import type {
   AttackPosition,
@@ -44,7 +44,7 @@ export function normalizeAdminNeedFilters(input: Record<string, string | undefin
     q: q || undefined,
     country: oneOf(input.country, COUNTRIES) as Country | undefined,
     league: oneOf(input.league, LEAGUES) as League | undefined,
-    season: oneOf(input.season, SEASONS) as Season | undefined,
+    season: input.season && isValidSeason(input.season) ? (input.season as Season) : undefined,
     type: oneOf(input.type, NEED_TYPES) as NeedType | undefined,
     position: oneOf(input.position, ATTACK_POSITIONS) as AttackPosition | undefined,
     defense: oneOf(input.defense, DEFENSE_GROUPS) as DefenseGroup | undefined,

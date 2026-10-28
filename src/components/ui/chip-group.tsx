@@ -12,6 +12,7 @@ export function ChipGroup({
   defaultValues = [],
   type = "checkbox",
   help,
+  required = false,
   className
 }: {
   legend: string;
@@ -20,6 +21,8 @@ export function ChipGroup({
   defaultValues?: readonly (string | number)[];
   type?: "checkbox" | "radio";
   help?: string;
+  /** Radio groups only: the browser asks for a selection before submitting. */
+  required?: boolean;
   className?: string;
 }) {
   const selected = defaultValues.map(String);
@@ -39,6 +42,7 @@ export function ChipGroup({
                 name={name}
                 value={option.value}
                 defaultChecked={selected.includes(option.value)}
+                required={required && type === "radio"}
                 className="peer sr-only"
               />
               <span className="chip">{option.label}</span>

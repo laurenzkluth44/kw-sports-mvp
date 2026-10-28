@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app:
+    name: Typecheck, lint, build
+    runs-on: ubuntu-latest
+    env:
+      # Placeholders: the build never talks to Supabase, it only needs the variables to exist.
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - name: Build
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee build.log
+      - name: Report build errors
+        if: failure()
+        # Surface the end of the build log as an annotation, readable without downloading logs.
+        run: |
+          [ -f build.log ] || exit 0
+          tail -n 60 build.log | sed 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}' > tail.txt
+          echo "::error title=next build failed::$(cat tail.txt)"
+
+  database:
+    name: Migrations and access tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      # Starts the real Supabase Postgres, applies every migration and the seed files.
+      - run: supabase db start
+      - name: Access tests
+        run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -X -f supabase/tests/access.sql

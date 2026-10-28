@@ -8,11 +8,14 @@ import {
   NEED_TYPES,
   PLAYER_TYPES,
   PRIORITIES,
-  SEASONS,
   STATUSES,
   PRIORITY_LABELS,
   STATUS_LABELS,
-  TARGET_ROLES
+  TARGET_ROLES,
+  seasonForDate,
+  seasonLabel,
+  seasonOptions,
+  seasonStartYear
 } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { ChipGroup } from "@/components/ui/chip-group";
@@ -37,12 +40,21 @@ import {
   languageLabel,
   type ClubLocale
 } from "@/lib/club-i18n";
-import type { Club, PlayerNeed } from "@/types/domain";
+import type { AttackPosition, Club, DefensePosition, PlayerNeed, Season } from "@/types/domain";
+
+/** Starting values for a new need, e.g. when created from a gap in the squad. */
+export type NeedPrefill = {
+  attack_positions?: AttackPosition[];
+  defense_positions?: DefensePosition[];
+  season?: Season;
+  needed_from_date?: string;
+};
 
 export function NeedForm({
   action,
   need,
   confidentialNote,
+  prefill,
   clubs,
   defaultClubId,
   submitLabel = "Speichern",
@@ -52,6 +64,7 @@ export function NeedForm({
   action: (formData: FormData) => void | Promise<void>;
   need?: PlayerNeed;
   confidentialNote?: string | null;
+  prefill?: NeedPrefill;
   clubs?: Club[];
   defaultClubId?: string | null;
   submitLabel?: string;
@@ -66,6 +79,8 @@ export function NeedForm({
     positions: t.positionsError,
     coach_role: t.coachRoleError
   };
+  const nextSeason = seasonLabel(seasonStartYear(seasonForDate()) + 1);
+  const selectedSeason = need?.season || prefill?.season || nextSeason;
 
   return (
     <form action={action} className="panel need-form">
@@ -109,7 +124,7 @@ export function NeedForm({
           legend={t.attackPositions}
           name="attack_positions"
           options={ATTACK_POSITIONS.map((position) => ({ value: position, label: CLUB_POSITION_LABELS[locale][position] }))}
-          defaultValues={need?.attack_positions}
+          defaultValues={need?.attack_positions ?? prefill?.attack_positions}
           help={t.positionsHelp}
           className="player-only md:col-span-2"
         />
@@ -121,7 +136,7 @@ export function NeedForm({
             value: String(position),
             label: defensePositionLabel(position, locale)
           }))}
-          defaultValues={need?.defense_positions}
+          defaultValues={need?.defense_positions ?? prefill?.defense_positions}
           help={t.defenseHelp}
           className="player-only md:col-span-2"
         />
@@ -136,8 +151,8 @@ export function NeedForm({
         />
 
         <Field label={t.season} htmlFor="season">
-          <Select id="season" name="season" defaultValue={need?.season || "2026/27"} required>
-            {SEASONS.map((season) => (
+          <Select id="season" name="season" defaultValue={selectedSeason} required>
+            {seasonOptions([selectedSeason]).map((season) => (
               <option key={season} value={season}>
                 {season}
               </option>
@@ -149,7 +164,7 @@ export function NeedForm({
           <DateTextInput
             id="needed_from_date"
             name="needed_from_date"
-            defaultValue={need?.needed_from_date || ""}
+            defaultValue={need?.needed_from_date || prefill?.needed_from_date || ""}
             required
           />
         </Field>

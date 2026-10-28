@@ -1,0 +1,71 @@
+name: Visual preview
+
+# Renders the Squad screens with fictional sample data and publishes screenshots to the
+# `visual-previews` branch, so design changes can be reviewed without logging in.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "src/**"
+      - "scripts/visual-preview/**"
+      - ".github/workflows/visual-preview.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: visual-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screenshots:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      # Unreachable on purpose: the preview pages never talk to Supabase.
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:9
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: preview
+      SUPABASE_SERVICE_ROLE_KEY: preview
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Add preview route (CI only)
+        run: |
+          mkdir -p "src/app/visual-preview/[screen]"
+          cp scripts/visual-preview/page.tsx "src/app/visual-preview/[screen]/page.tsx"
+      - name: Build
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee build.log
+      - name: Report build errors
+        if: failure()
+        run: |
+          [ -f build.log ] || exit 0
+          tail -n 60 build.log | sed 's/%/%25/g' | awk 'BEGIN{ORS="%0A"} {print}' > tail.txt
+          echo "::error title=preview build failed::$(cat tail.txt)"
+      - name: Start app
+        run: |
+          npx next start -p 3000 > server.log 2>&1 &
+          npx -y wait-on@8 -t 60000 http://127.0.0.1:3000/login
+      - name: Screenshots
+        run: |
+          npm install --no-save playwright@1.49.1
+          npx playwright install --with-deps chromium
+          node scripts/visual-preview/screenshot.mjs
+      - name: Publish to visual-previews branch
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          cd screenshots
+          git init -q
+          git checkout -q -b visual-previews
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          echo "Screenshots for ${GITHUB_REF_NAME} @ ${SHA}" > README.md
+          git add -A
+          git commit -q -m "Screenshots for ${SHA}"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" visual-previews

@@ -7,9 +7,9 @@ import {
   NEED_TYPES,
   PLAYER_TYPES,
   PRIORITIES,
-  SEASONS,
   STATUSES,
-  TARGET_ROLES
+  TARGET_ROLES,
+  isValidSeason
 } from "@/lib/constants";
 import type { Database } from "@/types/database";
 import type { DefensePosition, League, PlayerNeedStatus, Priority, Season } from "@/types/domain";
@@ -116,7 +116,7 @@ export function parseNeedFormData(formData: FormData): Omit<PlayerNeedInsert, "c
   const budgetAmount = optionalNumber(formData, "budget_amount");
   const budgetCurrency = optionalString(formData, "budget_currency")?.toUpperCase() || null;
 
-  if (!isOneOf(season, SEASONS)) throw new Error("Invalid season");
+  if (!isValidSeason(season)) throw new Error("Invalid season");
   if (!isOneOf(needType, NEED_TYPES)) throw new Error("Invalid need_type");
   if (!isOneOf(priority, PRIORITIES)) throw new Error("Invalid priority");
   if (!isOneOf(status, STATUSES)) throw new Error("Invalid status");
