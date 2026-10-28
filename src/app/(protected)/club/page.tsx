@@ -1,16 +1,18 @@
 import Link from "next/link";
-import { AlertTriangle, Building2, Copy, Edit, MessageCircle, Plus, Target, type LucideIcon } from "lucide-react";
+import { AlertTriangle, ArrowRight, Building2, Copy, Edit, MessageCircle, Plus, Target, type LucideIcon } from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NeedBadges } from "@/features/player-needs/need-badges";
 import { NeedStatusForm } from "@/features/player-needs/need-status-form";
 import { NeedPositionCell } from "@/features/player-needs/need-summary";
+import { attackGaps, planningSeasons } from "@/features/squad/squad-model";
 import { duplicateClubNeedAction } from "@/features/player-needs/actions";
 import { CLUB_STATUS_LABELS, clubCopy } from "@/lib/club-i18n";
 import { getClubLocale } from "@/lib/club-locale";
 import { requireClubUser } from "@/lib/auth";
+import { squadCopy } from "@/lib/squad-i18n";
 import { formatDate } from "@/lib/utils";
-import type { PlayerNeed } from "@/types/domain";
+import type { PlayerNeed, RosterPlayer } from "@/types/domain";
 
 export default async function ClubDashboardPage({
   searchParams
@@ -30,6 +32,13 @@ export default async function ClubDashboardPage({
     .order("needed_from_date", { ascending: true });
 
   const { data: agencyCount } = await supabase.rpc("agency_count");
+
+  // Squad summary: visible to this club only (RLS), shown as a shortcut to the Squad tab.
+  const { data: rosterRows } = await supabase.from("roster_players").select("*").eq("club_id", profile.club_id!);
+  const roster = (rosterRows ?? []) as RosterPlayer[];
+  const planningSeason = planningSeasons(1)[1];
+  const rosterGapCount = attackGaps(roster, planningSeason).filter((gap) => gap.status === "gap").length;
+  const teaser = squadCopy[locale].teaser;
 
   const typedNeeds = needs as PlayerNeed[];
   const openCount = typedNeeds.filter((need) => need.status === "offen").length;
@@ -88,6 +97,22 @@ export default async function ClubDashboardPage({
         <Metric icon={AlertTriangle} label={t.highPriority} value={highCount} tone="danger" />
         <Metric icon={Building2} label={t.agencies} value={agencyCount ?? 0} />
       </section>
+
+      <Link
+        href="/club/squad"
+        className="panel group flex flex-col gap-3 border-l-2 border-l-brand-500 px-5 py-4 transition-shadow duration-300 ease-out-expo hover:shadow-cardHover sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <p className="eyebrow">{teaser.title}</p>
+          <p className="mt-1.5 text-sm font-semibold text-navy-950">
+            {roster.length > 0 ? teaser.body(roster.length, rosterGapCount, planningSeason) : teaser.empty}
+          </p>
+        </div>
+        <span className="inline-flex items-center gap-2 text-[0.75rem] font-bold uppercase tracking-[0.08em] text-brand-600">
+          {teaser.open}
+          <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out-expo group-hover:translate-x-0.5" aria-hidden="true" />
+        </span>
+      </Link>
 
       {typedNeeds.length === 0 ? (
         <EmptyState
