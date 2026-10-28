@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { getSafeNextPath } from "@/lib/safe-redirect";
 
 export function AuthConfirm() {
   const [message, setMessage] = useState("Einladung wird geprüft...");
@@ -60,9 +61,4 @@ export function AuthConfirm() {
       <p className="text-sm font-semibold text-navy-950">{message}</p>
     </div>
   );
-}
-
-function getSafeNextPath(value: string | null) {
-  if (value?.startsWith("/") && !value.startsWith("//")) return value;
-  return "/set-password";
 }

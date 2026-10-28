@@ -17,7 +17,56 @@ export const LEAGUES = [
 
 export const COUNTRIES = ["Deutschland", "Frankreich", "Dänemark", "Spanien", "Schweiz"] as const;
 
-export const SEASONS = ["2025/26", "2026/27", "2027/28", "2028/29"] as const;
+// Seasons run 1 July – 30 June and are stored as "2026/27". There is no fixed list any more:
+// the app offers a rolling window around the current season.
+const SEASON_PATTERN = /^(\d{4})\/(\d{2})$/;
+
+export function isValidSeason(value: string): boolean {
+  const match = SEASON_PATTERN.exec(value);
+  if (!match) return false;
+  return Number(match[2]) === (Number(match[1]) + 1) % 100;
+}
+
+export function seasonLabel(startYear: number) {
+  return `${startYear}/${String((startYear + 1) % 100).padStart(2, "0")}`;
+}
+
+export function seasonStartYear(season: string) {
+  return Number(season.slice(0, 4));
+}
+
+/** Season a date falls into; seasons switch on 1 July. */
+export function seasonForDate(date = new Date()) {
+  const year = date.getUTCFullYear();
+  return seasonLabel(date.getUTCMonth() >= 6 ? year : year - 1);
+}
+
+/** Last day of a season, e.g. "2026/27" -> "2027-06-30". */
+export function seasonEndDate(season: string) {
+  return `${seasonStartYear(season) + 1}-06-30`;
+}
+
+/** First day of a season, e.g. "2026/27" -> "2026-07-01". */
+export function seasonStartDate(season: string) {
+  return `${seasonStartYear(season)}-07-01`;
+}
+
+/** Rolling window of seasons: `before` seasons back to `after` seasons ahead of the current one. */
+export function seasonWindow(before = 1, after = 3, today = new Date()) {
+  const current = seasonStartYear(seasonForDate(today));
+  return Array.from({ length: before + after + 1 }, (_, index) => seasonLabel(current - before + index));
+}
+
+/** Season options for a select, always including `extra` values (e.g. a stored older season). */
+export function seasonOptions(extra: (string | null | undefined)[] = []) {
+  const values = new Set(seasonWindow());
+  extra.forEach((season) => {
+    if (season && isValidSeason(season)) values.add(season);
+  });
+  return [...values].sort();
+}
+
+export const SEASONS: readonly string[] = seasonWindow();
 
 export const NEED_TYPES = ["spieler", "trainer"] as const;
 

@@ -3,10 +3,16 @@ import { getCurrentProfile } from "@/lib/auth";
 import { applyNeedFilters, normalizeAdminNeedFilters } from "@/features/admin/filters";
 import { buildNeedExportTable, type ExportNeed } from "@/features/admin/export-table";
 
+// Text typed by clubs ends up here. Excel runs cells starting with = + - @ (or tab/CR)
+// as formulas, so such text is prefixed with ' to force it to plain text.
+// Real numbers are left alone so they stay numeric.
 function csvCell(value: unknown) {
   if (value === null || value === undefined) return "";
-  const stringValue = String(value).replaceAll('"', '""');
-  return `"${stringValue}"`;
+  let stringValue = String(value);
+  if (typeof value !== "number" && /^[=+\-@\t\r]/.test(stringValue)) {
+    stringValue = `'${stringValue}`;
+  }
+  return `"${stringValue.replaceAll('"', '""')}"`;
 }
 
 export async function GET(request: NextRequest) {

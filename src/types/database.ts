@@ -199,6 +199,59 @@ export type Database = {
           }
         ];
       };
+      roster_players: {
+        Row: {
+          id: string;
+          club_id: string;
+          first_name: string;
+          last_name: string;
+          jersey_number: number | null;
+          position: AttackPosition;
+          secondary_positions: AttackPosition[];
+          defense_positions: DefensePosition[];
+          contract_until: string;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          club_id: string;
+          first_name: string;
+          last_name: string;
+          jersey_number?: number | null;
+          position: AttackPosition;
+          secondary_positions?: AttackPosition[];
+          defense_positions?: DefensePosition[];
+          contract_until: string;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          club_id?: string;
+          first_name?: string;
+          last_name?: string;
+          jersey_number?: number | null;
+          position?: AttackPosition;
+          secondary_positions?: AttackPosition[];
+          defense_positions?: DefensePosition[];
+          contract_until?: string;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "roster_players_club_id_fkey";
+            columns: ["club_id"];
+            isOneToOne: false;
+            referencedRelation: "clubs";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       player_need_confidential: {
         Row: {
           player_need_id: string;
@@ -232,7 +285,7 @@ export type Database = {
         Row: {
           id: string;
           player_need_id: string;
-          admin_id: string;
+          admin_id: string | null;
           body: string;
           created_at: string;
           updated_at: string;
@@ -240,7 +293,7 @@ export type Database = {
         Insert: {
           id?: string;
           player_need_id: string;
-          admin_id: string;
+          admin_id?: string | null;
           body: string;
           created_at?: string;
           updated_at?: string;
@@ -248,7 +301,7 @@ export type Database = {
         Update: {
           id?: string;
           player_need_id?: string;
-          admin_id?: string;
+          admin_id?: string | null;
           body?: string;
           created_at?: string;
           updated_at?: string;
@@ -356,7 +409,6 @@ export type Database = {
       need_type: NeedType;
       player_need_priority: Priority;
       player_need_status: PlayerNeedStatus;
-      season_label: Season;
     };
     CompositeTypes: Record<string, never>;
   };
