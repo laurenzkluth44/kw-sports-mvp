@@ -20,6 +20,7 @@ src/app
   auth/callback                 Supabase Auth Callback
   (protected)/club              Club Dashboard
   (protected)/club/needs        Bedarf erstellen/bearbeiten
+  (protected)/club/squad        Interner Kader mit Taktiktafel (nur für den eigenen Verein)
   (protected)/agency            Agency Dashboard mit Read-only Zugriff
   (protected)/agency/needs      Agency Bedarf Detail
   (protected)/admin             Admin Dashboard
@@ -32,6 +33,8 @@ src/features                    Auth, Admin, PlayerNeed Logik
 src/lib                         Supabase Clients, Auth Guards, Utils
 src/types                       Domain- und Supabase-Typen
 supabase/migrations             Schema, RLS, Policies
+supabase/tests/access.sql       Zugriffstests (wer sieht/ändert was), laufen in CI
+scripts/test-db-local.sh        Migrationen + Zugriffstests gegen lokales Postgres
 supabase/seed.sql               Beispielvereine und Beispielbedarfe
 supabase/clubs-2026-27.sql      Reale Clubs der Ziel-Ligen für 2026/27
 supabase/remove-old-demo-clubs.sql Sicheres Entfernen alter Demo-Vereine
@@ -70,6 +73,7 @@ SUPABASE_SERVICE_ROLE_KEY=...
 8. SQL aus `supabase/migrations/0007_agency_access.sql` ausführen.
 9. SQL aus `supabase/migrations/0008_need_profile_v2.sql` ausführen.
 10. SQL aus `supabase/migrations/0009_drop_legacy_position.sql` ausführen.
+10a. `0010_security_hardening.sql`, `0011_flexible_seasons.sql` und `0012_roster_players.sql` ausführen.
 11. Reale Clubs für 2026/27 mit `supabase/clubs-2026-27.sql` laden.
 12. Optional Beispielbedarfe mit `supabase/seed.sql` laden.
 13. Optional alte Demo-Vereine mit `supabase/remove-old-demo-clubs.sql` entfernen.
@@ -87,10 +91,30 @@ Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3
 
 Für Einladungen muss Supabase Auth die App-URLs als Redirect URLs erlauben, inklusive `/auth/confirm`. Für Vercel Previews sollte z.B. `https://*.vercel.app/**` erlaubt sein.
 
+## Tests und CI
+
+Jeder Pull Request durchläuft automatisch (`.github/workflows/ci.yml`):
+
+- Typecheck, Lint und Production Build
+- Alle Migrationen auf einem echten lokalen Supabase-Stack (`supabase db start`) plus `supabase/tests/access.sql`. Die Zugriffstests prüfen u.a., dass Verein A den Kader von Verein B weder sehen noch ändern kann und dass Agenturen und Admins keinen Kader sehen.
+
+Lokal ohne Docker: `PGHOST=... PGUSER=postgres scripts/test-db-local.sh` gegen einen beliebigen Postgres-Server.
+
+`.github/workflows/visual-preview.yml` rendert die Kader-Seiten mit fiktiven Beispieldaten und legt Screenshots im Branch `visual-previews` ab.
+
+## Kader (intern)
+
+- Tab „Kader“ für Club User: Spieler mit Name, Rückennummer, Haupt- und Nebenpositionen, Abwehrpositionen 1–6 und Vertragsende (Saisonende, 30.06.).
+- Taktiktafel (Angriff und Abwehr 6:0) zeigt pro Saison, wie viele Spieler je Position unter Vertrag stehen: Besetzt (2+), Dünn (1 oder nur Aushilfe), Lücke.
+- „Handlungsbedarf“ listet Lücken der gewählten Saison; „Bedarf anlegen“ öffnet das Bedarfsformular mit Position und Saison vorausgefüllt.
+- Saisonplanung: Positionen × aktuelle und nächste zwei Saisons.
+- Datenschutz: `public.roster_players` ist ausschließlich für Nutzer des eigenen Vereins lesbar und schreibbar. Es gibt bewusst keine Policy für Admins oder Agenturen und keinen Audit-Trigger (Audit Logs sind für Admins lesbar). Alle Nutzer eines Vereins sehen und bearbeiten denselben Kader.
+
 ## Sicherheit
 
 - `public.clubs`, `public.users` und `public.player_needs` haben RLS aktiviert.
 - `public.admin_notes` und `public.audit_logs` haben ebenfalls RLS aktiviert.
+- `public.roster_players` (Kader) ist nur für Nutzer des eigenen Vereins sichtbar, nicht für KW Sports Admins oder Agenturen.
 - `public.player_need_confidential` (vertrauliche Info pro Bedarf) ist nur für Admins und den eigenen Verein lesbar und schreibbar. Agency User haben keine Policy und sehen das Feld nicht.
 - `public.agency_count()` liefert Clubs und Admins nur die aggregierte Anzahl der Agenturen, ohne Zugriff auf `public.users`.
 - Club User sehen nur ihren eigenen Verein.
