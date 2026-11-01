@@ -5,6 +5,7 @@ import type {
   DefensePosition,
   Language,
   League,
+  NeedMatchStatus,
   NeedType,
   PlayerNeedStatus,
   PlayerType,
@@ -199,6 +200,156 @@ export type Database = {
           }
         ];
       };
+      kw_players: {
+        Row: {
+          id: string;
+          kind: NeedType;
+          first_name: string;
+          last_name: string;
+          birth_date: string | null;
+          nationality: string | null;
+          attack_positions: AttackPosition[];
+          defense_positions: DefensePosition[];
+          coach_roles: string[];
+          handedness: string | null;
+          height_cm: number | null;
+          current_club: string | null;
+          current_league: string | null;
+          contract_until: string | null;
+          available_from: string | null;
+          languages: string[];
+          player_types: string[];
+          league_experience: string | null;
+          profile: string | null;
+          video_url: string | null;
+          photo_path: string | null;
+          cv_path: string | null;
+          consent_at: string | null;
+          visible_to_clubs: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          kind?: NeedType;
+          first_name: string;
+          last_name: string;
+          birth_date?: string | null;
+          nationality?: string | null;
+          attack_positions?: AttackPosition[];
+          defense_positions?: DefensePosition[];
+          coach_roles?: string[];
+          handedness?: string | null;
+          height_cm?: number | null;
+          current_club?: string | null;
+          current_league?: string | null;
+          contract_until?: string | null;
+          available_from?: string | null;
+          languages?: string[];
+          player_types?: string[];
+          league_experience?: string | null;
+          profile?: string | null;
+          video_url?: string | null;
+          photo_path?: string | null;
+          cv_path?: string | null;
+          consent_at?: string | null;
+          visible_to_clubs?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          kind?: NeedType;
+          first_name?: string;
+          last_name?: string;
+          birth_date?: string | null;
+          nationality?: string | null;
+          attack_positions?: AttackPosition[];
+          defense_positions?: DefensePosition[];
+          coach_roles?: string[];
+          handedness?: string | null;
+          height_cm?: number | null;
+          current_club?: string | null;
+          current_league?: string | null;
+          contract_until?: string | null;
+          available_from?: string | null;
+          languages?: string[];
+          player_types?: string[];
+          league_experience?: string | null;
+          profile?: string | null;
+          video_url?: string | null;
+          photo_path?: string | null;
+          cv_path?: string | null;
+          consent_at?: string | null;
+          visible_to_clubs?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      need_matches: {
+        Row: {
+          id: string;
+          need_id: string;
+          player_id: string;
+          status: NeedMatchStatus;
+          score: number;
+          reasons: Json;
+          club_note: string | null;
+          released_at: string;
+          released_by: string | null;
+          responded_at: string | null;
+          responded_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          need_id: string;
+          player_id: string;
+          status?: NeedMatchStatus;
+          score?: number;
+          reasons?: Json;
+          club_note?: string | null;
+          released_at?: string;
+          released_by?: string | null;
+          responded_at?: string | null;
+          responded_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          need_id?: string;
+          player_id?: string;
+          status?: NeedMatchStatus;
+          score?: number;
+          reasons?: Json;
+          club_note?: string | null;
+          released_at?: string;
+          released_by?: string | null;
+          responded_at?: string | null;
+          responded_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "need_matches_need_id_fkey";
+            columns: ["need_id"];
+            isOneToOne: false;
+            referencedRelation: "player_needs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "need_matches_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "kw_players";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       roster_players: {
         Row: {
           id: string;
@@ -381,6 +532,14 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      respond_to_need_match: {
+        Args: { match_id: string; answer: NeedMatchStatus; note?: string | null };
+        Returns: undefined;
+      };
+      club_can_see_kw_player: {
+        Args: { target: string };
+        Returns: boolean;
+      };
       agency_count: {
         Args: Record<PropertyKey, never>;
         Returns: number;
@@ -403,6 +562,7 @@ export type Database = {
       };
     };
     Enums: {
+      need_match_status: NeedMatchStatus;
       app_role: AppRole;
       club_league: League;
       attack_position: AttackPosition;

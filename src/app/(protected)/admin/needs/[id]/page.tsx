@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Flash, flashKind } from "@/components/ui/flash";
+import { AdminNeedMatches } from "@/features/matching/admin-need-matches";
 import { guideCopy } from "@/lib/guide-i18n";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import type { ReactNode } from "react";
@@ -78,6 +79,8 @@ export default async function AdminNeedDetailPage({
         <SummaryItem label="Status" value={STATUS_LABELS[need.status]} />
         <SummaryItem label="Priorität" value={PRIORITY_LABELS[need.priority]} />
       </section>
+
+      <AdminNeedMatches supabase={supabase} need={need} done={query.done} error={query.error} />
 
       <section className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
         <div className="panel p-5">

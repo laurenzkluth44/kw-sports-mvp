@@ -11,6 +11,10 @@ import { normalizeAdminNeedFilters } from "@/features/admin/filters";
 import { NeedsOverview, parseOverviewView } from "@/features/needs-overview/needs-overview";
 import { createClubNeedAction } from "@/features/player-needs/actions";
 import { NeedForm } from "@/features/player-needs/need-form";
+import { createKwPlayerAction } from "@/features/kw-players/actions";
+import { KwPlayerCard } from "@/features/kw-players/kw-player-card";
+import { KwPlayerForm } from "@/features/kw-players/kw-player-form";
+import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
 import { createRosterPlayerAction } from "@/features/squad/actions";
 import { PlayerForm } from "@/features/squad/player-form";
 import { SquadScreen } from "@/features/squad/squad-screen";
@@ -19,7 +23,7 @@ import { seasonEndDate, seasonForDate, seasonLabel, seasonStartYear } from "@/li
 import { clubCopy } from "@/lib/club-i18n";
 import { overviewCopy } from "@/lib/overview-i18n";
 import { squadCopy } from "@/lib/squad-i18n";
-import type { AttackPosition, Club, DefensePosition, PlayerNeedWithClub, Priority, Profile, RosterPlayer } from "@/types/domain";
+import type { AttackPosition, Club, DefensePosition, KwPlayer, NeedMatch, PlayerNeedWithClub, Priority, Profile, RosterPlayer } from "@/types/domain";
 
 const profile: Profile = {
   id: "00000000-0000-0000-0000-000000000001",
@@ -163,6 +167,65 @@ const needs: PlayerNeedWithClub[] = [
   need(9, club(9, "Handball Rheinau", "3. Liga Süd-West", "Rheinau"), ["LA"], "niedrig", { age_max: 24, target_roles: ["perspektivspieler"] })
 ];
 
+// ---- KW player fixtures (fictional) ----
+function kwPlayer(index: number, extra: Partial<KwPlayer>): KwPlayer {
+  return {
+    id: `00000000-0000-0000-0000-0000000003${String(index).padStart(2, "0")}`,
+    kind: "spieler",
+    first_name: "",
+    last_name: "",
+    birth_date: null,
+    nationality: null,
+    attack_positions: [],
+    defense_positions: [],
+    coach_roles: [],
+    handedness: null,
+    height_cm: null,
+    current_club: null,
+    current_league: null,
+    contract_until: null,
+    available_from: null,
+    languages: [],
+    player_types: [],
+    league_experience: null,
+    profile: null,
+    video_url: null,
+    photo_path: null,
+    cv_path: null,
+    consent_at: "2026-10-01",
+    visible_to_clubs: true,
+    created_at: "2026-10-01T00:00:00Z",
+    updated_at: "2026-10-01T00:00:00Z",
+    ...extra
+  };
+}
+
+const kwPlayers: KwPlayer[] = [
+  kwPlayer(1, { first_name: "Jonas", last_name: "Brenner", birth_date: "2001-05-12", attack_positions: ["RR"], handedness: "links", height_cm: 192, current_club: "TV Beispielstadt", current_league: "2. Bundesliga", contract_until: `${start + 1}-06-30`, languages: ["de", "en"], player_types: ["wurfstark"], cv_path: "x/cv.pdf" }),
+  kwPlayer(2, { first_name: "Mats", last_name: "Lindgren", birth_date: "2002-02-02", attack_positions: ["RR", "RA"], handedness: "links", height_cm: 188, current_club: "IK Exempel", current_league: "Håndboldligaen", available_from: `${start + 1}-07-01`, languages: ["en", "sv"], player_types: ["eins_gegen_eins"], cv_path: "x/cv.pdf" }),
+  kwPlayer(3, { first_name: "Karim", last_name: "Haddad", birth_date: "1993-08-20", attack_positions: ["RR"], height_cm: 196, current_club: "HC Muster", current_league: "1. Bundesliga", contract_until: `${start + 2}-06-30`, languages: ["de", "fr"], player_types: ["wurfstark"], visible_to_clubs: false, consent_at: null }),
+  kwPlayer(4, { first_name: "Tom", last_name: "Weber", birth_date: "2003-03-03", attack_positions: ["RL", "RM"], height_cm: 190, current_club: "SG Probe", current_league: "3. Liga Süd", contract_until: `${start}-06-30`, languages: ["de"], player_types: ["spielstark"] }),
+  kwPlayer(5, { kind: "trainer", first_name: "Marco", last_name: "Stein", birth_date: "1985-11-01", coach_roles: ["co_trainer", "athletiktrainer"], current_club: "HSV Beispiel", current_league: "2. Bundesliga", languages: ["de", "en"] })
+];
+
+const sampleMatches: NeedMatch[] = [
+  {
+    id: "00000000-0000-0000-0000-000000000401",
+    need_id: needs[0].id,
+    player_id: kwPlayers[1].id,
+    status: "interessiert",
+    score: 86,
+    reasons: [],
+    club_note: "Gerne Videos und Gehaltsvorstellung schicken.",
+    released_at: daysAgo(6),
+    released_by: null,
+    responded_at: daysAgo(2),
+    responded_by: null,
+    created_at: daysAgo(6),
+    updated_at: daysAgo(2)
+  }
+];
+
 const adminProfile: Profile = { ...profile, id: "00000000-0000-0000-0000-000000000002", role: "admin", club_id: null, clubs: null, name: "KW Admin" };
 const agencyProfile: Profile = { ...profile, id: "00000000-0000-0000-0000-000000000003", role: "agency", club_id: null, clubs: null, name: "Agent", agency_name: "Beispiel Agentur" };
 
@@ -198,6 +261,40 @@ export default async function VisualPreview({
           inbox={null}
           summary={<p className="text-sm text-slate-500">[Auswertung]</p>}
         />
+      </AppShell>
+    );
+  }
+
+  if (screen === "players") {
+    return (
+      <AppShell profile={adminProfile} locale="de">
+        <div className="space-y-6">
+          <PageHeader eyebrow="KW Sports Admin" title="Spielerdatenbank" description="Beispieldaten" />
+          <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {kwPlayers.map((player) => (
+              <KwPlayerCard key={player.id} player={player} />
+            ))}
+          </section>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (screen === "player-form") {
+    return (
+      <AppShell profile={adminProfile} locale="de">
+        <div className="space-y-6">
+          <PageHeader eyebrow="KW Sports Admin" title="Spieler anlegen" />
+          <KwPlayerForm action={createKwPlayerAction} player={kwPlayers[0]} />
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (screen === "matches") {
+    return (
+      <AppShell profile={adminProfile} locale="de">
+        <AdminNeedMatchesView need={needs[0]} players={kwPlayers} matches={sampleMatches} photos={new Map()} />
       </AppShell>
     );
   }

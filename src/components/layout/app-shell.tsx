@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { Building2, Eye, FileDown, LogOut, Menu, Plus, Shield, Shirt, Users } from "lucide-react";
+import { Building2, Eye, FileDown, LogOut, Menu, Plus, Shield, Shirt, UserRound, Users } from "lucide-react";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { NavLinks, type NavItem } from "@/components/layout/nav-links";
 import { logoutAction } from "@/features/auth/actions";
@@ -123,6 +123,7 @@ function getNav(profile: Profile, locale: ClubLocale): NavItem[] {
     return [
       { href: "/admin", label: "Bedarfe", icon: <FileDown className={icon} aria-hidden="true" /> },
       { href: "/admin/needs/new", label: "Neuer Bedarf", icon: <Plus className={icon} aria-hidden="true" /> },
+      { href: "/admin/players", label: "Spieler", icon: <UserRound className={icon} aria-hidden="true" /> },
       { href: "/admin/users", label: "Nutzer", icon: <Users className={icon} aria-hidden="true" /> }
     ];
   }

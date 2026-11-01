@@ -25,7 +25,11 @@ const shots = [
   { name: "mobile-menu-open", path: "/visual-preview/squad", width: 390, click: "header summary", fullPage: false },
   { name: "login-desktop", path: "/login", width: 1280 },
   { name: "login-desktop-error", path: "/login?error=invalid", width: 1440 },
-  { name: "login-mobile", path: "/login", width: 390 }
+  { name: "login-mobile", path: "/login", width: 390 },
+  { name: "kw-players-desktop", path: "/visual-preview/players", width: 1280 },
+  { name: "kw-player-form-desktop", path: "/visual-preview/player-form", width: 1280 },
+  { name: "kw-matches-desktop", path: "/visual-preview/matches", width: 1280 },
+  { name: "kw-matches-mobile", path: "/visual-preview/matches", width: 390 }
 ];
 
 const browser = await chromium.launch();
