@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 // DE/EN toggle for the auth screens. Writes the shared locale cookie so the
 // choice persists into the logged-in app.
-export function AuthLanguageSwitcher({ locale }: { locale: AuthLocale }) {
+export function AuthLanguageSwitcher({ locale, tone = "light" }: { locale: AuthLocale; tone?: "light" | "dark" }) {
   const router = useRouter();
 
   function setLocale(next: AuthLocale) {
@@ -15,15 +15,26 @@ export function AuthLanguageSwitcher({ locale }: { locale: AuthLocale }) {
   }
 
   return (
-    <div className="inline-flex items-center gap-1 rounded-sm border border-slate-200 bg-white p-0.5">
+    <div
+      className={cn(
+        "inline-flex items-center gap-1 rounded-sm border p-0.5",
+        tone === "dark" ? "border-white/20 bg-transparent" : "border-slate-200 bg-white"
+      )}
+    >
       {AUTH_LOCALES.map((item) => (
         <button
           key={item}
           type="button"
           onClick={() => setLocale(item)}
           className={cn(
-            "h-7 min-w-9 rounded-sm px-2 text-xs font-bold uppercase tracking-[0.08em] transition-colors",
-            item === locale ? "bg-navy-950 text-white" : "text-slate-500 hover:text-navy-950"
+            "h-9 min-w-11 rounded-sm px-2 text-xs font-bold uppercase tracking-[0.08em] transition-colors",
+            tone === "dark"
+              ? item === locale
+                ? "bg-white text-navy-950"
+                : "text-white/70 hover:text-white"
+              : item === locale
+                ? "bg-navy-950 text-white"
+                : "text-slate-500 hover:text-navy-950"
           )}
           aria-pressed={item === locale}
         >

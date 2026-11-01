@@ -22,7 +22,10 @@ const shots = [
   { name: "need-form-mobile", path: "/visual-preview/need-form", width: 390 },
   { name: "not-found-desktop", path: "/diese-seite-gibt-es-nicht", width: 1280, expectStatus: 404 },
   { name: "error-desktop", path: "/visual-preview/error", width: 1280 },
-  { name: "mobile-menu-open", path: "/visual-preview/squad", width: 390, click: "header summary", fullPage: false }
+  { name: "mobile-menu-open", path: "/visual-preview/squad", width: 390, click: "header summary", fullPage: false },
+  { name: "login-desktop", path: "/login", width: 1280 },
+  { name: "login-desktop-error", path: "/login?error=invalid", width: 1440 },
+  { name: "login-mobile", path: "/login", width: 390 }
 ];
 
 const browser = await chromium.launch();
