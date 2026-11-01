@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { Building2, Eye, FileDown, Inbox, LogOut, Menu, Plus, Shield, Shirt, Sparkles, UserRound, Users } from "lucide-react";
+import { Eye, FileDown, Inbox, LayoutDashboard, LogOut, Menu, Plus, Shield, Shirt, Sparkles, UserRound, Users } from "lucide-react";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { NavLinks, type NavItem } from "@/components/layout/nav-links";
 import { logoutAction } from "@/features/auth/actions";
@@ -10,6 +10,7 @@ import { agencyCopy } from "@/lib/agency-i18n";
 import { clubCopy, type ClubLocale } from "@/lib/club-i18n";
 import { guideCopy } from "@/lib/guide-i18n";
 import { matchCopy } from "@/lib/match-i18n";
+import { cockpitCopy } from "@/lib/cockpit-i18n";
 import { getRoleHome } from "@/lib/auth";
 import type { Profile } from "@/types/domain";
 import { Button } from "@/components/ui/button";
@@ -138,7 +139,7 @@ function getNav(profile: Profile, locale: ClubLocale, badge: number): NavItem[] 
   }
 
   return [
-    { href: "/club", label: t.navNeeds, icon: <Building2 className={icon} aria-hidden="true" /> },
+    { href: "/club", label: cockpitCopy[locale].nav, icon: <LayoutDashboard className={icon} aria-hidden="true" /> },
     { href: "/club/suggestions", label: matchCopy[locale].nav, icon: <Sparkles className={icon} aria-hidden="true" />, badge },
     { href: "/club/squad", label: t.navSquad, icon: <Shirt className={icon} aria-hidden="true" /> },
     { href: "/club/needs/new", label: t.navNewNeed, icon: <Plus className={icon} aria-hidden="true" /> }

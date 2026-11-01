@@ -17,6 +17,10 @@ import { KwPlayerForm } from "@/features/kw-players/kw-player-form";
 import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
 import { AdminInboxView, type InboxTab } from "@/features/matching/admin-inbox";
 import { ClubSuggestionsView } from "@/features/matching/club-suggestions";
+import { ClubCockpit } from "@/features/club/cockpit";
+import { NeedFacts, NeedHero, chips } from "@/features/player-needs/need-hero";
+import { needProfileLabels } from "@/features/player-needs/need-summary";
+import { planningSeasons } from "@/features/squad/squad-model";
 import { scorePlayerForNeed } from "@/features/matching/engine";
 import { buildAnswerEmail, buildNewNeedEmail, buildReminderEmail, buildSuggestionEmail } from "@/lib/email/notifications";
 import { buildInviteEmail, buildResetEmail } from "@/lib/email/auth-emails";
@@ -372,6 +376,51 @@ export default async function VisualPreview({
           files={new Map()}
           done={query.done}
         />
+      </AppShell>
+    );
+  }
+
+  if (screen === "cockpit" || screen === "cockpit-empty") {
+    const empty = screen === "cockpit-empty";
+    return (
+      <AppShell profile={profile} locale={locale} badge={empty ? 0 : 2}>
+        <ClubCockpit
+          locale={locale}
+          clubName="HSG Musterstadt"
+          league="2. Bundesliga"
+          personName="Maria"
+          roster={empty ? [] : players}
+          needs={empty ? [] : [needs[0], needs[4], needs[5]]}
+          openSuggestions={empty ? 0 : 2}
+          planningSeason={planningSeasons(1)[1]}
+        />
+      </AppShell>
+    );
+  }
+
+  if (screen === "need-detail") {
+    const need = { ...needs[0], description: "Linkshänder für den rechten Rückraum, der sofort Spielanteile übernehmen kann.", budget_amount: 4500, budget_currency: "EUR" };
+    const labels = needProfileLabels(need, "de");
+    return (
+      <AppShell profile={adminProfile} locale="de">
+        <div className="space-y-6">
+          <NeedHero need={need} locale="de" />
+          <AdminNeedMatchesView need={need} players={kwPlayers} matches={sampleMatches} photos={new Map()} />
+          <section className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+            <NeedFacts
+              title="Anforderungsprofil"
+              empty="-"
+              rows={[
+                { label: "Beschreibung", value: need.description, wide: true },
+                { label: "Angriffspositionen", value: chips(labels.attackPositions) },
+                { label: "Spielertyp", value: chips(labels.playerTypes) },
+                { label: "Anvisierte Rolle", value: chips(labels.targetRoles) },
+                { label: "Alter", value: "22–28 Jahre" }
+              ]}
+            />
+            <NeedFacts title="Budget & Status" empty="-" rows={[{ label: "Budget", value: "4.500 € / Monat" }]} />
+          </section>
+        </div>
       </AppShell>
     );
   }

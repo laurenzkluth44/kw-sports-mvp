@@ -19,7 +19,7 @@ const inviteCopy = {
     title: "Willkommen bei Club Needs",
     intro: (name: string, org: string) =>
       `Hallo ${name}, KW Sports hat ${org ? `dich für ${org}` : "dich"} zu Club Needs eingeladen: der Plattform für Kaderplanung und Spielergesuche. Lege jetzt dein Passwort fest.`,
-    steps: "So geht's",
+    steps: "Schritt",
     step1: "Passwort festlegen",
     step2: "Kader eintragen und Lücken sehen",
     step3: "Bedarf melden, passende Spieler mit CV erhalten",
@@ -33,7 +33,7 @@ const inviteCopy = {
     title: "Welcome to Club Needs",
     intro: (name: string, org: string) =>
       `Hi ${name}, KW Sports invited you${org ? ` for ${org}` : ""} to Club Needs: the platform for squad planning and player requests. Set your password now.`,
-    steps: "How it works",
+    steps: "Step",
     step1: "Set your password",
     step2: "Add your squad and see the gaps",
     step3: "Report a need, get matching players with CV",
@@ -56,9 +56,9 @@ export function buildInviteEmail(
       title: t.title,
       intro: t.intro(input.name, org),
       rows: [
-        { label: `${t.steps} · 1`, value: t.step1 },
-        { label: "2", value: t.step2 },
-        { label: "3", value: t.step3 }
+        { label: `${t.steps} 1`, value: t.step1 },
+        { label: `${t.steps} 2`, value: t.step2 },
+        { label: `${t.steps} 3`, value: t.step3 }
       ],
       cta: { label: t.cta, href: input.link },
       outro: t.outro,

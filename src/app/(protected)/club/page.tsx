@@ -1,19 +1,20 @@
 import Link from "next/link";
 import { Flash, flashKind } from "@/components/ui/flash";
 import { guideCopy } from "@/lib/guide-i18n";
-import { AlertTriangle, ArrowRight, Building2, CheckCircle2, Copy, Edit, MessageCircle, Plus, Sparkles, Target, type LucideIcon } from "lucide-react";
+import { CheckCircle2, Copy, Edit, Plus, Sparkles } from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NeedBadges } from "@/features/player-needs/need-badges";
 import { NeedStatusForm } from "@/features/player-needs/need-status-form";
 import { NeedPositionCell } from "@/features/player-needs/need-summary";
-import { attackGaps, planningSeasons } from "@/features/squad/squad-model";
+import { planningSeasons } from "@/features/squad/squad-model";
 import { confirmClubNeedsAction, duplicateClubNeedAction } from "@/features/player-needs/actions";
 import { CLUB_STATUS_LABELS, clubCopy } from "@/lib/club-i18n";
 import { getClubLocale } from "@/lib/club-locale";
 import { requireClubUser } from "@/lib/auth";
-import { squadCopy } from "@/lib/squad-i18n";
 import { fill, matchCopy } from "@/lib/match-i18n";
+import { cockpitCopy, format } from "@/lib/cockpit-i18n";
+import { ClubCockpit } from "@/features/club/cockpit";
 import { formatDate } from "@/lib/utils";
 import type { PlayerNeed, RosterPlayer } from "@/types/domain";
 
@@ -29,24 +30,21 @@ export default async function ClubDashboardPage({
   const flash = guideCopy[locale].flash;
   const doneKind = flashKind(params.done);
 
-  const { data: needs = [] } = await supabase
-    .from("player_needs")
-    .select("*")
-    .eq("club_id", profile.club_id!)
-    .neq("status", "archiviert")
-    .order("needed_from_date", { ascending: true });
-
-  const { data: agencyCount } = await supabase.rpc("agency_count");
-
-  // Squad summary: visible to this club only (RLS), shown as a shortcut to the Squad tab.
-  const { data: rosterRows } = await supabase.from("roster_players").select("*").eq("club_id", profile.club_id!);
+  // All in parallel. Access rules keep squad, needs and KW suggestions to this club.
+  const [{ data: needs }, { data: agencyCount }, { data: rosterRows }, { data: matchRows }] = await Promise.all([
+    supabase
+      .from("player_needs")
+      .select("*")
+      .eq("club_id", profile.club_id!)
+      .neq("status", "archiviert")
+      .order("needed_from_date", { ascending: true }),
+    supabase.rpc("agency_count"),
+    supabase.from("roster_players").select("*").eq("club_id", profile.club_id!),
+    supabase.from("need_matches").select("need_id, status")
+  ]);
   const roster = (rosterRows ?? []) as RosterPlayer[];
   const planningSeason = planningSeasons(1)[1];
-  const rosterGapCount = attackGaps(roster, planningSeason).filter((gap) => gap.status === "gap").length;
-  const teaser = squadCopy[locale].teaser;
 
-  // KW suggestions (access rules: only released players for this club's own needs).
-  const { data: matchRows } = await supabase.from("need_matches").select("need_id, status");
   const suggestionsByNeed = new Map<string, { total: number; open: number }>();
   (matchRows ?? []).forEach((row) => {
     const entry = suggestionsByNeed.get(row.need_id) ?? { total: 0, open: 0 };
@@ -56,11 +54,9 @@ export default async function ClubDashboardPage({
   });
   const openSuggestions = [...suggestionsByNeed.values()].reduce((sum, entry) => sum + entry.open, 0);
   const m = matchCopy[locale];
+  const cockpit = cockpitCopy[locale];
 
-  const typedNeeds = needs as PlayerNeed[];
-  const openCount = typedNeeds.filter((need) => need.status === "offen").length;
-  const talksCount = typedNeeds.filter((need) => need.status === "in_gespraechen").length;
-  const highCount = typedNeeds.filter((need) => need.priority === "hoch").length;
+  const typedNeeds = (needs ?? []) as PlayerNeed[];
   const staleCount = typedNeeds.filter(
     (need) => (need.status === "offen" || need.status === "in_gespraechen") && isStaleNeed(need.last_confirmed_at)
   ).length;
@@ -74,36 +70,6 @@ export default async function ClubDashboardPage({
 
   return (
     <div className="space-y-6">
-      <div className="panel overflow-hidden">
-        <div className="flex flex-col gap-4 border-l-2 border-brand-500 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            {clubLogoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={clubLogoUrl}
-                alt=""
-                className="h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20"
-              />
-            ) : null}
-            <div className="min-w-0">
-              <p className="eyebrow">{club?.name || t.eyebrowFallback}</p>
-              <h1 className="kw-title mt-1.5 text-[2rem] leading-[0.95] sm:text-[2.75rem]">{t.title}</h1>
-              {profile.name ? (
-                <p className="mt-1 text-sm text-neutral-600">
-                  {t.greeting}, <span className="font-semibold text-navy-950">{profile.name}</span>
-                </p>
-              ) : null}
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <LinkButton href="/club/needs/new" variant="accent">
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              {t.newNeed}
-            </LinkButton>
-          </div>
-        </div>
-      </div>
-
       <Flash
         message={
           doneKind
@@ -118,10 +84,10 @@ export default async function ClubDashboardPage({
         }
       />
 
-      {staleCount > 0 ? (
+      {staleCount > 0 && params.confirm === "stale" ? (
         <section
           id="noch-aktuell"
-          className={`flex flex-col gap-3 border-l-4 border-amber-400 bg-amber-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between ${params.confirm === "stale" ? "ring-2 ring-amber-400" : ""}`}
+          className={`flex flex-col gap-3 border-l-4 border-amber-400 bg-amber-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between`}
         >
           <div>
             <p className="font-bold text-amber-900">{flash.staleTitle.replace("{n}", String(staleCount))}</p>
@@ -142,50 +108,22 @@ export default async function ClubDashboardPage({
         <div className="alert-error">{t.duplicateError}</div>
       ) : null}
 
-      {openSuggestions > 0 ? (
-        <Link
-          href="/club/suggestions"
-          className="group relative flex flex-col gap-3 overflow-hidden bg-navy-950 px-5 py-5 text-white transition-shadow duration-300 ease-out-expo hover:shadow-cardHover sm:flex-row sm:items-center sm:justify-between"
-        >
-          <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-brand-500" />
-          <div className="flex items-center gap-4">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center bg-brand-500 font-display text-2xl">{openSuggestions}</span>
-            <div>
-              <p className="font-display text-2xl uppercase leading-none">{m.bannerTitle}</p>
-              <p className="mt-1 text-sm text-white/70">
-                {openSuggestions === 1 ? m.bannerBodyOne : fill(m.bannerBody, openSuggestions)}
-              </p>
-            </div>
-          </div>
-          <span className="inline-flex items-center gap-2 text-[0.75rem] font-extrabold uppercase tracking-[0.1em] text-brand-300 group-hover:text-white">
-            {m.bannerOpen}
-            <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out-expo group-hover:translate-x-0.5" aria-hidden="true" />
-          </span>
-        </Link>
-      ) : null}
+      <ClubCockpit
+        locale={locale}
+        clubName={club?.name || t.eyebrowFallback}
+        league={club?.league}
+        logoUrl={clubLogoUrl}
+        personName={profile.name}
+        roster={roster}
+        needs={typedNeeds}
+        openSuggestions={openSuggestions}
+        planningSeason={planningSeason}
+      />
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Metric icon={Target} label={t.open} value={openCount} />
-        <Metric icon={MessageCircle} label={t.talks} value={talksCount} />
-        <Metric icon={AlertTriangle} label={t.highPriority} value={highCount} tone="danger" />
-        <Metric icon={Building2} label={t.agencies} value={agencyCount ?? 0} />
-      </section>
-
-      <Link
-        href="/club/squad"
-        className="panel group flex flex-col gap-3 border-l-2 border-l-brand-500 px-5 py-4 transition-shadow duration-300 ease-out-expo hover:shadow-cardHover sm:flex-row sm:items-center sm:justify-between"
-      >
-        <div>
-          <p className="eyebrow">{teaser.title}</p>
-          <p className="mt-1.5 text-sm font-semibold text-navy-950">
-            {roster.length > 0 ? teaser.body(roster.length, rosterGapCount, planningSeason) : teaser.empty}
-          </p>
-        </div>
-        <span className="inline-flex items-center gap-2 text-[0.75rem] font-bold uppercase tracking-[0.08em] text-brand-600">
-          {teaser.open}
-          <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out-expo group-hover:translate-x-0.5" aria-hidden="true" />
-        </span>
-      </Link>
+      <div id="bedarfe" className="flex scroll-mt-32 flex-wrap items-end justify-between gap-2 border-b-2 border-navy-950 pb-2 pt-2">
+        <h2 className="font-display text-[2rem] uppercase leading-none text-navy-950">{cockpit.needs}</h2>
+        <p className="text-xs text-slate-500">{format(cockpit.agencies, { n: agencyCount ?? 0 })}</p>
+      </div>
 
       {typedNeeds.length === 0 ? (
         <EmptyState
@@ -293,36 +231,4 @@ function isStaleNeed(lastConfirmedAt: string) {
 
   const thirtyDays = 30 * 24 * 60 * 60 * 1000;
   return Date.now() - lastConfirmed > thirtyDays;
-}
-
-function Metric({
-  icon: Icon,
-  label,
-  value,
-  tone = "default"
-}: {
-  icon: LucideIcon;
-  label: string;
-  value: number;
-  tone?: "default" | "danger";
-}) {
-  return (
-    <div className="metric-card">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="metric-kicker">{label}</p>
-          <p className="metric-value">{value}</p>
-        </div>
-        <span
-          className={
-            tone === "danger"
-              ? "flex h-10 w-10 items-center justify-center rounded-md bg-red-50 text-red-700"
-              : "flex h-10 w-10 items-center justify-center rounded-md bg-brand-50 text-brand-700"
-          }
-        >
-          <Icon className="h-5 w-5" aria-hidden="true" />
-        </span>
-      </div>
-    </div>
-  );
 }
