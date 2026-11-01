@@ -5,14 +5,16 @@ export type NeedFormFlowCopy = {
   stepHints: [string, string, string, string];
   next: string;
   back: string;
-  stepOf: (step: number, total: number) => string;
+  /** Template with {step} and {total}; plain text because it is passed to a client component. */
+  stepOf: string;
   picker: {
     attack: string;
     defense: string;
     tap: string;
     selected: string;
     none: string;
-    remove: (label: string) => string;
+    /** Template with {label}. */
+    remove: string;
     defensePrefix: string;
   };
 };
@@ -28,14 +30,14 @@ export const needFormFlowCopy: Record<ClubLocale, NeedFormFlowCopy> = {
     ],
     next: "Weiter",
     back: "Zurück",
-    stepOf: (step, total) => `Schritt ${step} von ${total}`,
+    stepOf: "Schritt {step} von {total}",
     picker: {
       attack: "Angriff",
       defense: "Abwehr 6:0",
       tap: "Tippe auf die Positionen",
       selected: "Deine Auswahl",
       none: "Noch keine Position gewählt. Mehrfachauswahl ist möglich.",
-      remove: (label) => `${label} entfernen`,
+      remove: "{label} entfernen",
       defensePrefix: "Abwehr"
     }
   },
@@ -49,14 +51,14 @@ export const needFormFlowCopy: Record<ClubLocale, NeedFormFlowCopy> = {
     ],
     next: "Next",
     back: "Back",
-    stepOf: (step, total) => `Step ${step} of ${total}`,
+    stepOf: "Step {step} of {total}",
     picker: {
       attack: "Attack",
       defense: "Defence 6:0",
       tap: "Tap the positions",
       selected: "Your selection",
       none: "No position selected yet. You can pick several.",
-      remove: (label) => `Remove ${label}`,
+      remove: "Remove {label}",
       defensePrefix: "Defence"
     }
   },
@@ -70,14 +72,14 @@ export const needFormFlowCopy: Record<ClubLocale, NeedFormFlowCopy> = {
     ],
     next: "Suivant",
     back: "Retour",
-    stepOf: (step, total) => `Étape ${step} sur ${total}`,
+    stepOf: "Étape {step} sur {total}",
     picker: {
       attack: "Attaque",
       defense: "Défense 6:0",
       tap: "Touche les postes",
       selected: "Ta sélection",
       none: "Aucun poste choisi. Plusieurs choix possibles.",
-      remove: (label) => `Retirer ${label}`,
+      remove: "Retirer {label}",
       defensePrefix: "Défense"
     }
   },
@@ -91,14 +93,14 @@ export const needFormFlowCopy: Record<ClubLocale, NeedFormFlowCopy> = {
     ],
     next: "Siguiente",
     back: "Atrás",
-    stepOf: (step, total) => `Paso ${step} de ${total}`,
+    stepOf: "Paso {step} de {total}",
     picker: {
       attack: "Ataque",
       defense: "Defensa 6:0",
       tap: "Toca los puestos",
       selected: "Tu selección",
       none: "Aún no hay puesto elegido. Puedes elegir varios.",
-      remove: (label) => `Quitar ${label}`,
+      remove: "Quitar {label}",
       defensePrefix: "Defensa"
     }
   }

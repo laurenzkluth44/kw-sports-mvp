@@ -157,7 +157,7 @@ export function CourtPositionPicker({
                 code={attackShort[position]}
                 label={attackLabels[position].split(" · ").pop() ?? attackLabels[position]}
                 group={legendAttack}
-                removeLabel={copy.remove(attackLabels[position])}
+                removeLabel={copy.remove.replace("{label}", attackLabels[position])}
                 onRemove={() => toggleAttack(position)}
               />
             ))}
@@ -167,7 +167,7 @@ export function CourtPositionPicker({
                 code={String(position)}
                 label={defenseLabels[position].split(" · ").pop() ?? defenseLabels[position]}
                 group={legendDefense}
-                removeLabel={copy.remove(`${copy.defensePrefix} ${defenseLabels[position]}`)}
+                removeLabel={copy.remove.replace("{label}", `${copy.defensePrefix} ${defenseLabels[position]}`)}
                 onRemove={() => toggleDefense(position)}
               />
             ))}

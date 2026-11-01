@@ -7,6 +7,10 @@ import { cn } from "@/lib/utils";
 
 type Validatable = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
+function stepOfText(template: string, step: number, total: number) {
+  return template.replace("{step}", String(step)).replace("{total}", String(total));
+}
+
 function isValidatable(element: Element): element is Validatable {
   return (
     element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement
@@ -109,7 +113,7 @@ export function NeedFormSteps({
 
   return (
     <div ref={ref} className="scroll-mt-28">
-      <nav aria-label={copy.stepOf(current + 1, steps.length)} className="grid grid-cols-2 gap-[2px] bg-slate-200 sm:grid-cols-4">
+      <nav aria-label={stepOfText(copy.stepOf, current + 1, steps.length)} className="grid grid-cols-2 gap-[2px] bg-slate-200 sm:grid-cols-4">
         {copy.steps.slice(0, steps.length).map((label, index) => (
           <button
             key={label}
@@ -135,7 +139,7 @@ export function NeedFormSteps({
 
       <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-4">
         <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.14em] text-brand-600">
-          {copy.stepOf(current + 1, steps.length)}
+          {stepOfText(copy.stepOf, current + 1, steps.length)}
         </p>
         <p className="mt-1 text-sm text-slate-600">{copy.stepHints[current]}</p>
       </div>
