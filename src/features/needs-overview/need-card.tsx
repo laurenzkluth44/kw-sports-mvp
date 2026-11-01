@@ -41,7 +41,7 @@ export function ClubCrest({ name, logoUrl, size = "md" }: { name: string; logoUr
     );
   }
   return (
-    <span className={cn("flex shrink-0 items-center justify-center rounded-full bg-navy-950 font-display leading-none text-white", box)}>
+    <span className={cn("flex shrink-0 items-center justify-center rounded-full bg-navy-950 font-display leading-none text-white ring-2 ring-white/25", box)}>
       {clubInitials(name)}
     </span>
   );
