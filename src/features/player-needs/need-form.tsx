@@ -1,6 +1,5 @@
 import { Lock, Save } from "lucide-react";
 import {
-  ATTACK_POSITIONS,
   COACH_ROLES,
   DEFENSE_POSITIONS,
   LANGUAGES,
@@ -24,7 +23,9 @@ import { Field, Input, Select, Textarea } from "@/components/ui/form";
 import { MinSlider, RangeSlider } from "@/components/ui/range-slider";
 import { ClubCascadeSelect } from "@/features/admin/club-cascade-select";
 import type { NeedFormErrorCode } from "@/features/player-needs/form-schema";
+import { CourtPositionPicker } from "@/features/player-needs/court-position-picker";
 import { NeedFormGuard } from "@/features/player-needs/need-form-guard";
+import { NeedFormSteps } from "@/features/player-needs/need-form-steps";
 import { hasNeedPosition } from "@/features/player-needs/need-summary";
 import {
   CLUB_COACH_ROLE_LABELS,
@@ -32,6 +33,7 @@ import {
   CLUB_NEED_TYPE_LABELS,
   CLUB_PLAYER_TYPE_LABELS,
   CLUB_POSITION_LABELS,
+  CLUB_POSITION_SHORT_LABELS,
   CLUB_PRIORITY_LABELS,
   CLUB_STATUS_LABELS,
   CLUB_TARGET_ROLE_LABELS,
@@ -40,6 +42,7 @@ import {
   languageLabel,
   type ClubLocale
 } from "@/lib/club-i18n";
+import { needFormFlowCopy } from "@/lib/need-form-i18n";
 import type { AttackPosition, Club, DefensePosition, PlayerNeed, Season } from "@/types/domain";
 
 /** Starting values for a new need, e.g. when created from a gap in the squad. */
@@ -82,17 +85,30 @@ export function NeedForm({
   const nextSeason = seasonLabel(seasonStartYear(seasonForDate()) + 1);
   const selectedSeason = need?.season || prefill?.season || nextSeason;
 
+  const flow = needFormFlowCopy[locale];
+  const attackLabels = CLUB_POSITION_LABELS[locale];
+  const defenseLabels = Object.fromEntries(
+    DEFENSE_POSITIONS.map((position) => [position, defensePositionLabel(position, locale)])
+  ) as Record<DefensePosition, string>;
+
+  const submit = (
+    <Button type="submit" variant="accent">
+      <Save className="h-4 w-4" aria-hidden="true" />
+      {submitLabel || t.save}
+    </Button>
+  );
+
   return (
-    <form action={action} className="panel need-form">
+    <form action={action} className="panel need-form overflow-hidden">
       {need ? <input type="hidden" name="id" value={need.id} /> : null}
+      {error ? <div className="alert-error m-5 mb-0">{errorMessages[error]}</div> : null}
 
-      <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-4">
-        <h2 className="section-heading">{t.coreDetails}</h2>
-        <p className="section-subtitle">{t.coreDetailsDescription}</p>
-      </div>
-
-      <div className="grid gap-5 p-5 md:grid-cols-2">
-        {error ? <div className="alert-error md:col-span-2">{errorMessages[error]}</div> : null}
+      <NeedFormSteps
+        copy={flow}
+        submit={submit}
+        submitOnEveryStep={Boolean(need)}
+        steps={[
+          <div key="kind" className="grid gap-5 p-5 md:grid-cols-2">
         <NeedFormGuard positionsError={t.positionsError} coachRoleError={t.coachRoleError} />
 
         {clubs ? (
@@ -120,26 +136,20 @@ export function NeedForm({
           <div className="alert-warning player-only md:col-span-2">{t.legacyPositionHint}</div>
         ) : null}
 
-        <ChipGroup
-          legend={t.attackPositions}
-          name="attack_positions"
-          options={ATTACK_POSITIONS.map((position) => ({ value: position, label: CLUB_POSITION_LABELS[locale][position] }))}
-          defaultValues={need?.attack_positions ?? prefill?.attack_positions}
-          help={t.positionsHelp}
-          className="player-only md:col-span-2"
-        />
-
-        <ChipGroup
-          legend={t.defensePositions}
-          name="defense_positions"
-          options={DEFENSE_POSITIONS.map((position) => ({
-            value: String(position),
-            label: defensePositionLabel(position, locale)
-          }))}
-          defaultValues={need?.defense_positions ?? prefill?.defense_positions}
-          help={t.defenseHelp}
-          className="player-only md:col-span-2"
-        />
+        <div className="player-only md:col-span-2">
+          <CourtPositionPicker
+            attackDefault={need?.attack_positions ?? prefill?.attack_positions ?? []}
+            defenseDefault={need?.defense_positions ?? prefill?.defense_positions ?? []}
+            attackLabels={attackLabels}
+            attackShort={CLUB_POSITION_SHORT_LABELS[locale]}
+            defenseLabels={defenseLabels}
+            legendAttack={t.attackPositions}
+            legendDefense={t.defensePositions}
+            helpAttack={t.positionsHelp}
+            helpDefense={t.defenseHelp}
+            copy={flow.picker}
+          />
+        </div>
 
         <ChipGroup
           legend={t.coachRole}
@@ -150,6 +160,8 @@ export function NeedForm({
           className="coach-only md:col-span-2"
         />
 
+          </div>,
+          <div key="timing" className="grid gap-5 p-5 md:grid-cols-2">
         <Field label={t.season} htmlFor="season">
           <Select id="season" name="season" defaultValue={selectedSeason} required>
             {seasonOptions([selectedSeason]).map((season) => (
@@ -214,13 +226,8 @@ export function NeedForm({
             placeholder={t.descriptionPlaceholder}
           />
         </Field>
-      </div>
-
-      <details className="border-t border-slate-200" open>
-        <summary className="cursor-pointer bg-white px-5 py-4 text-sm font-black uppercase text-navy-950 transition hover:bg-brand-50">
-          {t.sportDetails}
-        </summary>
-        <div className="grid gap-5 px-5 pb-5 md:grid-cols-2">
+          </div>,
+          <div key="profile" className="grid gap-5 p-5 md:grid-cols-2">
           <div className="player-only">
             <RangeSlider
               label={t.age}
@@ -309,14 +316,10 @@ export function NeedForm({
               ))}
             </datalist>
           </Field>
-        </div>
-      </details>
-
-      <details className="border-t border-slate-200">
-        <summary className="cursor-pointer bg-white px-5 py-4 text-sm font-black uppercase text-navy-950 transition hover:bg-brand-50">
-          {t.budget}
-        </summary>
-        <div className="grid gap-5 px-5 pb-5 md:grid-cols-[1fr_0.5fr]">
+          </div>,
+          <div key="budget" className="flex flex-col gap-6 p-5">
+            <section className="grid gap-5 md:grid-cols-[1fr_0.5fr]">
+              <h2 className="section-heading md:col-span-2">{t.budget}</h2>
           <Field label={t.budgetAmount} htmlFor="budget_amount">
             <Input
               id="budget_amount"
@@ -335,10 +338,8 @@ export function NeedForm({
           <Field label={t.budgetNote} htmlFor="budget_note" className="md:col-span-2">
             <Textarea id="budget_note" name="budget_note" defaultValue={need?.budget_note || ""} />
           </Field>
-        </div>
-      </details>
-
-      <section className="border-t border-slate-200 px-5 py-5">
+            </section>
+            <section className="border-t border-slate-200 pt-5">
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-navy-950 text-white">
             <Lock className="h-4 w-4" aria-hidden="true" />
@@ -357,14 +358,10 @@ export function NeedForm({
           defaultValue={confidentialNote || ""}
           placeholder={t.confidentialPlaceholder}
         />
-      </section>
-
-      <div className="flex flex-col gap-2 border-t border-slate-200 bg-slate-50 p-5 sm:flex-row sm:justify-end">
-        <Button type="submit">
-          <Save className="h-4 w-4" aria-hidden="true" />
-          {submitLabel || t.save}
-        </Button>
-      </div>
+            </section>
+          </div>
+        ]}
+      />
     </form>
   );
 }
