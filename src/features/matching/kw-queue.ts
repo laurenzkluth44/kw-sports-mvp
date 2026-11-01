@@ -6,8 +6,8 @@ import type { KwPlayer, NeedMatchStatus, PlayerNeed } from "@/types/domain";
  * KW work queue numbers per need: consented KW players that fit and weren't sent yet,
  * plus what was already sent and how clubs answered. KW admin only.
  */
-export function buildKwInfo(
-  needs: PlayerNeed[],
+export function buildKwInfo<N extends PlayerNeed>(
+  needs: N[],
   players: KwPlayer[],
   matches: { need_id: string; player_id: string; status: NeedMatchStatus }[]
 ) {
