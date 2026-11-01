@@ -20,6 +20,8 @@ import { ClubSuggestionsView } from "@/features/matching/club-suggestions";
 import { ClubCockpit } from "@/features/club/cockpit";
 import { ClubNeedCard, NewNeedTile } from "@/features/club/club-need-card";
 import { ClubNeedView } from "@/features/club/club-need-view";
+import { buildKwInfo } from "@/features/matching/kw-queue";
+import { KwQueueBanner } from "@/features/matching/kw-queue-banner";
 import { NeedFacts, NeedHero, chips } from "@/features/player-needs/need-hero";
 import { needProfileLabels } from "@/features/player-needs/need-summary";
 import { planningSeasons } from "@/features/squad/squad-model";
@@ -313,6 +315,7 @@ export default async function VisualPreview({
 
   if (screen === "needs" || screen === "agency") {
     const isAdmin = screen === "needs";
+    const adminKw = buildKwInfo(needs, kwPlayers, sampleMatches);
     const overviewLocale = isAdmin ? "de" : locale;
     return (
       <AppShell profile={isAdmin ? adminProfile : agencyProfile} locale={overviewLocale}>
@@ -325,9 +328,10 @@ export default async function VisualPreview({
           needs={needs}
           filters={normalizeAdminNeedFilters(query)}
           agencyCount={isAdmin ? 2 : undefined}
+          kwInfo={isAdmin ? adminKw.info : undefined}
           detailHref={(id) => `#${id}`}
           filterFields={<p className="text-sm text-slate-500">[Filterfelder]</p>}
-          quickFilters={null}
+          quickFilters={isAdmin ? <KwQueueBanner count={adminKw.queue.length} active={false} filtersQuery="" /> : null}
           inbox={null}
           summary={<p className="text-sm text-slate-500">[Auswertung]</p>}
         />

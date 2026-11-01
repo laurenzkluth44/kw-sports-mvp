@@ -69,16 +69,28 @@ function detailLine(need: PlayerNeedWithClub, locale: ClubLocale, copy: Overview
   return parts.join(" · ");
 }
 
+/** KW-internal matching numbers for one need. Only ever passed in on KW admin pages, never for agencies. */
+export type NeedKwInfo = {
+  /** Releasable KW players that fit and haven't been sent yet. */
+  fit: number;
+  /** Best match score among those. */
+  best: number;
+  sent: number;
+  interested: number;
+};
+
 export function NeedCard({
   need,
   href,
   locale,
-  copy
+  copy,
+  kw
 }: {
   need: PlayerNeedWithClub;
   href: string;
   locale: ClubLocale;
   copy: OverviewCopy;
+  kw?: NeedKwInfo;
 }) {
   const isCoach = need.need_type === "trainer";
   const labels = needProfileLabels(need, locale);
@@ -110,6 +122,7 @@ export function NeedCard({
       <div className="bg-navy-950 py-2">
         <NeedCourt need={need} locale={locale} className="mx-auto w-[72%] max-w-[260px]" />
       </div>
+      {kw ? <KwStrip kw={kw} closed={need.status === "besetzt" || need.status === "archiviert"} /> : null}
 
       <div className="flex flex-1 flex-col gap-3 px-4 pb-4 pt-4">
         <div className="flex items-baseline justify-between gap-3">
@@ -228,6 +241,32 @@ export function NeedCourt({
           ) : null}
         </>
       )}
+    </div>
+  );
+}
+
+/** Admin-only strip under the court: where KW can place a player right now. */
+export function KwStrip({ kw, closed, className }: { kw: NeedKwInfo; closed?: boolean; className?: string }) {
+  const opportunity = !closed && kw.sent === 0 && kw.fit > 0;
+  const parts: string[] = [];
+  if (kw.sent > 0) parts.push(`${kw.sent} gesendet`);
+  if (kw.interested > 0) parts.push(`${kw.interested} interessiert`);
+  if (kw.fit > 0 && !closed) parts.push(kw.sent > 0 ? `+${kw.fit} weitere passend` : `${kw.fit} passende KW-Spieler · bis ${kw.best} %`);
+  const text = parts.join(" · ") || (closed ? "Keine KW-Vorschläge" : "Kein passender KW-Spieler");
+
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 px-4 py-2 text-[0.72rem] font-bold",
+        opportunity ? "bg-brand-500 text-white" : kw.interested > 0 ? "bg-brand-50 text-brand-800" : "bg-slate-50 text-slate-500",
+        className
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className={cn("h-2 w-2 shrink-0 rotate-45", opportunity ? "bg-white" : kw.sent > 0 || kw.fit > 0 ? "bg-brand-500" : "bg-slate-300")}
+      />
+      <span className="truncate">{text}</span>
     </div>
   );
 }
