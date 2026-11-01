@@ -66,12 +66,12 @@ export function AppShell({
                 alt="KW Sports"
                 width={2557}
                 height={288}
-                className="h-5 w-auto shrink-0 md:h-6"
+                className="h-4 w-auto shrink-0 sm:h-5 md:h-6"
                 priority
                 unoptimized
               />
               <span className="min-w-0 border-l border-white/15 pl-3">
-                <span className="block font-display text-xl uppercase leading-none tracking-[0.02em] md:text-2xl">
+                <span className="block whitespace-nowrap font-display text-lg uppercase leading-none tracking-[0.02em] sm:text-xl md:text-2xl">
                   Club Needs
                 </span>
                 <span className="mt-0.5 block truncate text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-brand-300">
