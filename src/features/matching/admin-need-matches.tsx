@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Send, Undo2, UserRound } from "lucide-react";
+import { Clock3, Send, Undo2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { releaseNeedMatchAction, withdrawNeedMatchAction } from "@/features/kw-players/actions";
 import { signedFileUrls } from "@/features/kw-players/files";
+import { playerFreshness } from "@/features/kw-players/freshness";
 import { kwPlayerHeadline } from "@/features/kw-players/kw-player-card";
 import { rankPlayersForNeed } from "@/features/matching/engine";
 import { MatchReasons, scoreTone } from "@/features/matching/match-reasons";
@@ -160,6 +161,18 @@ export function AdminNeedMatchesView({
                     </span>
                   </p>
                   <MatchReasons reasons={reasons} locale="de" />
+                  {(() => {
+                    const fresh = playerFreshness(player);
+                    return fresh.stale ? (
+                      <Link
+                        href={`/admin/players/${player.id}/edit`}
+                        className="inline-flex items-center gap-1 bg-amber-50 px-2 py-0.5 text-xs font-bold text-amber-900 ring-1 ring-amber-200 hover:bg-amber-100"
+                      >
+                        <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
+                        {fresh.label}: vor dem Freigeben prüfen
+                      </Link>
+                    ) : null;
+                  })()}
                 </div>
                 {player.visible_to_clubs ? (
                   <form action={releaseNeedMatchAction}>

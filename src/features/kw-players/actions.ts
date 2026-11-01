@@ -277,3 +277,13 @@ export async function setNeedOutcomeAction(formData: FormData) {
   revalidatePath("/admin", "layout");
   redirect(`/admin/needs/${needId}?${error ? "error=outcome" : "done=outcome"}#ergebnis`);
 }
+
+/** "Daten sind aktuell": KW confirms a profile without changing anything; resets the freshness clock. */
+export async function confirmKwPlayerAction(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = String(formData.get("id") || "");
+  if (!UUID.test(id)) redirect("/admin/players");
+  const { error } = await supabase.from("kw_players").update({ updated_at: new Date().toISOString() }).eq("id", id);
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/players/${id}/edit?${error ? "error=save" : "done=confirmed"}`);
+}

@@ -1,11 +1,12 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { CheckCircle2, FileText, Plus, UserPlus } from "lucide-react";
+import { CheckCircle2, Clock3, FileText, Plus, UserPlus } from "lucide-react";
 import { LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Flash } from "@/components/ui/flash";
 import { PageHeader } from "@/components/ui/page-header";
 import { signedFileUrls } from "@/features/kw-players/files";
+import { playerFreshness, type Freshness } from "@/features/kw-players/freshness";
 import { KwPlayerCard } from "@/features/kw-players/kw-player-card";
 import { requireAdmin } from "@/lib/auth";
 import { ATTACK_POSITIONS } from "@/lib/constants";
@@ -21,7 +22,7 @@ const FLASH: Record<string, string> = {
 export default async function AdminPlayersPage({
   searchParams
 }: {
-  searchParams: Promise<{ done?: string; position?: string; kind?: string }>;
+  searchParams: Promise<{ done?: string; position?: string; kind?: string; check?: string }>;
 }) {
   const { supabase } = await requireAdmin();
   const params = await searchParams;
@@ -30,16 +31,24 @@ export default async function AdminPlayersPage({
 
   const { data } = await supabase.from("kw_players").select("*").order("last_name", { ascending: true });
   const all = (data ?? []) as KwPlayer[];
+  const now = new Date();
+  const freshness = new Map(all.map((player) => [player.id, playerFreshness(player, now)]));
+  const toCheck = all.filter((player) => freshness.get(player.id)!.stale).length;
+  const checkOnly = params.check === "1";
   const players = all.filter(
-    (player) => (!position || player.attack_positions.includes(position)) && (!kind || player.kind === kind)
+    (player) =>
+      (!position || player.attack_positions.includes(position)) &&
+      (!kind || player.kind === kind) &&
+      (!checkOnly || freshness.get(player.id)!.stale)
   );
   const photos = await signedFileUrls(supabase, players.map((player) => player.photo_path));
   const released = all.filter((player) => player.visible_to_clubs).length;
 
-  const filterHref = (next: { position?: AttackPosition; kind?: string }) => {
+  const filterHref = (next: { position?: AttackPosition; kind?: string; check?: boolean }) => {
     const query = new URLSearchParams();
     if (next.position) query.set("position", next.position);
     if (next.kind) query.set("kind", next.kind);
+    if (next.check) query.set("check", "1");
     const text = query.toString();
     return text ? `/admin/players?${text}` : "/admin/players";
   };
@@ -61,7 +70,7 @@ export default async function AdminPlayersPage({
       <Flash message={params.done ? FLASH[params.done] : null} />
 
       <nav aria-label="Filter" className="flex flex-wrap gap-2">
-        <FilterChip href={filterHref({})} active={!position && !kind}>
+        <FilterChip href={filterHref({})} active={!position && !kind && !checkOnly}>
           Alle
         </FilterChip>
         {ATTACK_POSITIONS.map((code) => (
@@ -72,6 +81,11 @@ export default async function AdminPlayersPage({
         <FilterChip href={filterHref({ kind: "trainer" })} active={kind === "trainer"}>
           Trainer
         </FilterChip>
+        {toCheck > 0 || checkOnly ? (
+          <FilterChip href={filterHref({ check: true })} active={checkOnly} tone="warn">
+            Zu prüfen · {toCheck}
+          </FilterChip>
+        ) : null}
       </nav>
 
       {players.length === 0 ? (
@@ -116,6 +130,7 @@ export default async function AdminPlayersPage({
                       <FileText className="h-3.5 w-3.5" aria-hidden="true" />
                       {player.cv_path ? "CV" : "CV fehlt"}
                     </span>
+                    <FreshnessTag freshness={freshness.get(player.id)!} />
                   </div>
                 }
               />
@@ -127,14 +142,28 @@ export default async function AdminPlayersPage({
   );
 }
 
-function FilterChip({ href, active, children }: { href: string; active: boolean; children: ReactNode }) {
+function FreshnessTag({ freshness }: { freshness: Freshness }) {
+  if (!freshness.stale) return null;
+  return (
+    <span className="inline-flex items-center gap-1 bg-amber-400 px-2 py-1 text-navy-950">
+      <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
+      {freshness.reason === "contract" ? "Vertrag abgelaufen" : "Profil prüfen"}
+    </span>
+  );
+}
+
+function FilterChip({ href, active, children, tone }: { href: string; active: boolean; children: ReactNode; tone?: "warn" }) {
   return (
     <Link
       href={href}
       aria-current={active ? "true" : undefined}
       className={cn(
         "inline-flex min-h-10 items-center border px-4 text-xs font-extrabold uppercase tracking-[0.1em] transition-colors",
-        active ? "border-navy-950 bg-navy-950 text-white" : "border-slate-200 bg-white text-navy-950 hover:border-brand-300"
+        active
+          ? "border-navy-950 bg-navy-950 text-white"
+          : tone === "warn"
+            ? "border-amber-300 bg-amber-50 text-amber-900 hover:border-amber-400"
+            : "border-slate-200 bg-white text-navy-950 hover:border-brand-300"
       )}
     >
       {children}
