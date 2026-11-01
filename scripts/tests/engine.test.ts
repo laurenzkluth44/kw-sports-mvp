@@ -24,3 +24,12 @@ const defNeed = { ...need, attack_positions:[], defense_positions:[3,4] };
 assert(scorePlayerForNeed(defNeed, { ...base, defense_positions:[4] }).reasons[0].value === "A4", "defence position match is labelled A4");
 const ranked = rankPlayersForNeed(need, [unknown, wrongPos, tooOld, perfect]);
 assert(ranked.map(r=>r.player.last_name).join(",") === "Perfect,Old,Unknown" || ranked[0].player.last_name === "Perfect", `ranking: ${ranked.map(r=>r.player.last_name+":"+r.score).join(", ")}`);
+
+// ---- password rules (shared with the set-password form)
+import { isAcceptablePassword, passwordChecks } from "../../src/lib/password-rules.ts";
+assert(!isAcceptablePassword("kurz1", "kurz1"), "password: too short is rejected");
+assert(!isAcceptablePassword("nurbuchstabenlang", "nurbuchstabenlang"), "password: needs a number");
+assert(!isAcceptablePassword("1234567890", "1234567890"), "password: needs a letter");
+assert(!isAcceptablePassword("Handball2027", "Handball2028"), "password: entries must match");
+assert(isAcceptablePassword("Handball2027", "Handball2027"), "password: good password accepted");
+assert(passwordChecks("Äöü1234567", "").letter, "password: umlauts count as letters");

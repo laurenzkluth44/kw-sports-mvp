@@ -38,7 +38,13 @@ const shots = [
   { name: "email-suggestion-fr-mobile", path: "/visual-preview/email?kind=suggestion-fr", width: 390 },
   { name: "email-new-need", path: "/visual-preview/email?kind=need", width: 680 },
   { name: "email-answer", path: "/visual-preview/email?kind=answer", width: 680 },
-  { name: "email-reminder", path: "/visual-preview/email?kind=reminder", width: 680 }
+  { name: "email-reminder", path: "/visual-preview/email?kind=reminder", width: 680 },
+  { name: "email-invite", path: "/visual-preview/email?kind=invite", width: 680 },
+  { name: "email-reset", path: "/visual-preview/email?kind=reset", width: 680 },
+  { name: "auth-set-password", path: "/set-password", width: 1280 },
+  { name: "auth-set-password-mobile", path: "/set-password", width: 390 },
+  { name: "auth-forgot-password", path: "/forgot-password?sent=1", width: 1280 },
+  { name: "auth-confirm-invite", path: "/auth/confirm?token_hash=preview&type=invite&next=/set-password", width: 1280 }
 ];
 
 const browser = await chromium.launch();

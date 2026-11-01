@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getAuthConfirmUrl } from "@/lib/site-url";
+import { authConfirmLink, buildInviteEmail } from "@/lib/email/auth-emails";
+import { emailEnabled, sendEmail } from "@/lib/email/send";
 import type { AppRole } from "@/types/domain";
 
 const VALID_ROLES: AppRole[] = ["admin", "club", "agency"];
@@ -145,6 +147,15 @@ export async function inviteUserAction(
     agency_name: role === "agency" ? agencyName : null
   };
   const redirectTo = getAuthConfirmUrl("/set-password");
+
+  // Branded KW invitation (when email is configured); otherwise Supabase's default invite below.
+  if (emailEnabled()) {
+    const branded = await inviteWithBrandedEmail(adminClient, { name, email, role, clubId, agencyName, logoDataUrl, metadata });
+    if (branded) {
+      revalidatePath("/admin/users");
+      return branded;
+    }
+  }
 
   try {
     const { data, error: authError } = await adminClient.auth.admin.inviteUserByEmail(email, {
@@ -371,4 +382,63 @@ function getInviteErrorMessage(error: unknown) {
   }
 
   return String(error || "");
+}
+
+/**
+ * Creates the invite link without Supabase sending anything, stores the profile, and sends KW's own
+ * invitation email. Returns null when the link can't be created (caller falls back to Supabase's invite).
+ */
+async function inviteWithBrandedEmail(
+  adminClient: ReturnType<typeof createSupabaseAdminClient>,
+  input: {
+    name: string;
+    email: string;
+    role: AppRole;
+    clubId: string | null;
+    agencyName: string | null;
+    logoDataUrl: string;
+    metadata: { name: string; role: AppRole; club_id: string | null; agency_name: string | null };
+  }
+): Promise<InviteUserActionState | null> {
+  const { data, error } = await adminClient.auth.admin.generateLink({
+    type: "invite",
+    email: input.email,
+    options: { data: input.metadata, redirectTo: getAuthConfirmUrl("/set-password") }
+  });
+  if (error || !data.user || !data.properties?.hashed_token) {
+    console.error("Branded invite: link failed", error);
+    return null;
+  }
+
+  const profileError = await createInvitedProfile(
+    adminClient,
+    data.user.id,
+    input.name,
+    input.email,
+    input.role,
+    input.clubId,
+    input.agencyName
+  );
+  if (profileError) {
+    await adminClient.auth.admin.deleteUser(data.user.id);
+    return { status: "error", message: "Nutzerprofil konnte nicht angelegt werden.", detail: getInviteErrorMessage(profileError) };
+  }
+  if (input.role === "club" && input.clubId) {
+    await uploadClubLogoFromDataUrl(adminClient, input.clubId, input.logoDataUrl);
+  }
+
+  let organisation = input.agencyName;
+  let locale: "de" | "en" = "de";
+  if (input.clubId) {
+    const { data: club } = await adminClient.from("clubs").select("name, country").eq("id", input.clubId).maybeSingle();
+    organisation = (club?.name as string | undefined) ?? null;
+    const country = club?.country as string | undefined;
+    locale = !country || ["Deutschland", "Österreich", "Schweiz"].includes(country) ? "de" : "en";
+  }
+
+  const link = authConfirmLink(data.properties.hashed_token, "invite", "/set-password");
+  const sent = await sendEmail({ to: [input.email], ...buildInviteEmail({ name: input.name, organisation, link, locale }) });
+  return sent
+    ? { status: "sent", email: input.email }
+    : { status: "manual", email: input.email, actionLink: link, detail: "E-Mail-Versand fehlgeschlagen. Link bitte manuell weitergeben." };
 }

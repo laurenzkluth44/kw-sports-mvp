@@ -2,15 +2,14 @@
 
 import Image from "next/image";
 import { useEffect, useState, type FormEvent } from "react";
-import { KeyRound, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Field, Input } from "@/components/ui/form";
+import { Check, Eye, EyeOff, KeyRound, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { SetPasswordCopy } from "@/lib/auth-i18n";
+import { isAcceptablePassword, MIN_PASSWORD_LENGTH, passwordChecks, type PasswordCheck } from "@/lib/password-rules";
 import type { AppRole } from "@/types/domain";
 
-export function SetPasswordForm({ copy }: { copy: SetPasswordCopy }) {
+export function SetPasswordForm({ copy, mode = "invite" }: { copy: SetPasswordCopy; mode?: "invite" | "reset" }) {
   const errorCopy = copy.errors;
   const [loading, setLoading] = useState(true);
   const [ready, setReady] = useState(false);
@@ -21,6 +20,11 @@ export function SetPasswordForm({ copy }: { copy: SetPasswordCopy }) {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoFailed, setLogoFailed] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmation, setConfirmation] = useState("");
+  const [visible, setVisible] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const checks = passwordChecks(password, confirmation);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -105,24 +109,21 @@ export function SetPasswordForm({ copy }: { copy: SetPasswordCopy }) {
     event.preventDefault();
     setError(null);
 
-    const formData = new FormData(event.currentTarget);
-    const password = String(formData.get("password") || "");
-    const passwordConfirm = String(formData.get("password_confirm") || "");
-
-    if (password.length < 8) {
+    if (password !== confirmation && checks.length && checks.letter && checks.number) {
+      setError(errorCopy.mismatch);
+      return;
+    }
+    if (!isAcceptablePassword(password, confirmation)) {
       setError(errorCopy.short);
       return;
     }
 
-    if (password !== passwordConfirm) {
-      setError(errorCopy.mismatch);
-      return;
-    }
-
+    setSaving(true);
     const supabase = createSupabaseBrowserClient();
     const { error: updateError } = await supabase.auth.updateUser({ password });
 
     if (updateError) {
+      setSaving(false);
       setError(errorCopy.update);
       return;
     }
@@ -135,76 +136,136 @@ export function SetPasswordForm({ copy }: { copy: SetPasswordCopy }) {
   // Spinner while the invite session resolves, or while the club logo is still downloading.
   const showSpinner = loading || (hasClubLogo && !logoLoaded);
 
+  const rules: { key: PasswordCheck; label: string }[] = [
+    { key: "length", label: copy.ruleLength },
+    { key: "letter", label: copy.ruleLetter },
+    { key: "number", label: copy.ruleNumber },
+    { key: "match", label: copy.ruleMatch }
+  ];
+  const inputClass =
+    "min-h-12 w-full border border-slate-200 px-3.5 pr-12 text-[0.95rem] outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-100";
+
   return (
-    <form onSubmit={onSubmit} className="panel space-y-6 border-l-2 border-l-brand-500 p-6 sm:p-8">
-      <div className="flex flex-col items-center text-center">
+    <form onSubmit={onSubmit} className="flex flex-col gap-5">
+      {mode === "invite" ? (
+        <div className="flex items-center gap-4">
+          <span className="relative flex h-16 w-16 shrink-0 items-center justify-center">
+            {showSpinner ? (
+              <Loader2 className="absolute h-6 w-6 animate-spin text-brand-500" aria-label="Logo wird geladen" />
+            ) : null}
+            {hasClubLogo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={logoUrl as string}
+                alt={clubTitle}
+                className={cn(
+                  "h-16 w-16 object-contain transition-opacity duration-300 ease-out-expo",
+                  logoLoaded ? "opacity-100" : "opacity-0"
+                )}
+                onLoad={() => setLogoLoaded(true)}
+                onError={() => setLogoFailed(true)}
+              />
+            ) : !loading ? (
+              <Image src="/kw-sports-logo.svg" alt="KW Sports" width={2557} height={288} className="w-16" unoptimized />
+            ) : null}
+          </span>
+          <div className="min-w-0">
+            <p className="eyebrow">{copy.access}</p>
+            <p className="mt-1 truncate font-display text-[1.9rem] uppercase leading-none">{clubTitle}</p>
+            {personName ? (
+              <p className="mt-1 text-sm text-slate-600">
+                {copy.welcome}, <span className="font-semibold text-navy-950">{personName}</span>
+              </p>
+            ) : null}
+          </div>
+        </div>
+      ) : (
         <p className="eyebrow">{copy.access}</p>
-        <span className="relative mt-5 flex h-24 min-w-[6rem] items-center justify-center">
-          {showSpinner ? (
-            <Loader2 className="absolute h-8 w-8 animate-spin text-brand-500" aria-label="Logo wird geladen" />
-          ) : null}
+      )}
 
-          {hasClubLogo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={logoUrl as string}
-              alt={clubTitle}
-              className={cn(
-                "h-24 w-24 object-contain transition-opacity duration-300 ease-out-expo",
-                logoLoaded ? "opacity-100" : "opacity-0"
-              )}
-              onLoad={() => setLogoLoaded(true)}
-              onError={() => setLogoFailed(true)}
-            />
-          ) : !loading ? (
-            <Image
-              src="/kw-sports-logo.svg"
-              alt="KW Sports"
-              width={2557}
-              height={288}
-              className="w-40"
-              unoptimized
-            />
-          ) : null}
-        </span>
-        <h2 className="kw-title mt-4 text-4xl">{clubTitle}</h2>
-        {personName ? (
-          <p className="mt-1.5 text-sm text-neutral-600">
-            {copy.welcome}, <span className="font-semibold text-navy-950">{personName}</span>
-          </p>
-        ) : null}
+      <div className={mode === "invite" ? "border-t border-slate-200 pt-5" : ""}>
+        <h2 className="font-display text-[2.5rem] uppercase leading-[0.9]">{mode === "reset" ? copy.resetTitle : copy.title}</h2>
+        <p className="mt-1.5 text-sm leading-6 text-slate-600">{mode === "reset" ? copy.resetDescription : copy.description}</p>
       </div>
 
-      <div className="flex flex-col items-center border-t border-slate-200/80 pt-6 text-center">
-        <h1 className="kw-title text-2xl">{copy.title}</h1>
-        <p className="mt-1.5 max-w-sm text-sm leading-6 text-neutral-600">{copy.description}</p>
-      </div>
-
-      {loading ? (
-        <p className="text-center text-sm text-neutral-500">{copy.checking}</p>
-      ) : null}
-
+      {loading ? <p className="text-sm text-slate-500">{copy.checking}</p> : null}
       {error ? <div className="alert-error">{error}</div> : null}
 
-      <Field label={copy.newPassword} htmlFor="password">
-        <Input id="password" name="password" type="password" autoComplete="new-password" minLength={8} required />
-      </Field>
+      <div className="flex flex-col gap-2">
+        <label htmlFor="password" className="field-label">
+          {copy.newPassword}
+        </label>
+        <div className="relative">
+          <input
+            id="password"
+            name="password"
+            type={visible ? "text" : "password"}
+            autoComplete="new-password"
+            minLength={MIN_PASSWORD_LENGTH}
+            required
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            aria-describedby="password-rules"
+            className={inputClass}
+          />
+          <button
+            type="button"
+            onClick={() => setVisible((value) => !value)}
+            className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-slate-500 hover:text-navy-950"
+            aria-label={visible ? copy.hide : copy.show}
+            aria-pressed={visible}
+          >
+            {visible ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
+          </button>
+        </div>
+      </div>
 
-      <Field label={copy.repeatPassword} htmlFor="password_confirm">
-        <Input
+      <div className="flex flex-col gap-2">
+        <label htmlFor="password_confirm" className="field-label">
+          {copy.repeatPassword}
+        </label>
+        <input
           id="password_confirm"
           name="password_confirm"
-          type="password"
+          type={visible ? "text" : "password"}
           autoComplete="new-password"
-          minLength={8}
           required
+          value={confirmation}
+          onChange={(event) => setConfirmation(event.target.value)}
+          className={inputClass}
         />
-      </Field>
+      </div>
 
-      <Button type="submit" className="w-full" disabled={!ready || loading}>
-        <KeyRound className="h-4 w-4" aria-hidden="true" />
+      <ul id="password-rules" aria-label={copy.rulesTitle} className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+        {rules.map((rule) => (
+          <li
+            key={rule.key}
+            className={cn(
+              "flex items-center gap-2 text-xs font-semibold transition-colors",
+              checks[rule.key] ? "text-brand-700" : "text-slate-400"
+            )}
+          >
+            <span
+              className={cn(
+                "flex h-4 w-4 shrink-0 items-center justify-center",
+                checks[rule.key] ? "bg-brand-500 text-white" : "border border-slate-300"
+              )}
+            >
+              {checks[rule.key] ? <Check className="h-3 w-3" aria-hidden="true" /> : null}
+            </span>
+            {rule.label}
+          </li>
+        ))}
+      </ul>
+
+      <button
+        type="submit"
+        disabled={!ready || loading || saving}
+        className="inline-flex min-h-[52px] items-center justify-center gap-2 bg-brand-500 text-sm font-extrabold uppercase tracking-[0.12em] text-white shadow-blueGlow transition-colors hover:bg-blue-bright disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <KeyRound className="h-4 w-4" aria-hidden="true" />}
         {copy.submit}
-      </Button>
+      </button>
     </form>
   );
 }

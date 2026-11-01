@@ -19,6 +19,7 @@ import { AdminInboxView, type InboxTab } from "@/features/matching/admin-inbox";
 import { ClubSuggestionsView } from "@/features/matching/club-suggestions";
 import { scorePlayerForNeed } from "@/features/matching/engine";
 import { buildAnswerEmail, buildNewNeedEmail, buildReminderEmail, buildSuggestionEmail } from "@/lib/email/notifications";
+import { buildInviteEmail, buildResetEmail } from "@/lib/email/auth-emails";
 import { createRosterPlayerAction } from "@/features/squad/actions";
 import { PlayerForm } from "@/features/squad/player-form";
 import { SquadScreen } from "@/features/squad/squad-screen";
@@ -389,7 +390,11 @@ export default async function VisualPreview({
     const kind = query.kind ?? "suggestion";
     const frenchNeed = needs[3];
     const email =
-      kind === "need"
+      kind === "invite"
+        ? buildInviteEmail({ name: "Maria", organisation: "HSG Musterstadt", link: `${site}/auth/confirm`, locale: "de" }, site)
+        : kind === "reset"
+          ? buildResetEmail({ link: `${site}/auth/confirm`, locale: "en" }, site)
+          : kind === "need"
         ? buildNewNeedEmail(needs[0], site)
         : kind === "answer"
           ? buildAnswerEmail(needs[2], suggestionPlayers[0], inboxMatches[1], ["lars@example.com"], site)

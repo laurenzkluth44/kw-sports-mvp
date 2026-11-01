@@ -6,6 +6,11 @@ export type OutgoingEmail = {
   replyTo?: string;
 };
 
+/** True when branded emails can go out (Resend key set and not disabled). */
+export function emailEnabled() {
+  return Boolean(process.env.RESEND_API_KEY?.trim()) && process.env.EMAIL_DISABLED !== "1";
+}
+
 /**
  * Sends through Resend's HTTP API (no SDK needed). Without RESEND_API_KEY it only logs,
  * so local runs and previews never email real clubs. Never throws: a failed notification

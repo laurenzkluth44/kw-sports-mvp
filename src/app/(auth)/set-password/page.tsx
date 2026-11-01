@@ -1,19 +1,23 @@
+import { ArenaSteps, AuthArena } from "@/features/auth/auth-arena";
 import { SetPasswordForm } from "@/features/auth/set-password-form";
-import { AuthLanguageSwitcher } from "@/components/layout/auth-language-switcher";
 import { getClubLocale } from "@/lib/club-locale";
 import { authCopy, parseAuthLocale } from "@/lib/auth-i18n";
 
-export default async function SetPasswordPage() {
+export default async function SetPasswordPage({ searchParams }: { searchParams: Promise<{ mode?: string }> }) {
   const locale = parseAuthLocale(await getClubLocale());
+  const t = authCopy[locale];
+  const mode = (await searchParams).mode === "reset" ? "reset" : "invite";
 
   return (
-    <main className="kw-stripes flex min-h-screen items-center justify-center bg-brand-500 px-4 py-10">
-      <div className="w-full max-w-md space-y-4">
-        <div className="flex justify-end">
-          <AuthLanguageSwitcher locale={locale} />
-        </div>
-        <SetPasswordForm copy={authCopy[locale].setPassword} />
-      </div>
-    </main>
+    <AuthArena
+      locale={locale}
+      eyebrow={t.setPassword.arenaEyebrow}
+      headline={mode === "reset" ? t.setPassword.resetArenaHeadline : t.setPassword.arenaHeadline}
+      intro={mode === "reset" ? t.setPassword.resetArenaIntro : t.setPassword.arenaIntro}
+      aside={mode === "invite" ? <ArenaSteps steps={t.setPassword.arenaSteps} /> : null}
+      footer={t.login.footer}
+    >
+      <SetPasswordForm copy={t.setPassword} mode={mode} />
+    </AuthArena>
   );
 }
