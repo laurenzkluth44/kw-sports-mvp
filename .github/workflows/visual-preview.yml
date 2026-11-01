@@ -66,6 +66,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           echo "Screenshots for ${GITHUB_REF_NAME} @ ${SHA}" > README.md
+          # Images only: tell Vercel not to try (and fail) to deploy this branch.
+          echo '{ "git": { "deploymentEnabled": false } }' > vercel.json
           git add -A
           git commit -q -m "Screenshots for ${SHA}"
           git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" visual-previews
