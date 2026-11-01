@@ -33,7 +33,12 @@ const shots = [
   { name: "club-suggestions-desktop", path: "/visual-preview/suggestions", width: 1280 },
   { name: "club-suggestions-mobile", path: "/visual-preview/suggestions?lang=en", width: 390 },
   { name: "admin-inbox-desktop", path: "/visual-preview/inbox", width: 1280 },
-  { name: "admin-inbox-waiting", path: "/visual-preview/inbox?tab=wartet", width: 1280 }
+  { name: "admin-inbox-waiting", path: "/visual-preview/inbox?tab=wartet", width: 1280 },
+  { name: "email-suggestion", path: "/visual-preview/email?kind=suggestion", width: 680 },
+  { name: "email-suggestion-fr-mobile", path: "/visual-preview/email?kind=suggestion-fr", width: 390 },
+  { name: "email-new-need", path: "/visual-preview/email?kind=need", width: 680 },
+  { name: "email-answer", path: "/visual-preview/email?kind=answer", width: 680 },
+  { name: "email-reminder", path: "/visual-preview/email?kind=reminder", width: 680 }
 ];
 
 const browser = await chromium.launch();

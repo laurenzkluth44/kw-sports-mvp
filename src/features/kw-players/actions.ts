@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { notifyClubNewSuggestion } from "@/lib/email/notifications";
 import { requireAdmin, type AuthedContext } from "@/lib/auth";
 import { ATTACK_POSITIONS, COACH_ROLES, DEFENSE_POSITIONS, LANGUAGES, PLAYER_TYPES } from "@/lib/constants";
 import { isValidDateString } from "@/features/player-needs/form-schema";
@@ -205,6 +207,7 @@ export async function releaseNeedMatchAction(formData: FormData) {
     redirect(`/admin/needs/${needId}?error=match#kw-spieler`);
   }
 
+  after(() => notifyClubNewSuggestion(needId, playerId));
   revalidatePath(`/admin/needs/${needId}`);
   redirect(`/admin/needs/${needId}?done=released#kw-spieler`);
 }

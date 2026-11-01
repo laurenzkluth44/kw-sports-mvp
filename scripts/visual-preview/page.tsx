@@ -18,6 +18,7 @@ import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
 import { AdminInboxView, type InboxTab } from "@/features/matching/admin-inbox";
 import { ClubSuggestionsView } from "@/features/matching/club-suggestions";
 import { scorePlayerForNeed } from "@/features/matching/engine";
+import { buildAnswerEmail, buildNewNeedEmail, buildReminderEmail, buildSuggestionEmail } from "@/lib/email/notifications";
 import { createRosterPlayerAction } from "@/features/squad/actions";
 import { PlayerForm } from "@/features/squad/player-form";
 import { SquadScreen } from "@/features/squad/squad-screen";
@@ -380,6 +381,28 @@ export default async function VisualPreview({
       <AppShell profile={adminProfile} locale="de" badge={2}>
         <AdminInboxView tab={tab} matches={inboxMatches} needs={needs} players={kwPlayers} contacts={inboxContacts} />
       </AppShell>
+    );
+  }
+
+  if (screen === "email") {
+    const site = "http://127.0.0.1:3000";
+    const kind = query.kind ?? "suggestion";
+    const frenchNeed = needs[3];
+    const email =
+      kind === "need"
+        ? buildNewNeedEmail(needs[0], site)
+        : kind === "answer"
+          ? buildAnswerEmail(needs[2], suggestionPlayers[0], inboxMatches[1], ["lars@example.com"], site)
+          : kind === "reminder"
+            ? buildReminderEmail([needs[4], { ...needs[4], id: "x", attack_positions: ["RL"], season: "2027/28" }], site)
+            : kind === "suggestion-fr"
+              ? buildSuggestionEmail(frenchNeed, suggestionPlayers[3], 78, site)
+              : buildSuggestionEmail(needs[0], suggestionPlayers[0], 100, site);
+    return (
+      <div style={{ background: "#e5e7eb", padding: 16 }}>
+        <p style={{ font: "600 13px system-ui", margin: "0 0 8px" }}>Betreff: {email.subject}</p>
+        <iframe title="email" srcDoc={email.html} style={{ width: "100%", height: 1000, border: 0, background: "#fff" }} />
+      </div>
     );
   }
 

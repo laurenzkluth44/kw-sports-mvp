@@ -89,7 +89,7 @@ export function KwPlayerCard({
           value={freeFrom ? formatDate(freeFrom, locale) : player.contract_until ? formatDate(player.contract_until, locale) : t.open}
         />
       </dl>
-      {footer ? <div className="relative border-t border-white/10 p-4">{footer}</div> : null}
+      {footer ? <div className="relative mt-auto border-t border-white/10 p-4">{footer}</div> : null}
     </article>
   );
 }

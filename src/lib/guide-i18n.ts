@@ -9,6 +9,11 @@ export type GuideCopy = {
     needCreated: string;
     needUpdated: string;
     statusUpdated: string;
+    needsConfirmed: string;
+    staleTitle: string;
+    staleBody: string;
+    staleConfirmAll: string;
+    staleConfirmOne: string;
   };
   notFound: { eyebrow: string; title: string; body: string; home: string };
   error: { eyebrow: string; title: string; body: string; retry: string; home: string };
@@ -23,7 +28,12 @@ export const guideCopy: Record<ClubLocale, GuideCopy> = {
     flash: {
       needCreated: "Bedarf gespeichert. Er ist jetzt für KW Sports und die Agenturen sichtbar.",
       needUpdated: "Änderungen gespeichert.",
-      statusUpdated: "Status aktualisiert."
+      statusUpdated: "Status aktualisiert.",
+      needsConfirmed: "Danke! Als aktuell bestätigt.",
+      staleTitle: "{n} Bedarf(e) seit über 30 Tagen nicht bestätigt",
+      staleBody: "Noch aktuell? Ein Klick, damit Agenturen und KW Sports wissen, dass ihr weiter sucht. Schon besetzt? Status auf „Besetzt“ setzen.",
+      staleConfirmAll: "Alle als aktuell bestätigen",
+      staleConfirmOne: "Noch aktuell"
     },
     notFound: {
       eyebrow: "Fehler 404",
@@ -47,7 +57,12 @@ export const guideCopy: Record<ClubLocale, GuideCopy> = {
     flash: {
       needCreated: "Need saved. It is now visible to KW Sports and the agencies.",
       needUpdated: "Changes saved.",
-      statusUpdated: "Status updated."
+      statusUpdated: "Status updated.",
+      needsConfirmed: "Thanks! Confirmed as current.",
+      staleTitle: "{n} need(s) not confirmed for over 30 days",
+      staleBody: "Still current? One click tells agencies and KW Sports you are still searching. Already filled? Set the status to “Filled”.",
+      staleConfirmAll: "Confirm all as current",
+      staleConfirmOne: "Still current"
     },
     notFound: {
       eyebrow: "Error 404",
@@ -71,7 +86,12 @@ export const guideCopy: Record<ClubLocale, GuideCopy> = {
     flash: {
       needCreated: "Besoin enregistré. Il est maintenant visible pour KW Sports et les agences.",
       needUpdated: "Modifications enregistrées.",
-      statusUpdated: "Statut mis à jour."
+      statusUpdated: "Statut mis à jour.",
+      needsConfirmed: "Merci ! Confirmé comme actuel.",
+      staleTitle: "{n} besoin(s) non confirmé(s) depuis plus de 30 jours",
+      staleBody: "Toujours d’actualité ? Un clic pour indiquer aux agences et à KW Sports que vous cherchez toujours. Déjà pourvu ? Passez le statut à « Pourvu ».",
+      staleConfirmAll: "Tout confirmer",
+      staleConfirmOne: "Toujours actuel"
     },
     notFound: {
       eyebrow: "Erreur 404",
@@ -95,7 +115,12 @@ export const guideCopy: Record<ClubLocale, GuideCopy> = {
     flash: {
       needCreated: "Necesidad guardada. Ahora la ven KW Sports y las agencias.",
       needUpdated: "Cambios guardados.",
-      statusUpdated: "Estado actualizado."
+      statusUpdated: "Estado actualizado.",
+      needsConfirmed: "¡Gracias! Confirmado como vigente.",
+      staleTitle: "{n} necesidad(es) sin confirmar desde hace más de 30 días",
+      staleBody: "¿Sigue vigente? Un clic para que agencias y KW Sports sepan que seguís buscando. ¿Ya cubierta? Cambiad el estado a «Cubierta».",
+      staleConfirmAll: "Confirmar todas",
+      staleConfirmOne: "Sigue vigente"
     },
     notFound: {
       eyebrow: "Error 404",

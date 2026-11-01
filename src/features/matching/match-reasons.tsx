@@ -1,12 +1,13 @@
 import { Check, HelpCircle, X } from "lucide-react";
 import {
   CLUB_COACH_ROLE_LABELS,
+  CLUB_POSITION_SHORT_LABELS,
   CLUB_PLAYER_TYPE_LABELS,
   languageLabel,
   type ClubLocale
 } from "@/lib/club-i18n";
 import { cn } from "@/lib/utils";
-import type { CoachRole, Language, MatchReason, PlayerType } from "@/types/domain";
+import type { AttackPosition, CoachRole, Language, MatchReason, PlayerType } from "@/types/domain";
 
 const text = {
   de: {
@@ -88,7 +89,13 @@ export function reasonLabel(reason: MatchReason, locale: ClubLocale) {
   const value = reason.value ?? "";
   switch (reason.key) {
     case "position":
-      return t.position(value);
+      // "RR · A4": attack codes get the club's language (RR → RB in English), defence stays "A4".
+      return t.position(
+        value
+          .split(" · ")
+          .map((code) => CLUB_POSITION_SHORT_LABELS[locale][code as AttackPosition] ?? code)
+          .join(" · ")
+      );
     case "coach_role":
       return t.coachRole(CLUB_COACH_ROLE_LABELS[locale][value as CoachRole] ?? value);
     case "availability":

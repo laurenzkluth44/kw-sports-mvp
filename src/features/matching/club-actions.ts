@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { notifyKwClubAnswer } from "@/lib/email/notifications";
 import { requireClubUser } from "@/lib/auth";
 
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -25,6 +27,7 @@ export async function respondToMatchAction(formData: FormData) {
 
   if (error) redirect(`/club/suggestions?error=respond#match-${matchId}`);
 
+  if (answer === "interessiert") after(() => notifyKwClubAnswer(matchId));
   revalidatePath("/club", "layout");
   redirect(`/club/suggestions?done=${answer}#match-${matchId}`);
 }

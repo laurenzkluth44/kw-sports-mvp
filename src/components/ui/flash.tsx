@@ -11,8 +11,8 @@ export function Flash({ message }: { message: string | null | undefined }) {
   );
 }
 
-export type FlashKind = "created" | "updated" | "status";
+export type FlashKind = "created" | "updated" | "status" | "confirmed";
 
 export function flashKind(value: string | undefined): FlashKind | null {
-  return value === "created" || value === "updated" || value === "status" ? value : null;
+  return value === "created" || value === "updated" || value === "status" || value === "confirmed" ? value : null;
 }

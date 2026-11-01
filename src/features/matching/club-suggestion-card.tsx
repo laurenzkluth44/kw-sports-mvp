@@ -71,7 +71,7 @@ export function ClubSuggestionCard({
         ) : null}
 
         {facts.length > 0 ? (
-          <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
             {facts.map((fact) => (
               <div key={fact.label}>
                 <dt className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-slate-500">{fact.label}</dt>

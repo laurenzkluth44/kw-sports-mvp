@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { Flash, flashKind } from "@/components/ui/flash";
 import { guideCopy } from "@/lib/guide-i18n";
-import { AlertTriangle, ArrowRight, Building2, Copy, Edit, MessageCircle, Plus, Sparkles, Target, type LucideIcon } from "lucide-react";
+import { AlertTriangle, ArrowRight, Building2, CheckCircle2, Copy, Edit, MessageCircle, Plus, Sparkles, Target, type LucideIcon } from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NeedBadges } from "@/features/player-needs/need-badges";
 import { NeedStatusForm } from "@/features/player-needs/need-status-form";
 import { NeedPositionCell } from "@/features/player-needs/need-summary";
 import { attackGaps, planningSeasons } from "@/features/squad/squad-model";
-import { duplicateClubNeedAction } from "@/features/player-needs/actions";
+import { confirmClubNeedsAction, duplicateClubNeedAction } from "@/features/player-needs/actions";
 import { CLUB_STATUS_LABELS, clubCopy } from "@/lib/club-i18n";
 import { getClubLocale } from "@/lib/club-locale";
 import { requireClubUser } from "@/lib/auth";
@@ -20,7 +20,7 @@ import type { PlayerNeed, RosterPlayer } from "@/types/domain";
 export default async function ClubDashboardPage({
   searchParams
 }: {
-  searchParams: Promise<{ error?: string; done?: string }>;
+  searchParams: Promise<{ error?: string; done?: string; confirm?: string }>;
 }) {
   const { supabase, profile } = await requireClubUser();
   const locale = await getClubLocale();
@@ -61,6 +61,9 @@ export default async function ClubDashboardPage({
   const openCount = typedNeeds.filter((need) => need.status === "offen").length;
   const talksCount = typedNeeds.filter((need) => need.status === "in_gespraechen").length;
   const highCount = typedNeeds.filter((need) => need.priority === "hoch").length;
+  const staleCount = typedNeeds.filter(
+    (need) => (need.status === "offen" || need.status === "in_gespraechen") && isStaleNeed(need.last_confirmed_at)
+  ).length;
 
   const club = profile.clubs ?? null;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
@@ -101,7 +104,37 @@ export default async function ClubDashboardPage({
         </div>
       </div>
 
-      <Flash message={doneKind ? (doneKind === "created" ? flash.needCreated : doneKind === "updated" ? flash.needUpdated : flash.statusUpdated) : null} />
+      <Flash
+        message={
+          doneKind
+            ? doneKind === "created"
+              ? flash.needCreated
+              : doneKind === "updated"
+                ? flash.needUpdated
+                : doneKind === "confirmed"
+                  ? flash.needsConfirmed
+                  : flash.statusUpdated
+            : null
+        }
+      />
+
+      {staleCount > 0 ? (
+        <section
+          id="noch-aktuell"
+          className={`flex flex-col gap-3 border-l-4 border-amber-400 bg-amber-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between ${params.confirm === "stale" ? "ring-2 ring-amber-400" : ""}`}
+        >
+          <div>
+            <p className="font-bold text-amber-900">{flash.staleTitle.replace("{n}", String(staleCount))}</p>
+            <p className="mt-1 max-w-2xl text-sm text-amber-900/80">{flash.staleBody}</p>
+          </div>
+          <form action={confirmClubNeedsAction}>
+            <Button type="submit" variant="accent" className="w-full whitespace-nowrap sm:w-auto">
+              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+              {flash.staleConfirmAll}
+            </Button>
+          </form>
+        </section>
+      ) : null}
       {params.error === "status" ? (
         <div className="alert-error">{t.statusError}</div>
       ) : null}
@@ -201,10 +234,18 @@ export default async function ClubDashboardPage({
                         {suggestions.total === 1 ? m.needChipOne : fill(m.needChip, suggestions.total)}
                       </Link>
                     ) : null}
-                    {stale ? (
-                      <p className="mt-2 rounded-md bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700">
-                        {t.updateHint}
-                      </p>
+                    {stale && (need.status === "offen" || need.status === "in_gespraechen") ? (
+                      <form action={confirmClubNeedsAction} className="mt-2">
+                        <input type="hidden" name="id" value={need.id} />
+                        <button
+                          type="submit"
+                          className="inline-flex min-h-8 items-center gap-1.5 bg-amber-50 px-2 py-1 text-xs font-bold text-amber-800 ring-1 ring-amber-200 hover:bg-amber-100"
+                          title={t.updateHint}
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                          {flash.staleConfirmOne}
+                        </button>
+                      </form>
                     ) : null}
                   </div>
                   <p className="hidden text-sm font-medium text-slate-700 lg:block">{need.season}</p>
