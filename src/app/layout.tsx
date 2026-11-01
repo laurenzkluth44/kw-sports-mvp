@@ -19,8 +19,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "KW Sports Kaderbedarf",
-  description: "Interne B2B-Datenbank für offene Kaderbedarfe von Handballvereinen.",
+  title: "KW Club Hub",
+  description: "Kaderplanung, Bedarfe und Spielervorschläge für Handballvereine – von KW Sports.",
   icons: {
     icon: "/icon.png",
     apple: "/apple-icon.png"

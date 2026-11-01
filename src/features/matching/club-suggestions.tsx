@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Lock, Plus } from "lucide-react";
 import { LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -97,7 +98,9 @@ export function ClubSuggestionsView({
               <div>
                 <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-slate-500">{t.forNeed}</p>
                 <h2 className="font-display text-[1.9rem] uppercase leading-none text-navy-950">
-                  {needHeadline(need, locale)}
+                  <Link href={`/club/needs/${need.id}`} className="hover:text-brand-600">
+                    {needHeadline(need, locale)}
+                  </Link>
                   <span className="ml-3 text-lg text-slate-400">
                     {need.season} · {formatDate(need.needed_from_date, locale)}
                   </span>

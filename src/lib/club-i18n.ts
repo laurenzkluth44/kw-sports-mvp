@@ -34,7 +34,7 @@ export const clubCopy = {
       navNeeds: "Meine Bedarfe",
       navNewNeed: "Neuer Bedarf",
       navSquad: "Kader",
-      tagline: "Kaderbedarf Datenbank",
+      tagline: "Kaderplanung & Spielervermittlung",
       role: "Club User",
       logout: "Logout",
       language: "Sprache"
@@ -130,7 +130,7 @@ export const clubCopy = {
       navNeeds: "My roster needs",
       navNewNeed: "New need",
       navSquad: "Squad",
-      tagline: "Roster needs database",
+      tagline: "Squad planning & player matching",
       role: "Club user",
       logout: "Log out",
       language: "Language"
@@ -226,7 +226,7 @@ export const clubCopy = {
       navNeeds: "Mes besoins d'effectif",
       navNewNeed: "Nouveau besoin",
       navSquad: "Effectif",
-      tagline: "Base des besoins d'effectif",
+      tagline: "Planification d'effectif & recrutement",
       role: "Utilisateur club",
       logout: "Déconnexion",
       language: "Langue"
@@ -322,7 +322,7 @@ export const clubCopy = {
       navNeeds: "Mis necesidades",
       navNewNeed: "Nueva necesidad",
       navSquad: "Plantilla",
-      tagline: "Base de necesidades de plantilla",
+      tagline: "Planificación de plantilla y fichajes",
       role: "Usuario de club",
       logout: "Cerrar sesión",
       language: "Idioma"

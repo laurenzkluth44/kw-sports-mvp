@@ -8,6 +8,7 @@ import { needHeadline } from "@/features/player-needs/need-summary";
 import { requireClubUser } from "@/lib/auth";
 import { clubCopy } from "@/lib/club-i18n";
 import { getClubLocale } from "@/lib/club-locale";
+import { cockpitCopy } from "@/lib/cockpit-i18n";
 import type { PlayerNeed } from "@/types/domain";
 
 export default async function EditClubNeedPage({
@@ -35,7 +36,13 @@ export default async function EditClubNeedPage({
 
   return (
     <div className="space-y-6">
-      <Breadcrumbs items={[{ label: clubCopy[locale].app.navNeeds, href: "/club" }, { label: needHeadline(typedNeed, locale) }]} />
+      <Breadcrumbs
+        items={[
+          { label: cockpitCopy[locale].nav, href: "/club" },
+          { label: needHeadline(typedNeed, locale), href: `/club/needs/${typedNeed.id}` },
+          { label: t.editTitle }
+        ]}
+      />
       <PageHeader
         title={t.editTitle}
         description={`${needHeadline(typedNeed, locale)} · ${typedNeed.season}`}

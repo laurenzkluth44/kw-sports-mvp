@@ -105,7 +105,7 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
         invite: "Die Einladung konnte nicht geprüft werden. Bitte öffne den neuesten Einladungslink erneut."
       },
       brand: "KW Sports GmbH · Vereinsplattform",
-      headline: "Club Needs",
+      headline: "Club Hub",
       intro: "Die Plattform für Kaderplanung und Spielergesuche: Kader verwalten, Lücken früh erkennen und Bedarfe direkt an KW Sports melden.",
       card1Title: "Kaderplanung",
       card1Body: "Spieler, Verträge und Lücken je Saison im Blick.",
@@ -113,7 +113,7 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
       card2Body: "Bedarfe melden und passende Spieler mit CV direkt von KW Sports erhalten.",
       footer: "Plattform für Vereine und KW Sports",
       noAccess: "Noch kein Zugang? Dein Verein erhält eine Einladung von KW Sports.",
-      mobileSubtitle: "Kaderbedarf Datenbank",
+      mobileSubtitle: "Kaderplanung & Spielervermittlung",
       portal: "KW Sports Portal",
       title: "Login",
       subtitle: "Mit E-Mail und Passwort anmelden.",
@@ -150,10 +150,10 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
       resetDescription: "Wähle ein neues Passwort für deinen KW Sports Zugang.",
       arenaEyebrow: "Willkommen bei KW Sports",
       arenaHeadline: "Los geht's",
-      arenaIntro: "Dein Verein ist bei Club Needs freigeschaltet. In drei Schritten bist du startklar:",
+      arenaIntro: "Dein Verein ist bei KW Club Hub freigeschaltet. In drei Schritten bist du startklar:",
       arenaSteps: ["Passwort festlegen", "Kader eintragen und Lücken sehen", "Bedarf melden und Spielervorschläge erhalten"],
       resetArenaHeadline: "Neues Passwort",
-      resetArenaIntro: "Kurz ein neues Passwort festlegen, dann geht es direkt weiter in Club Needs."
+      resetArenaIntro: "Kurz ein neues Passwort festlegen, dann geht es direkt weiter in KW Club Hub."
     },
     forgot: {
       eyebrow: "KW Sports Portal",
@@ -169,7 +169,7 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
     },
     confirm: {
       inviteTitle: "Einladung annehmen",
-      inviteBody: "KW Sports hat dich zu Club Needs eingeladen. Im nächsten Schritt legst du dein Passwort fest.",
+      inviteBody: "KW Sports hat dich zu KW Club Hub eingeladen. Im nächsten Schritt legst du dein Passwort fest.",
       inviteButton: "Zugang einrichten",
       resetTitle: "Passwort zurücksetzen",
       resetBody: "Du hast einen neuen Passwort-Link angefordert. Im nächsten Schritt legst du dein neues Passwort fest.",
@@ -192,7 +192,7 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
         invite: "The invite could not be verified. Please open the newest invitation link again."
       },
       brand: "KW Sports GmbH · Club Platform",
-      headline: "Club Needs",
+      headline: "Club Hub",
       intro: "The platform for squad planning and player requests: manage your squad, spot gaps early and send needs straight to KW Sports.",
       card1Title: "Squad planning",
       card1Body: "Players, contracts and gaps per season at a glance.",
@@ -200,7 +200,7 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
       card2Body: "Report needs and get matching players with CV straight from KW Sports.",
       footer: "Platform for clubs and KW Sports",
       noAccess: "No access yet? Your club receives an invitation from KW Sports.",
-      mobileSubtitle: "Club Needs Database",
+      mobileSubtitle: "Squad planning & player matching",
       portal: "KW Sports Portal",
       title: "Login",
       subtitle: "Sign in with your email and password.",
@@ -237,10 +237,10 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
       resetDescription: "Choose a new password for your KW Sports access.",
       arenaEyebrow: "Welcome to KW Sports",
       arenaHeadline: "Let's go",
-      arenaIntro: "Your club is set up on Club Needs. Three steps and you're ready:",
+      arenaIntro: "Your club is set up on KW Club Hub. Three steps and you're ready:",
       arenaSteps: ["Set your password", "Add your squad and see the gaps", "Report a need and get player suggestions"],
       resetArenaHeadline: "New password",
-      resetArenaIntro: "Set a new password and you're straight back in Club Needs."
+      resetArenaIntro: "Set a new password and you're straight back in KW Club Hub."
     },
     forgot: {
       eyebrow: "KW Sports Portal",
@@ -256,7 +256,7 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
     },
     confirm: {
       inviteTitle: "Accept invitation",
-      inviteBody: "KW Sports invited you to Club Needs. Next, you'll set your password.",
+      inviteBody: "KW Sports invited you to KW Club Hub. Next, you'll set your password.",
       inviteButton: "Set up access",
       resetTitle: "Reset password",
       resetBody: "You requested a new password link. Next, you'll set your new password.",

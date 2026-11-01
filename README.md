@@ -1,4 +1,4 @@
-# KW Sports Kaderbedarf MVP
+# KW Club Hub
 
 Interne B2B-Webplattform für KW Sports GmbH. Vereine tragen offene Kaderbedarfe ein, KW Sports Admins sehen, filtern und exportieren alle Suchaufträge.
 

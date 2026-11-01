@@ -56,7 +56,13 @@ function detailLine(need: PlayerNeedWithClub, locale: ClubLocale, copy: Overview
   const parts = [`${copy.from} ${formatDate(need.needed_from_date, locale)}`];
   if (need.need_type === "spieler") {
     if (need.age_min !== null || need.age_max !== null) {
-      parts.push(`${need.age_min ?? "–"}–${need.age_max ?? "–"} ${copy.age}`);
+      parts.push(
+        need.age_min !== null && need.age_max !== null
+          ? `${need.age_min}–${need.age_max} ${copy.age}`
+          : need.age_min !== null
+            ? `${copy.ageFrom} ${need.age_min} ${copy.age}`
+            : `${copy.ageTo} ${need.age_max} ${copy.age}`
+      );
     }
     if (need.height_min !== null) parts.push(`${copy.heightMin} ${need.height_min} cm`);
   }

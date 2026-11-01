@@ -7,7 +7,7 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
       <body style={{ margin: 0, minHeight: "100vh", background: "#0a0a0a", color: "#fff", fontFamily: "system-ui, sans-serif" }}>
         <main style={{ maxWidth: 560, margin: "0 auto", padding: "96px 24px" }}>
           <p style={{ color: "#7aa8ff", fontSize: 12, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase" }}>
-            KW Sports · Club Needs
+            KW Club Hub
           </p>
           <h1 style={{ fontSize: 44, lineHeight: 1, margin: "16px 0" }}>Etwas ist schiefgelaufen</h1>
           <p style={{ color: "rgba(255,255,255,.75)", lineHeight: 1.6 }}>
