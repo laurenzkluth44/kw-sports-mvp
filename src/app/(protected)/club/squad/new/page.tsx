@@ -1,4 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { clubCopy } from "@/lib/club-i18n";
 import { createRosterPlayerAction } from "@/features/squad/actions";
 import { PlayerForm } from "@/features/squad/player-form";
 import { requireClubUser } from "@/lib/auth";
@@ -19,6 +21,7 @@ export default async function NewRosterPlayerPage({
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[{ label: clubCopy[locale].app.navSquad, href: "/club/squad" }, { label: t.form.newTitle }]} />
       <PageHeader eyebrow={profile.clubs?.name || t.page.eyebrow} title={t.form.newTitle} description={t.form.newDescription} />
       <PlayerForm
         action={createRosterPlayerAction}

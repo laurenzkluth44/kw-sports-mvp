@@ -3,6 +3,10 @@
 // for the screenshot build only. It is never part of the deployed app.
 import { AppShell } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/ui/page-header";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { StatusScreen } from "@/components/layout/status-screen";
+import { LinkButton } from "@/components/ui/button";
+import { guideCopy } from "@/lib/guide-i18n";
 import { normalizeAdminNeedFilters } from "@/features/admin/filters";
 import { NeedsOverview, parseOverviewView } from "@/features/needs-overview/needs-overview";
 import { createClubNeedAction } from "@/features/player-needs/actions";
@@ -198,11 +202,32 @@ export default async function VisualPreview({
     );
   }
 
+  if (screen === "error") {
+    const errorCopy = guideCopy[locale].error;
+    return (
+      <AppShell profile={profile} locale={locale}>
+        <StatusScreen
+          ghost="!"
+          eyebrow={errorCopy.eyebrow}
+          title={errorCopy.title}
+          body={errorCopy.body}
+          actions={
+            <>
+              <LinkButton href="#" variant="accent">{errorCopy.retry}</LinkButton>
+              <LinkButton href="/" variant="secondary">{errorCopy.home}</LinkButton>
+            </>
+          }
+        />
+      </AppShell>
+    );
+  }
+
   if (screen === "need-form") {
     const formCopy = clubCopy[locale].form;
     return (
       <AppShell profile={profile} locale={locale}>
         <div className="space-y-6">
+          <Breadcrumbs items={[{ label: clubCopy[locale].app.navNeeds, href: "/club" }, { label: formCopy.newTitle }]} />
           <PageHeader title={formCopy.newTitle} description={formCopy.newDescription} />
           <NeedForm
             action={createClubNeedAction}

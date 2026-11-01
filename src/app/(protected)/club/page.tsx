@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Flash, flashKind } from "@/components/ui/flash";
+import { guideCopy } from "@/lib/guide-i18n";
 import { AlertTriangle, ArrowRight, Building2, Copy, Edit, MessageCircle, Plus, Target, type LucideIcon } from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -17,12 +19,14 @@ import type { PlayerNeed, RosterPlayer } from "@/types/domain";
 export default async function ClubDashboardPage({
   searchParams
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; done?: string }>;
 }) {
   const { supabase, profile } = await requireClubUser();
   const locale = await getClubLocale();
   const t = clubCopy[locale].dashboard;
   const params = await searchParams;
+  const flash = guideCopy[locale].flash;
+  const doneKind = flashKind(params.done);
 
   const { data: needs = [] } = await supabase
     .from("player_needs")
@@ -84,6 +88,7 @@ export default async function ClubDashboardPage({
         </div>
       </div>
 
+      <Flash message={doneKind ? (doneKind === "created" ? flash.needCreated : doneKind === "updated" ? flash.needUpdated : flash.statusUpdated) : null} />
       {params.error === "status" ? (
         <div className="alert-error">{t.statusError}</div>
       ) : null}

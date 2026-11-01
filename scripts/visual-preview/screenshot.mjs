@@ -19,18 +19,25 @@ const shots = [
   { name: "needs-admin-list", path: "/visual-preview/needs?view=list", width: 1280 },
   { name: "needs-agency-en-mobile", path: "/visual-preview/agency?lang=en", width: 390 },
   { name: "need-form-desktop", path: "/visual-preview/need-form", width: 1280, steps: 4 },
-  { name: "need-form-mobile", path: "/visual-preview/need-form", width: 390 }
+  { name: "need-form-mobile", path: "/visual-preview/need-form", width: 390 },
+  { name: "not-found-desktop", path: "/diese-seite-gibt-es-nicht", width: 1280, expectStatus: 404 },
+  { name: "error-desktop", path: "/visual-preview/error", width: 1280 },
+  { name: "mobile-menu-open", path: "/visual-preview/squad", width: 390, click: "header summary", fullPage: false }
 ];
 
 const browser = await chromium.launch();
 for (const shot of shots) {
   const page = await browser.newPage({ viewport: { width: shot.width, height: 900 }, deviceScaleFactor: 1 });
   const response = await page.goto(base + shot.path, { waitUntil: "networkidle" });
-  if (!response || response.status() >= 400) {
+  if (!response || (response.status() >= 400 && response.status() !== shot.expectStatus)) {
     console.error(`::error::${shot.path} returned ${response?.status()}`);
     process.exitCode = 1;
   }
-  await page.screenshot({ path: `${out}/${shot.name}.png`, fullPage: true });
+  if (shot.click) {
+    await page.locator(shot.click).first().click();
+    await page.waitForTimeout(300);
+  }
+  await page.screenshot({ path: `${out}/${shot.name}.png`, fullPage: shot.fullPage ?? true });
   console.log(`captured ${shot.name}`);
   // Multi-step forms: click through the step tabs and capture each step.
   for (let step = 2; step <= (shot.steps ?? 0); step += 1) {

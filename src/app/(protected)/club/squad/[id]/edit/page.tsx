@@ -1,4 +1,6 @@
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { clubCopy } from "@/lib/club-i18n";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -29,11 +31,12 @@ export default async function EditRosterPlayerPage({
     .eq("club_id", profile.club_id!)
     .maybeSingle();
 
-  if (!data) redirect("/club/squad");
+  if (!data) notFound();
   const player = data as RosterPlayer;
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[{ label: clubCopy[locale].app.navSquad, href: "/club/squad" }, { label: `${player.first_name} ${player.last_name}` }]} />
       <PageHeader
         eyebrow={t.form.editTitle}
         title={`${player.first_name} ${player.last_name}`}
