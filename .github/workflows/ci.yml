@@ -52,4 +52,8 @@ jobs:
       # Starts the real Supabase Postgres, applies every migration and the seed files.
       - run: supabase db start
       - name: Access tests
-        run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -X -f supabase/tests/access.sql
+        run: |
+          for test in supabase/tests/*.sql; do
+            echo "== $test"
+            psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -X -f "$test"
+          done

@@ -25,5 +25,7 @@ echo "seed     clubs-2026-27.sql + seed.sql"
 "${PSQL[@]}" -d "$DB" -1 -f supabase/clubs-2026-27.sql
 "${PSQL[@]}" -d "$DB" -1 -f supabase/seed.sql
 
-echo "test     access.sql"
-psql -v ON_ERROR_STOP=1 -X -d "$DB" -f supabase/tests/access.sql
+for test in supabase/tests/*.sql; do
+  echo "test     $(basename "$test")"
+  psql -v ON_ERROR_STOP=1 -X -q -d "$DB" -f "$test" | grep -E "PASSED|FAIL" || true
+done
