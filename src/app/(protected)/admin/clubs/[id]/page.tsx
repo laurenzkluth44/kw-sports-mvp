@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import type { ReactNode } from "react";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Eye, PlusCircle, Trash2, UserX } from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/form";
@@ -30,7 +31,7 @@ export default async function AdminClubDetailPage({
     supabase.from("users").select("*").eq("club_id", id).order("name", { ascending: true })
   ]);
 
-  if (!club) redirect("/admin");
+  if (!club) notFound();
 
   const typedClub = club as Club;
   const typedNeeds = needs as PlayerNeed[];
@@ -42,6 +43,7 @@ export default async function AdminClubDetailPage({
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[{ label: "Bedarfe", href: "/admin" }, { label: typedClub.name }]} />
       <PageHeader
         eyebrow={typedClub.league}
         title={typedClub.name}

@@ -1,4 +1,5 @@
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { PageHeader } from "@/components/ui/page-header";
 import { NeedForm } from "@/features/player-needs/need-form";
 import { updateAdminNeedAction } from "@/features/player-needs/actions";
@@ -23,10 +24,11 @@ export default async function AdminNeedEditPage({
     supabase.from("clubs").select("*").order("name", { ascending: true })
   ]);
 
-  if (!need) redirect("/admin");
+  if (!need) notFound();
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[{ label: "Bedarfe", href: "/admin" }, { label: needHeadline(need), href: `/admin/needs/${id}` }, { label: "Bearbeiten" }]} />
       <PageHeader title="Bedarf bearbeiten" description={`${needHeadline(need)} · ${need.season}`} />
       <NeedForm
         action={updateAdminNeedAction}

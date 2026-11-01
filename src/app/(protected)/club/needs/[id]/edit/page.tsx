@@ -1,4 +1,5 @@
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { PageHeader } from "@/components/ui/page-header";
 import { NeedForm } from "@/features/player-needs/need-form";
 import { updateClubNeedAction } from "@/features/player-needs/actions";
@@ -29,11 +30,12 @@ export default async function EditClubNeedPage({
     .eq("club_id", profile.club_id!)
     .single();
 
-  if (!need) redirect("/club");
+  if (!need) notFound();
   const typedNeed = need as PlayerNeed;
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[{ label: clubCopy[locale].app.navNeeds, href: "/club" }, { label: needHeadline(typedNeed, locale) }]} />
       <PageHeader
         title={t.editTitle}
         description={`${needHeadline(typedNeed, locale)} · ${typedNeed.season}`}

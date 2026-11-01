@@ -1,12 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { Building2, Eye, FileDown, LogOut, Plus, Shield, Shirt, Users } from "lucide-react";
+import { Building2, Eye, FileDown, LogOut, Menu, Plus, Shield, Shirt, Users } from "lucide-react";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { NavLinks, type NavItem } from "@/components/layout/nav-links";
 import { logoutAction } from "@/features/auth/actions";
 import { ROLE_LABELS } from "@/lib/constants";
 import { agencyCopy } from "@/lib/agency-i18n";
 import { clubCopy, type ClubLocale } from "@/lib/club-i18n";
+import { guideCopy } from "@/lib/guide-i18n";
 import { getRoleHome } from "@/lib/auth";
 import type { Profile } from "@/types/domain";
 import { Button } from "@/components/ui/button";
@@ -34,64 +36,77 @@ export function AppShell({
       ? "Kaderbedarf Datenbank"
       : profile.role === "agency"
         ? profile.agency_name || agencyApp.tagline
-        : t.tagline;
+        : profile.clubs?.name || t.tagline;
+  const menuLabel = guideCopy[profile.role === "admin" ? "de" : locale].menu;
+
+  const roleBadge = (
+    <span className="inline-flex min-h-10 items-center gap-2 rounded-sm border border-white/10 bg-white/5 px-3 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-100">
+      <Shield className="h-4 w-4 text-brand-300" aria-hidden="true" />
+      {roleLabel}
+    </span>
+  );
+
+  const logout = (
+    <form action={logoutAction}>
+      <Button variant="ghost" className="text-white hover:bg-white/10" type="submit">
+        <LogOut className="h-4 w-4" aria-hidden="true" />
+        {logoutLabel}
+      </Button>
+    </form>
+  );
 
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-30 border-b border-white/10 bg-navy-950/95 text-white backdrop-blur">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Link
-              href={roleHome}
-              prefetch={false}
-              className="group flex items-center gap-3"
-            >
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 md:gap-4 md:py-4 lg:px-8">
+          <div className="flex items-center justify-between gap-3">
+            <Link href={roleHome} prefetch={false} className="group flex min-w-0 items-center gap-3">
               <Image
                 src="/kw-sports-logo-white.svg"
                 alt="KW Sports"
                 width={2557}
                 height={288}
-                className="h-6 w-auto"
+                className="h-4 w-auto shrink-0 sm:h-5 md:h-6"
                 priority
                 unoptimized
               />
-              <span className="border-l border-white/15 pl-3">
-                <span className="block font-display text-2xl uppercase leading-none tracking-[0.02em]">
+              <span className="min-w-0 border-l border-white/15 pl-3">
+                <span className="block whitespace-nowrap font-display text-lg uppercase leading-none tracking-[0.02em] sm:text-xl md:text-2xl">
                   Club Needs
                 </span>
-                <span className="mt-0.5 block text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-brand-300">
+                <span className="mt-0.5 block truncate text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-brand-300">
                   {tagline}
                 </span>
               </span>
             </Link>
 
-            <div className="flex flex-wrap items-center gap-2 text-sm">
+            {/* Desktop: everything in one row */}
+            <div className="hidden flex-wrap items-center gap-2 text-sm md:flex">
               {showLanguageSwitcher ? <LanguageSwitcher locale={locale} label={languageLabel} /> : null}
-              <span className="inline-flex min-h-10 items-center gap-2 rounded-sm border border-white/10 bg-white/5 px-3 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-100">
-                <Shield className="h-4 w-4 text-brand-300" aria-hidden="true" />
-                {roleLabel}
-              </span>
-              <form action={logoutAction}>
-                <Button variant="ghost" className="text-white hover:bg-white/10" type="submit">
-                  <LogOut className="h-4 w-4" aria-hidden="true" />
-                  {logoutLabel}
-                </Button>
-              </form>
+              {roleBadge}
+              {logout}
             </div>
+
+            {/* Mobile: one menu button instead of the stacked controls */}
+            <details className="group md:hidden">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 border border-white/15 px-3 text-[0.72rem] font-extrabold uppercase tracking-[0.12em] [&::-webkit-details-marker]:hidden">
+                <Menu className="h-4 w-4" aria-hidden="true" />
+                {menuLabel}
+              </summary>
+              <div className="absolute inset-x-0 top-full border-b border-white/10 bg-navy-950 pb-4 shadow-cardHover">
+                <NavLinks items={nav} variant="menu" className="border-b border-white/10 py-2" />
+                <div className="flex flex-col gap-3 px-4 pt-4">
+                  {showLanguageSwitcher ? <LanguageSwitcher locale={locale} label={languageLabel} /> : null}
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    {roleBadge}
+                    {logout}
+                  </div>
+                </div>
+              </div>
+            </details>
           </div>
 
-          <nav className="-mb-px flex gap-6 overflow-x-auto">
-            {nav.map((item) => {
-              const Icon = item.icon;
-
-              return (
-                <Link key={item.href} href={item.href} prefetch={false} className="nav-link">
-                  <Icon className="h-4 w-4" aria-hidden="true" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
+          <NavLinks items={nav} className="hidden md:block" />
         </div>
       </header>
 
@@ -100,24 +115,25 @@ export function AppShell({
   );
 }
 
-function getNav(profile: Profile, locale: ClubLocale) {
+function getNav(profile: Profile, locale: ClubLocale): NavItem[] {
   const t = clubCopy[locale].app;
+  const icon = "h-4 w-4";
 
   if (profile.role === "admin") {
     return [
-      { href: "/admin", label: "Bedarfe", icon: FileDown },
-      { href: "/admin/needs/new", label: "Neuer Bedarf", icon: Plus },
-      { href: "/admin/users", label: "Nutzer", icon: Users }
+      { href: "/admin", label: "Bedarfe", icon: <FileDown className={icon} aria-hidden="true" /> },
+      { href: "/admin/needs/new", label: "Neuer Bedarf", icon: <Plus className={icon} aria-hidden="true" /> },
+      { href: "/admin/users", label: "Nutzer", icon: <Users className={icon} aria-hidden="true" /> }
     ];
   }
 
   if (profile.role === "agency") {
-    return [{ href: "/agency", label: agencyCopy[locale].app.navNeeds, icon: Eye }];
+    return [{ href: "/agency", label: agencyCopy[locale].app.navNeeds, icon: <Eye className={icon} aria-hidden="true" /> }];
   }
 
   return [
-    { href: "/club", label: t.navNeeds, icon: Building2 },
-    { href: "/club/squad", label: t.navSquad, icon: Shirt },
-    { href: "/club/needs/new", label: t.navNewNeed, icon: Plus }
+    { href: "/club", label: t.navNeeds, icon: <Building2 className={icon} aria-hidden="true" /> },
+    { href: "/club/squad", label: t.navSquad, icon: <Shirt className={icon} aria-hidden="true" /> },
+    { href: "/club/needs/new", label: t.navNewNeed, icon: <Plus className={icon} aria-hidden="true" /> }
   ];
 }

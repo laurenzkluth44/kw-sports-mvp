@@ -77,7 +77,7 @@ export async function createClubNeedAction(formData: FormData) {
   }
 
   revalidatePath("/club");
-  redirect("/club");
+  redirect("/club?done=created");
 }
 
 export async function updateClubNeedAction(formData: FormData) {
@@ -102,7 +102,7 @@ export async function updateClubNeedAction(formData: FormData) {
   }
 
   revalidatePath("/club");
-  redirect("/club");
+  redirect("/club?done=updated");
 }
 
 export async function updateClubNeedStatusAction(formData: FormData) {
@@ -127,7 +127,7 @@ export async function updateClubNeedStatusAction(formData: FormData) {
   }
 
   revalidatePath("/club");
-  redirect("/club");
+  redirect("/club?done=status");
 }
 
 export async function duplicateClubNeedAction(formData: FormData) {
@@ -214,7 +214,7 @@ export async function createAdminNeedAction(formData: FormData) {
   }
 
   revalidatePath("/admin");
-  redirect(`/admin/needs/${needId}`);
+  redirect(`/admin/needs/${needId}?done=created`);
 }
 
 export async function updateAdminNeedAction(formData: FormData) {
@@ -241,5 +241,5 @@ export async function updateAdminNeedAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath(`/admin/needs/${id}`);
-  redirect(`/admin/needs/${id}`);
+  redirect(`/admin/needs/${id}?done=updated`);
 }

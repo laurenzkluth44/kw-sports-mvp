@@ -23,6 +23,7 @@ type LoginCopy = {
   card2Title: string;
   card2Body: string;
   footer: string;
+  noAccess: string;
   mobileSubtitle: string;
   portal: string;
   title: string;
@@ -61,13 +62,14 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
         invite: "Die Einladung konnte nicht geprüft werden. Bitte öffne den neuesten Einladungslink erneut."
       },
       brand: "KW Sports GmbH · Vereinsplattform",
-      headline: "Club Needs Database",
-      intro: "Eine ruhige, zentrale Arbeitsfläche für Kaderbedarfe nach Verein, Liga, Saison, Position und Status.",
-      card1Title: "Zentrale Datenbasis",
-      card1Body: "Alle Club-Bedarfe sauber in Supabase gesichert.",
-      card2Title: "Rollenbasiert geschützt",
-      card2Body: "Clubs sehen eigene Daten, Agencies lesen die Gesamtübersicht, Admins steuern die Plattform.",
+      headline: "Club Needs",
+      intro: "Die Plattform für Kaderplanung und Spielergesuche: Kader verwalten, Lücken früh erkennen und Bedarfe direkt an KW Sports melden.",
+      card1Title: "Kaderplanung",
+      card1Body: "Spieler, Verträge und Lücken je Saison im Blick.",
+      card2Title: "Spielergesuche",
+      card2Body: "Bedarfe anlegen, die KW Sports und Partneragenturen sehen.",
       footer: "Plattform für Vereine und KW Sports",
+      noAccess: "Noch kein Zugang? Dein Verein erhält eine Einladung von KW Sports.",
       mobileSubtitle: "Kaderbedarf Datenbank",
       portal: "KW Sports Portal",
       title: "Login",
@@ -106,13 +108,14 @@ export const authCopy: Record<AuthLocale, AuthCopy> = {
         invite: "The invite could not be verified. Please open the newest invitation link again."
       },
       brand: "KW Sports GmbH · Club Platform",
-      headline: "Club Needs Database",
-      intro: "A calm, central workspace for squad needs by club, league, season, position and status.",
-      card1Title: "Central database",
-      card1Body: "All club needs stored securely in Supabase.",
-      card2Title: "Role-based access",
-      card2Body: "Clubs see their own data, agencies read the full overview, admins control the platform.",
+      headline: "Club Needs",
+      intro: "The platform for squad planning and player requests: manage your squad, spot gaps early and send needs straight to KW Sports.",
+      card1Title: "Squad planning",
+      card1Body: "Players, contracts and gaps per season at a glance.",
+      card2Title: "Player requests",
+      card2Body: "Create needs that KW Sports and partner agencies can see.",
       footer: "Platform for clubs and KW Sports",
+      noAccess: "No access yet? Your club receives an invitation from KW Sports.",
       mobileSubtitle: "Club Needs Database",
       portal: "KW Sports Portal",
       title: "Login",

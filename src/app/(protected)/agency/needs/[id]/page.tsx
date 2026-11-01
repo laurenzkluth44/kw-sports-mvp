@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { redirect } from "next/navigation";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { notFound } from "next/navigation";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { LinkButton } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -26,7 +27,7 @@ export default async function AgencyNeedDetailPage({ params }: { params: Promise
     .eq("id", id)
     .single();
 
-  if (!data) redirect("/agency");
+  if (!data) notFound();
 
   const need = data as PlayerNeedWithClub;
   const labels = needProfileLabels(need, locale);
@@ -35,6 +36,7 @@ export default async function AgencyNeedDetailPage({ params }: { params: Promise
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[{ label: agencyCopy[locale].app.navNeeds, href: "/agency" }, { label: need.clubs.name }, { label: needHeadline(need, locale) }]} />
       <PageHeader
         eyebrow={need.clubs.name}
         title={`${needHeadline(need, locale)} · ${need.season}`}

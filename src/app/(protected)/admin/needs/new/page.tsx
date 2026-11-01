@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/ui/page-header";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { NeedForm } from "@/features/player-needs/need-form";
 import { createAdminNeedAction } from "@/features/player-needs/actions";
 import { parseNeedFormErrorCode } from "@/features/player-needs/form-schema";
@@ -21,6 +22,7 @@ export default async function NewAdminNeedPage({
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[{ label: "Bedarfe", href: "/admin" }, { label: "Neuer Bedarf" }]} />
       <PageHeader
         eyebrow="Admin"
         title="Bedarf für Verein anlegen"

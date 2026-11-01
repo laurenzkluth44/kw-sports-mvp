@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { Flash, flashKind } from "@/components/ui/flash";
+import { guideCopy } from "@/lib/guide-i18n";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import type { ReactNode } from "react";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Edit, History, Lock, MessageSquarePlus } from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/form";
@@ -18,7 +21,7 @@ export default async function AdminNeedDetailPage({
   searchParams
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; done?: string }>;
 }) {
   const { id } = await params;
   const query = await searchParams;
@@ -43,7 +46,7 @@ export default async function AdminNeedDetailPage({
       .limit(12)
   ]);
 
-  if (!data) redirect("/admin");
+  if (!data) notFound();
 
   const need = data as PlayerNeedWithClub;
   const confidentialNote = data.player_need_confidential?.note ?? null;
@@ -54,6 +57,8 @@ export default async function AdminNeedDetailPage({
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs items={[{ label: "Bedarfe", href: "/admin" }, { label: need.clubs.name, href: `/admin/clubs/${need.clubs.id}` }, { label: needHeadline(need) }]} />
+      <Flash message={flashKind(query.done) === "created" ? guideCopy.de.flash.needCreated : flashKind(query.done) === "updated" ? guideCopy.de.flash.needUpdated : null} />
       <PageHeader
         eyebrow={need.clubs.name}
         title={`${needHeadline(need)} · ${need.season}`}
