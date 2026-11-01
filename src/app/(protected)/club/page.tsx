@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Flash, flashKind } from "@/components/ui/flash";
 import { guideCopy } from "@/lib/guide-i18n";
-import { AlertTriangle, ArrowRight, Building2, Copy, Edit, MessageCircle, Plus, Target, type LucideIcon } from "lucide-react";
+import { AlertTriangle, ArrowRight, Building2, Copy, Edit, MessageCircle, Plus, Sparkles, Target, type LucideIcon } from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NeedBadges } from "@/features/player-needs/need-badges";
@@ -13,6 +13,7 @@ import { CLUB_STATUS_LABELS, clubCopy } from "@/lib/club-i18n";
 import { getClubLocale } from "@/lib/club-locale";
 import { requireClubUser } from "@/lib/auth";
 import { squadCopy } from "@/lib/squad-i18n";
+import { fill, matchCopy } from "@/lib/match-i18n";
 import { formatDate } from "@/lib/utils";
 import type { PlayerNeed, RosterPlayer } from "@/types/domain";
 
@@ -43,6 +44,18 @@ export default async function ClubDashboardPage({
   const planningSeason = planningSeasons(1)[1];
   const rosterGapCount = attackGaps(roster, planningSeason).filter((gap) => gap.status === "gap").length;
   const teaser = squadCopy[locale].teaser;
+
+  // KW suggestions (access rules: only released players for this club's own needs).
+  const { data: matchRows } = await supabase.from("need_matches").select("need_id, status");
+  const suggestionsByNeed = new Map<string, { total: number; open: number }>();
+  (matchRows ?? []).forEach((row) => {
+    const entry = suggestionsByNeed.get(row.need_id) ?? { total: 0, open: 0 };
+    entry.total += 1;
+    if (row.status === "freigegeben") entry.open += 1;
+    suggestionsByNeed.set(row.need_id, entry);
+  });
+  const openSuggestions = [...suggestionsByNeed.values()].reduce((sum, entry) => sum + entry.open, 0);
+  const m = matchCopy[locale];
 
   const typedNeeds = needs as PlayerNeed[];
   const openCount = typedNeeds.filter((need) => need.status === "offen").length;
@@ -96,6 +109,28 @@ export default async function ClubDashboardPage({
         <div className="alert-error">{t.duplicateError}</div>
       ) : null}
 
+      {openSuggestions > 0 ? (
+        <Link
+          href="/club/suggestions"
+          className="group relative flex flex-col gap-3 overflow-hidden bg-navy-950 px-5 py-5 text-white transition-shadow duration-300 ease-out-expo hover:shadow-cardHover sm:flex-row sm:items-center sm:justify-between"
+        >
+          <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-brand-500" />
+          <div className="flex items-center gap-4">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center bg-brand-500 font-display text-2xl">{openSuggestions}</span>
+            <div>
+              <p className="font-display text-2xl uppercase leading-none">{m.bannerTitle}</p>
+              <p className="mt-1 text-sm text-white/70">
+                {openSuggestions === 1 ? m.bannerBodyOne : fill(m.bannerBody, openSuggestions)}
+              </p>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-2 text-[0.75rem] font-extrabold uppercase tracking-[0.1em] text-brand-300 group-hover:text-white">
+            {m.bannerOpen}
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out-expo group-hover:translate-x-0.5" aria-hidden="true" />
+          </span>
+        </Link>
+      ) : null}
+
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Metric icon={Target} label={t.open} value={openCount} />
         <Metric icon={MessageCircle} label={t.talks} value={talksCount} />
@@ -143,6 +178,7 @@ export default async function ClubDashboardPage({
           <div className="divide-y divide-slate-200">
             {typedNeeds.map((need) => {
               const stale = isStaleNeed(need.last_confirmed_at);
+              const suggestions = suggestionsByNeed.get(need.id);
 
               return (
                 <article
@@ -152,6 +188,19 @@ export default async function ClubDashboardPage({
                   <div>
                     <NeedPositionCell need={need} locale={locale} />
                     <p className="mt-1 text-sm text-slate-500 lg:hidden">{need.season}</p>
+                    {suggestions ? (
+                      <Link
+                        href={`/club/suggestions#need-${need.id}`}
+                        className={
+                          suggestions.open > 0
+                            ? "mt-2 inline-flex items-center gap-1.5 bg-brand-500 px-2 py-1 text-[0.66rem] font-extrabold uppercase tracking-[0.1em] text-white hover:bg-brand-600"
+                            : "mt-2 inline-flex items-center gap-1.5 bg-brand-50 px-2 py-1 text-[0.66rem] font-extrabold uppercase tracking-[0.1em] text-brand-700 hover:bg-brand-100"
+                        }
+                      >
+                        <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                        {suggestions.total === 1 ? m.needChipOne : fill(m.needChip, suggestions.total)}
+                      </Link>
+                    ) : null}
                     {stale ? (
                       <p className="mt-2 rounded-md bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700">
                         {t.updateHint}

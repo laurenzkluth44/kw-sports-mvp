@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { Building2, Eye, FileDown, LogOut, Menu, Plus, Shield, Shirt, UserRound, Users } from "lucide-react";
+import { Building2, Eye, FileDown, Inbox, LogOut, Menu, Plus, Shield, Shirt, Sparkles, UserRound, Users } from "lucide-react";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { NavLinks, type NavItem } from "@/components/layout/nav-links";
 import { logoutAction } from "@/features/auth/actions";
@@ -9,6 +9,7 @@ import { ROLE_LABELS } from "@/lib/constants";
 import { agencyCopy } from "@/lib/agency-i18n";
 import { clubCopy, type ClubLocale } from "@/lib/club-i18n";
 import { guideCopy } from "@/lib/guide-i18n";
+import { matchCopy } from "@/lib/match-i18n";
 import { getRoleHome } from "@/lib/auth";
 import type { Profile } from "@/types/domain";
 import { Button } from "@/components/ui/button";
@@ -16,16 +17,19 @@ import { Button } from "@/components/ui/button";
 export function AppShell({
   profile,
   locale,
+  badge = 0,
   children
 }: {
   profile: Profile;
   locale: ClubLocale;
+  /** Club: unanswered KW suggestions. Admin: club answers not yet followed up. */
+  badge?: number;
   children: ReactNode;
 }) {
   const t = clubCopy[locale].app;
   const agencyApp = agencyCopy[locale].app;
   const roleHome = getRoleHome(profile.role);
-  const nav = getNav(profile, locale);
+  const nav = getNav(profile, locale, badge);
   const showLanguageSwitcher = profile.role !== "admin";
   const languageLabel = profile.role === "agency" ? agencyApp.language : t.language;
   const roleLabel =
@@ -115,7 +119,7 @@ export function AppShell({
   );
 }
 
-function getNav(profile: Profile, locale: ClubLocale): NavItem[] {
+function getNav(profile: Profile, locale: ClubLocale, badge: number): NavItem[] {
   const t = clubCopy[locale].app;
   const icon = "h-4 w-4";
 
@@ -124,6 +128,7 @@ function getNav(profile: Profile, locale: ClubLocale): NavItem[] {
       { href: "/admin", label: "Bedarfe", icon: <FileDown className={icon} aria-hidden="true" /> },
       { href: "/admin/needs/new", label: "Neuer Bedarf", icon: <Plus className={icon} aria-hidden="true" /> },
       { href: "/admin/players", label: "Spieler", icon: <UserRound className={icon} aria-hidden="true" /> },
+      { href: "/admin/inbox", label: "Antworten", icon: <Inbox className={icon} aria-hidden="true" />, badge },
       { href: "/admin/users", label: "Nutzer", icon: <Users className={icon} aria-hidden="true" /> }
     ];
   }
@@ -134,6 +139,7 @@ function getNav(profile: Profile, locale: ClubLocale): NavItem[] {
 
   return [
     { href: "/club", label: t.navNeeds, icon: <Building2 className={icon} aria-hidden="true" /> },
+    { href: "/club/suggestions", label: matchCopy[locale].nav, icon: <Sparkles className={icon} aria-hidden="true" />, badge },
     { href: "/club/squad", label: t.navSquad, icon: <Shirt className={icon} aria-hidden="true" /> },
     { href: "/club/needs/new", label: t.navNewNeed, icon: <Plus className={icon} aria-hidden="true" /> }
   ];

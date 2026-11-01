@@ -15,6 +15,9 @@ import { createKwPlayerAction } from "@/features/kw-players/actions";
 import { KwPlayerCard } from "@/features/kw-players/kw-player-card";
 import { KwPlayerForm } from "@/features/kw-players/kw-player-form";
 import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
+import { AdminInboxView, type InboxTab } from "@/features/matching/admin-inbox";
+import { ClubSuggestionsView } from "@/features/matching/club-suggestions";
+import { scorePlayerForNeed } from "@/features/matching/engine";
 import { createRosterPlayerAction } from "@/features/squad/actions";
 import { PlayerForm } from "@/features/squad/player-form";
 import { SquadScreen } from "@/features/squad/squad-screen";
@@ -221,10 +224,66 @@ const sampleMatches: NeedMatch[] = [
     released_by: null,
     responded_at: daysAgo(2),
     responded_by: null,
+    handled_at: null,
     created_at: daysAgo(6),
     updated_at: daysAgo(2)
   }
 ];
+
+// Club-side suggestions and KW inbox (fictional).
+function released(index: number, needIndex: number, playerIndex: number, extra: Partial<NeedMatch>): NeedMatch {
+  const result = scorePlayerForNeed(needs[needIndex], kwPlayers[playerIndex]);
+  return {
+    id: `00000000-0000-0000-0000-0000000005${String(index).padStart(2, "0")}`,
+    need_id: needs[needIndex].id,
+    player_id: kwPlayers[playerIndex].id,
+    status: "freigegeben",
+    score: result.score,
+    reasons: result.reasons,
+    club_note: null,
+    released_at: daysAgo(3),
+    released_by: null,
+    responded_at: null,
+    responded_by: null,
+    handled_at: null,
+    created_at: daysAgo(3),
+    updated_at: daysAgo(3),
+    ...extra
+  };
+}
+
+const suggestionPlayers: KwPlayer[] = kwPlayers.map((player, index) =>
+  index === 0
+    ? {
+        ...player,
+        nationality: "Deutschland",
+        league_experience: "2. Bundesliga, EHF European League",
+        video_url: "https://example.com/video",
+        profile:
+          "Linkshändiger Rückraum rechts mit starkem Wurf aus der zweiten Reihe. Stammspieler in der 2. Bundesliga, 6,1 Tore pro Spiel. Sucht den nächsten Schritt mit klarer Rolle."
+      }
+    : index === 1
+      ? { ...player, nationality: "Schweden", profile: "Schneller, dynamischer Rechtshänder im 1-gegen-1. Spielt auch Rechtsaußen." }
+      : player
+);
+
+const clubMatches: NeedMatch[] = [
+  released(1, 0, 0, {}),
+  released(2, 0, 1, { status: "interessiert", club_note: "Gerne Videos und Gehaltsvorstellung schicken.", responded_at: daysAgo(1) })
+];
+
+const inboxMatches: NeedMatch[] = [
+  released(3, 0, 1, { status: "interessiert", club_note: "Gerne Videos und Gehaltsvorstellung schicken.", responded_at: daysAgo(1) }),
+  released(4, 2, 0, { status: "interessiert", club_note: "Können wir nächste Woche telefonieren?", responded_at: daysAgo(0) }),
+  released(5, 3, 3, { status: "interessiert", responded_at: daysAgo(2), handled_at: daysAgo(1) }),
+  released(6, 2, 1, { released_at: daysAgo(9) }),
+  released(7, 0, 2, { status: "kein_interesse", club_note: "Zu teuer für unser Budget.", responded_at: daysAgo(4) })
+];
+
+const inboxContacts = new Map<string, Profile[]>([
+  [needs[0].club_id, [{ ...profile, club_id: needs[0].club_id }]],
+  [needs[2].club_id, [{ ...profile, id: "00000000-0000-0000-0000-000000000009", name: "Lars Lindner", email: "lars@example.com", club_id: needs[2].club_id }]]
+]);
 
 const adminProfile: Profile = { ...profile, id: "00000000-0000-0000-0000-000000000002", role: "admin", club_id: null, clubs: null, name: "KW Admin" };
 const agencyProfile: Profile = { ...profile, id: "00000000-0000-0000-0000-000000000003", role: "agency", club_id: null, clubs: null, name: "Agent", agency_name: "Beispiel Agentur" };
@@ -295,6 +354,31 @@ export default async function VisualPreview({
     return (
       <AppShell profile={adminProfile} locale="de">
         <AdminNeedMatchesView need={needs[0]} players={kwPlayers} matches={sampleMatches} photos={new Map()} />
+      </AppShell>
+    );
+  }
+
+  if (screen === "suggestions") {
+    const clubProfile: Profile = { ...profile, club_id: needs[0].club_id, clubs: needs[0].clubs };
+    return (
+      <AppShell profile={clubProfile} locale={locale} badge={1}>
+        <ClubSuggestionsView
+          locale={locale}
+          needs={[needs[0]]}
+          players={suggestionPlayers}
+          matches={clubMatches}
+          files={new Map()}
+          done={query.done}
+        />
+      </AppShell>
+    );
+  }
+
+  if (screen === "inbox") {
+    const tab = (query.tab as InboxTab | undefined) ?? "offen";
+    return (
+      <AppShell profile={adminProfile} locale="de" badge={2}>
+        <AdminInboxView tab={tab} matches={inboxMatches} needs={needs} players={kwPlayers} contacts={inboxContacts} />
       </AppShell>
     );
   }

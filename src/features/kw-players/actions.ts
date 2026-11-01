@@ -223,3 +223,23 @@ export async function withdrawNeedMatchAction(formData: FormData) {
   revalidatePath(`/admin/needs/${needId}`);
   redirect(`/admin/needs/${needId}#kw-spieler`);
 }
+
+/** Inbox: KW marks a club answer as followed up (or reopens it). */
+export async function setMatchHandledAction(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const matchId = String(formData.get("match_id") || "");
+  const handled = formData.get("handled") === "1";
+  const tab = String(formData.get("tab") || "");
+
+  const { error } = await supabase
+    .from("need_matches")
+    .update({ handled_at: handled ? new Date().toISOString() : null })
+    .eq("id", matchId);
+  if (error) console.error("Inbox update failed", error);
+
+  revalidatePath("/admin", "layout");
+  const query = new URLSearchParams();
+  if (tab) query.set("tab", tab);
+  query.set(error ? "error" : "done", error ? "inbox" : handled ? "handled" : "reopened");
+  redirect(`/admin/inbox?${query.toString()}`);
+}

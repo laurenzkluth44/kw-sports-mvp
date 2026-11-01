@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import type { MouseEvent, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-export type NavItem = { href: string; label: string; icon: ReactNode };
+export type NavItem = { href: string; label: string; icon: ReactNode; badge?: number };
 
 /** The item whose href is the longest prefix of the current path is the active one. */
 export function activeHref(pathname: string, items: NavItem[]) {
@@ -53,6 +53,11 @@ export function NavLinks({
               >
                 {item.icon}
                 {item.label}
+                {item.badge ? (
+                  <span className="ml-0.5 inline-flex min-w-5 items-center justify-center bg-brand-500 px-1.5 py-0.5 text-[0.62rem] font-extrabold leading-none text-white">
+                    {item.badge}
+                  </span>
+                ) : null}
               </Link>
             </li>
           );

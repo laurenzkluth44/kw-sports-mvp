@@ -68,6 +68,8 @@ create table public.need_matches (
   released_by uuid references public.users(id) on delete set null,
   responded_at timestamptz,
   responded_by uuid references public.users(id) on delete set null,
+  -- KW-internal: set when KW has followed up on the club's answer (inbox "erledigt").
+  handled_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint need_matches_unique unique (need_id, player_id),
@@ -158,7 +160,8 @@ begin
   set status = answer,
       club_note = nullif(trim(note), ''),
       responded_at = now(),
-      responded_by = auth.uid()
+      responded_by = auth.uid(),
+      handled_at = null
   from public.player_needs n, public.kw_players p
   where m.id = match_id
     and n.id = m.need_id

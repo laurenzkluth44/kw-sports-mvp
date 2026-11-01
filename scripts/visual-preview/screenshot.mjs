@@ -29,7 +29,11 @@ const shots = [
   { name: "kw-players-desktop", path: "/visual-preview/players", width: 1280 },
   { name: "kw-player-form-desktop", path: "/visual-preview/player-form", width: 1280 },
   { name: "kw-matches-desktop", path: "/visual-preview/matches", width: 1280 },
-  { name: "kw-matches-mobile", path: "/visual-preview/matches", width: 390 }
+  { name: "kw-matches-mobile", path: "/visual-preview/matches", width: 390 },
+  { name: "club-suggestions-desktop", path: "/visual-preview/suggestions", width: 1280 },
+  { name: "club-suggestions-mobile", path: "/visual-preview/suggestions?lang=en", width: 390 },
+  { name: "admin-inbox-desktop", path: "/visual-preview/inbox", width: 1280 },
+  { name: "admin-inbox-waiting", path: "/visual-preview/inbox?tab=wartet", width: 1280 }
 ];
 
 const browser = await chromium.launch();

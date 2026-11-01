@@ -300,6 +300,7 @@ export type Database = {
           released_by: string | null;
           responded_at: string | null;
           responded_by: string | null;
+          handled_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -315,6 +316,7 @@ export type Database = {
           released_by?: string | null;
           responded_at?: string | null;
           responded_by?: string | null;
+          handled_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -330,6 +332,7 @@ export type Database = {
           released_by?: string | null;
           responded_at?: string | null;
           responded_by?: string | null;
+          handled_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

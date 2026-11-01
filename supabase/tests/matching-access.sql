@@ -31,10 +31,10 @@ insert into public.kw_players (id, first_name, last_name, attack_positions, cons
   ('f2000000-0000-0000-0000-000000000002', 'Piet', 'Two', '{RR}', null, false, null),
   ('f3000000-0000-0000-0000-000000000003', 'Pit', 'Three', '{RR}', '2026-10-01', true, null);
 
-insert into public.need_matches (id, need_id, player_id, score) values
-  ('e1000000-0000-0000-0000-000000000001', 'ab000000-0000-0000-0000-000000000001', 'f1000000-0000-0000-0000-000000000001', 90),
-  ('e2000000-0000-0000-0000-000000000002', 'ab000000-0000-0000-0000-000000000001', 'f2000000-0000-0000-0000-000000000002', 80),
-  ('e3000000-0000-0000-0000-000000000003', 'bb000000-0000-0000-0000-000000000001', 'f3000000-0000-0000-0000-000000000003', 70);
+insert into public.need_matches (id, need_id, player_id, score, handled_at) values
+  ('e1000000-0000-0000-0000-000000000001', 'ab000000-0000-0000-0000-000000000001', 'f1000000-0000-0000-0000-000000000001', 90, now()),
+  ('e2000000-0000-0000-0000-000000000002', 'ab000000-0000-0000-0000-000000000001', 'f2000000-0000-0000-0000-000000000002', 80, null),
+  ('e3000000-0000-0000-0000-000000000003', 'bb000000-0000-0000-0000-000000000001', 'f3000000-0000-0000-0000-000000000003', 70, null);
 
 -- ---------------------------------------------------------------- club A
 set local role authenticated;
@@ -75,6 +75,9 @@ begin
   perform public.respond_to_need_match('e1000000-0000-0000-0000-000000000001', 'interessiert', 'Bitte melden');
   select status into s from public.need_matches where id = 'e1000000-0000-0000-0000-000000000001';
   if s <> 'interessiert' then raise exception 'FAIL club A answer not stored'; end if;
+  if exists (select 1 from public.need_matches where id = 'e1000000-0000-0000-0000-000000000001' and handled_at is not null) then
+    raise exception 'FAIL a new club answer must reopen the item in the KW inbox';
+  end if;
 
   begin
     perform public.respond_to_need_match('e3000000-0000-0000-0000-000000000003', 'interessiert', null);
