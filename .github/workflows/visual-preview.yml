@@ -41,7 +41,13 @@ jobs:
       - name: Build
         run: |
           set -o pipefail
-          npm run build 2>&1 | tee build.log
+          # Google Fonts occasionally times out during the build (next/font). Retry only that case.
+          for attempt in 1 2 3; do
+            if npm run build 2>&1 | tee build.log; then exit 0; fi
+            grep -q "next/font" build.log || exit 1
+            echo "Font download failed, retrying ($attempt/3)…"; sleep 15
+          done
+          exit 1
       - name: Report build errors
         if: failure()
         run: |
