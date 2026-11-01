@@ -13,7 +13,13 @@ const shots = [
   { name: "squad-attack-mobile", path: "/visual-preview/squad", width: 390 },
   { name: "squad-empty-desktop", path: "/visual-preview/empty", width: 1280 },
   { name: "player-form-desktop", path: "/visual-preview/form", width: 1280 },
-  { name: "player-form-mobile", path: "/visual-preview/form", width: 390 }
+  { name: "player-form-mobile", path: "/visual-preview/form", width: 390 },
+  { name: "needs-admin-desktop", path: "/visual-preview/needs", width: 1280 },
+  { name: "needs-admin-position-rr", path: "/visual-preview/needs?position=RR", width: 1280 },
+  { name: "needs-admin-list", path: "/visual-preview/needs?view=list", width: 1280 },
+  { name: "needs-agency-en-mobile", path: "/visual-preview/agency?lang=en", width: 390 },
+  { name: "need-form-desktop", path: "/visual-preview/need-form", width: 1280, steps: 4 },
+  { name: "need-form-mobile", path: "/visual-preview/need-form", width: 390 }
 ];
 
 const browser = await chromium.launch();
@@ -26,6 +32,13 @@ for (const shot of shots) {
   }
   await page.screenshot({ path: `${out}/${shot.name}.png`, fullPage: true });
   console.log(`captured ${shot.name}`);
+  // Multi-step forms: click through the step tabs and capture each step.
+  for (let step = 2; step <= (shot.steps ?? 0); step += 1) {
+    await page.locator("nav[aria-label^='Schritt'] button").nth(step - 1).click();
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: `${out}/${shot.name}-step${step}.png`, fullPage: true });
+    console.log(`captured ${shot.name}-step${step}`);
+  }
   await page.close();
 }
 await browser.close();
