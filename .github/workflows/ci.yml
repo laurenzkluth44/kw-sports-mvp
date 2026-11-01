@@ -28,6 +28,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      - name: Unit tests (matching engine, password rules, squad import)
+        run: |
+          node --experimental-strip-types scripts/tests/engine.test.ts
+          node --experimental-strip-types scripts/tests/import.test.ts
       - run: npm run lint
       - name: Build
         run: |
@@ -52,4 +56,8 @@ jobs:
       # Starts the real Supabase Postgres, applies every migration and the seed files.
       - run: supabase db start
       - name: Access tests
-        run: psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -X -f supabase/tests/access.sql
+        run: |
+          for test in supabase/tests/*.sql; do
+            echo "== $test"
+            psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -X -f "$test"
+          done

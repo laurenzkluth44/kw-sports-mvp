@@ -81,7 +81,6 @@ export function NeedCard({
   const attack = attackPositionsText(need, locale);
   const defense = defensePositionsText(need, locale);
   const stale = isStale(need);
-  const missingPosition = !hasNeedPosition(need);
 
   return (
     <Link
@@ -103,53 +102,7 @@ export function NeedCard({
 
       {/* Compact strip: the court is drawn at ~70% width so cards stay short. */}
       <div className="bg-navy-950 py-2">
-      <div className="relative mx-auto w-[72%] max-w-[260px] overflow-hidden" style={{ aspectRatio: COURT_ASPECT.mini }}>
-        {isCoach ? (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span aria-hidden="true" className="absolute font-display text-[5rem] leading-none text-white/[0.07]">
-              COACH
-            </span>
-            <span className="relative font-display text-2xl tracking-[0.02em] text-white">{needHeadline(need, locale)}</span>
-          </div>
-        ) : (
-          <>
-            <CourtLines crop="mini" />
-            {ATTACK_POSITIONS.map((position) => {
-              const on = need.attack_positions.includes(position);
-              return (
-                <span
-                  key={position}
-                  aria-hidden="true"
-                  className={cn(
-                    "absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 font-display leading-none text-white",
-                    on
-                      ? "h-7 w-7 border-brand-500 bg-brand-500 text-[0.85rem] shadow-[0_0_0_4px_rgba(0,85,255,0.28)]"
-                      : "h-2 w-2 border-white/30"
-                  )}
-                  style={attackSpot(position, "mini")}
-                >
-                  {on ? position : null}
-                </span>
-              );
-            })}
-            {need.defense_positions.map((position) => (
-              <span
-                key={`d${position}`}
-                aria-hidden="true"
-                className="absolute flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-white font-display text-[0.8rem] leading-none text-navy-950 shadow-[0_0_0_3px_rgba(0,85,255,0.6)]"
-                style={defenseSpot(position, "mini")}
-              >
-                {position}
-              </span>
-            ))}
-            {missingPosition ? (
-              <span className="absolute inset-x-0 bottom-3 mx-auto w-fit bg-amber-100 px-2 py-1 text-xs font-bold text-amber-800">
-                {clubCopy[locale].dashboard.noPosition}
-              </span>
-            ) : null}
-          </>
-        )}
-      </div>
+        <NeedCourt need={need} locale={locale} className="mx-auto w-[72%] max-w-[260px]" />
       </div>
 
       <div className="flex flex-1 flex-col gap-3 px-4 pb-4 pt-4">
@@ -195,5 +148,80 @@ export function NeedCard({
       </div>
       <span className="sr-only">{copy.open}</span>
     </Link>
+  );
+}
+
+/** The need drawn on the court: sought attack positions as blue markers, defence slots as white squares. */
+export function NeedCourt({
+  need,
+  locale,
+  className,
+  size = "sm"
+}: {
+  need: Pick<PlayerNeedWithClub, "need_type" | "attack_positions" | "defense_positions" | "coach_role">;
+  locale: ClubLocale;
+  className?: string;
+  size?: "sm" | "lg";
+}) {
+  const isCoach = need.need_type === "trainer";
+  const missingPosition = !hasNeedPosition(need);
+  const big = size === "lg";
+
+  return (
+    <div className={cn("relative overflow-hidden", className)} style={{ aspectRatio: COURT_ASPECT.mini }}>
+      {isCoach ? (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span aria-hidden="true" className="absolute font-display text-[5rem] leading-none text-white/[0.07]">
+            COACH
+          </span>
+          <span className="relative font-display text-2xl tracking-[0.02em] text-white">{needHeadline(need, locale)}</span>
+        </div>
+      ) : (
+        <>
+          <CourtLines crop="mini" />
+          {ATTACK_POSITIONS.map((position) => {
+            const on = need.attack_positions.includes(position);
+            return (
+              <span
+                key={position}
+                aria-hidden="true"
+                className={cn(
+                  "absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 font-display leading-none text-white",
+                  on
+                    ? cn(
+                        "border-brand-500 bg-brand-500 shadow-[0_0_0_4px_rgba(0,85,255,0.28)]",
+                        big ? "h-11 w-11 text-[1.15rem]" : "h-7 w-7 text-[0.85rem]"
+                      )
+                    : big
+                      ? "h-3 w-3 border-white/30"
+                      : "h-2 w-2 border-white/30"
+                )}
+                style={attackSpot(position, "mini")}
+              >
+                {on ? position : null}
+              </span>
+            );
+          })}
+          {need.defense_positions.map((position) => (
+            <span
+              key={`d${position}`}
+              aria-hidden="true"
+              className={cn(
+                "absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-white font-display leading-none text-navy-950 shadow-[0_0_0_3px_rgba(0,85,255,0.6)]",
+                big ? "h-7 w-7 text-[1rem]" : "h-5 w-5 text-[0.8rem]"
+              )}
+              style={defenseSpot(position, "mini")}
+            >
+              {position}
+            </span>
+          ))}
+          {missingPosition ? (
+            <span className="absolute inset-x-0 bottom-3 mx-auto w-fit bg-amber-100 px-2 py-1 text-xs font-bold text-amber-800">
+              {clubCopy[locale].dashboard.noPosition}
+            </span>
+          ) : null}
+        </>
+      )}
+    </div>
   );
 }

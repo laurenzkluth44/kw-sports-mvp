@@ -11,15 +11,31 @@ import { normalizeAdminNeedFilters } from "@/features/admin/filters";
 import { NeedsOverview, parseOverviewView } from "@/features/needs-overview/needs-overview";
 import { createClubNeedAction } from "@/features/player-needs/actions";
 import { NeedForm } from "@/features/player-needs/need-form";
+import { createKwPlayerAction } from "@/features/kw-players/actions";
+import { KwPlayerCard } from "@/features/kw-players/kw-player-card";
+import { KwPlayerForm } from "@/features/kw-players/kw-player-form";
+import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
+import { AdminInboxView, type InboxTab } from "@/features/matching/admin-inbox";
+import { ClubSuggestionsView } from "@/features/matching/club-suggestions";
+import { ClubCockpit } from "@/features/club/cockpit";
+import { NeedFacts, NeedHero, chips } from "@/features/player-needs/need-hero";
+import { needProfileLabels } from "@/features/player-needs/need-summary";
+import { planningSeasons } from "@/features/squad/squad-model";
+import { scorePlayerForNeed } from "@/features/matching/engine";
+import { buildAnswerEmail, buildNewNeedEmail, buildReminderEmail, buildSuggestionEmail } from "@/lib/email/notifications";
+import { buildInviteEmail, buildResetEmail } from "@/lib/email/auth-emails";
 import { createRosterPlayerAction } from "@/features/squad/actions";
 import { PlayerForm } from "@/features/squad/player-form";
 import { SquadScreen } from "@/features/squad/squad-screen";
+import { commitSquadImportAction, previewSquadImportAction, type SquadImportState } from "@/features/squad/import-actions";
+import { SquadImportScreen } from "@/features/squad/import-screen";
+import { squadImportCopy } from "@/lib/squad-import-i18n";
 import { parseClubLocale } from "@/lib/club-i18n";
 import { seasonEndDate, seasonForDate, seasonLabel, seasonStartYear } from "@/lib/constants";
 import { clubCopy } from "@/lib/club-i18n";
 import { overviewCopy } from "@/lib/overview-i18n";
 import { squadCopy } from "@/lib/squad-i18n";
-import type { AttackPosition, Club, DefensePosition, PlayerNeedWithClub, Priority, Profile, RosterPlayer } from "@/types/domain";
+import type { AttackPosition, Club, DefensePosition, KwPlayer, NeedMatch, PlayerNeedWithClub, Priority, Profile, RosterPlayer } from "@/types/domain";
 
 const profile: Profile = {
   id: "00000000-0000-0000-0000-000000000001",
@@ -163,6 +179,121 @@ const needs: PlayerNeedWithClub[] = [
   need(9, club(9, "Handball Rheinau", "3. Liga Süd-West", "Rheinau"), ["LA"], "niedrig", { age_max: 24, target_roles: ["perspektivspieler"] })
 ];
 
+// ---- KW player fixtures (fictional) ----
+function kwPlayer(index: number, extra: Partial<KwPlayer>): KwPlayer {
+  return {
+    id: `00000000-0000-0000-0000-0000000003${String(index).padStart(2, "0")}`,
+    kind: "spieler",
+    first_name: "",
+    last_name: "",
+    birth_date: null,
+    nationality: null,
+    attack_positions: [],
+    defense_positions: [],
+    coach_roles: [],
+    handedness: null,
+    height_cm: null,
+    current_club: null,
+    current_league: null,
+    contract_until: null,
+    available_from: null,
+    languages: [],
+    player_types: [],
+    league_experience: null,
+    profile: null,
+    video_url: null,
+    photo_path: null,
+    cv_path: null,
+    consent_at: "2026-10-01",
+    visible_to_clubs: true,
+    created_at: "2026-10-01T00:00:00Z",
+    updated_at: "2026-10-01T00:00:00Z",
+    ...extra
+  };
+}
+
+const kwPlayers: KwPlayer[] = [
+  kwPlayer(1, { first_name: "Jonas", last_name: "Brenner", birth_date: "2001-05-12", attack_positions: ["RR"], handedness: "links", height_cm: 192, current_club: "TV Beispielstadt", current_league: "2. Bundesliga", contract_until: `${start + 1}-06-30`, languages: ["de", "en"], player_types: ["wurfstark"], cv_path: "x/cv.pdf" }),
+  kwPlayer(2, { first_name: "Mats", last_name: "Lindgren", birth_date: "2002-02-02", attack_positions: ["RR", "RA"], handedness: "links", height_cm: 188, current_club: "IK Exempel", current_league: "Håndboldligaen", available_from: `${start + 1}-07-01`, languages: ["en", "sv"], player_types: ["eins_gegen_eins"], cv_path: "x/cv.pdf" }),
+  kwPlayer(3, { first_name: "Karim", last_name: "Haddad", birth_date: "1993-08-20", attack_positions: ["RR"], height_cm: 196, current_club: "HC Muster", current_league: "1. Bundesliga", contract_until: `${start + 2}-06-30`, languages: ["de", "fr"], player_types: ["wurfstark"], visible_to_clubs: false, consent_at: null }),
+  kwPlayer(4, { first_name: "Tom", last_name: "Weber", birth_date: "2003-03-03", attack_positions: ["RL", "RM"], height_cm: 190, current_club: "SG Probe", current_league: "3. Liga Süd", contract_until: `${start}-06-30`, languages: ["de"], player_types: ["spielstark"] }),
+  kwPlayer(5, { kind: "trainer", first_name: "Marco", last_name: "Stein", birth_date: "1985-11-01", coach_roles: ["co_trainer", "athletiktrainer"], current_club: "HSV Beispiel", current_league: "2. Bundesliga", languages: ["de", "en"] })
+];
+
+const sampleMatches: NeedMatch[] = [
+  {
+    id: "00000000-0000-0000-0000-000000000401",
+    need_id: needs[0].id,
+    player_id: kwPlayers[1].id,
+    status: "interessiert",
+    score: 86,
+    reasons: [],
+    club_note: "Gerne Videos und Gehaltsvorstellung schicken.",
+    released_at: daysAgo(6),
+    released_by: null,
+    responded_at: daysAgo(2),
+    responded_by: null,
+    handled_at: null,
+    created_at: daysAgo(6),
+    updated_at: daysAgo(2)
+  }
+];
+
+// Club-side suggestions and KW inbox (fictional).
+function released(index: number, needIndex: number, playerIndex: number, extra: Partial<NeedMatch>): NeedMatch {
+  const result = scorePlayerForNeed(needs[needIndex], kwPlayers[playerIndex]);
+  return {
+    id: `00000000-0000-0000-0000-0000000005${String(index).padStart(2, "0")}`,
+    need_id: needs[needIndex].id,
+    player_id: kwPlayers[playerIndex].id,
+    status: "freigegeben",
+    score: result.score,
+    reasons: result.reasons,
+    club_note: null,
+    released_at: daysAgo(3),
+    released_by: null,
+    responded_at: null,
+    responded_by: null,
+    handled_at: null,
+    created_at: daysAgo(3),
+    updated_at: daysAgo(3),
+    ...extra
+  };
+}
+
+const suggestionPlayers: KwPlayer[] = kwPlayers.map((player, index) =>
+  index === 0
+    ? {
+        ...player,
+        nationality: "Deutschland",
+        league_experience: "2. Bundesliga, EHF European League",
+        video_url: "https://example.com/video",
+        profile:
+          "Linkshändiger Rückraum rechts mit starkem Wurf aus der zweiten Reihe. Stammspieler in der 2. Bundesliga, 6,1 Tore pro Spiel. Sucht den nächsten Schritt mit klarer Rolle."
+      }
+    : index === 1
+      ? { ...player, nationality: "Schweden", profile: "Schneller, dynamischer Rechtshänder im 1-gegen-1. Spielt auch Rechtsaußen." }
+      : player
+);
+
+const clubMatches: NeedMatch[] = [
+  released(1, 0, 0, {}),
+  released(2, 0, 1, { status: "interessiert", club_note: "Gerne Videos und Gehaltsvorstellung schicken.", responded_at: daysAgo(1) })
+];
+
+const inboxMatches: NeedMatch[] = [
+  released(3, 0, 1, { status: "interessiert", club_note: "Gerne Videos und Gehaltsvorstellung schicken.", responded_at: daysAgo(1) }),
+  released(4, 2, 0, { status: "interessiert", club_note: "Können wir nächste Woche telefonieren?", responded_at: daysAgo(0) }),
+  released(5, 3, 3, { status: "interessiert", responded_at: daysAgo(2), handled_at: daysAgo(1) }),
+  released(6, 2, 1, { released_at: daysAgo(9) }),
+  released(7, 0, 2, { status: "kein_interesse", club_note: "Zu teuer für unser Budget.", responded_at: daysAgo(4) })
+];
+
+const inboxContacts = new Map<string, Profile[]>([
+  [needs[0].club_id, [{ ...profile, club_id: needs[0].club_id }]],
+  [needs[2].club_id, [{ ...profile, id: "00000000-0000-0000-0000-000000000009", name: "Lars Lindner", email: "lars@example.com", club_id: needs[2].club_id }]]
+]);
+
 const adminProfile: Profile = { ...profile, id: "00000000-0000-0000-0000-000000000002", role: "admin", club_id: null, clubs: null, name: "KW Admin" };
 const agencyProfile: Profile = { ...profile, id: "00000000-0000-0000-0000-000000000003", role: "agency", club_id: null, clubs: null, name: "Agent", agency_name: "Beispiel Agentur" };
 
@@ -202,6 +333,136 @@ export default async function VisualPreview({
     );
   }
 
+  if (screen === "players") {
+    return (
+      <AppShell profile={adminProfile} locale="de">
+        <div className="space-y-6">
+          <PageHeader eyebrow="KW Sports Admin" title="Spielerdatenbank" description="Beispieldaten" />
+          <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {kwPlayers.map((player) => (
+              <KwPlayerCard key={player.id} player={player} />
+            ))}
+          </section>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (screen === "player-form") {
+    return (
+      <AppShell profile={adminProfile} locale="de">
+        <div className="space-y-6">
+          <PageHeader eyebrow="KW Sports Admin" title="Spieler anlegen" />
+          <KwPlayerForm action={createKwPlayerAction} player={kwPlayers[0]} />
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (screen === "matches") {
+    return (
+      <AppShell profile={adminProfile} locale="de">
+        <AdminNeedMatchesView need={needs[0]} players={kwPlayers} matches={sampleMatches} photos={new Map()} />
+      </AppShell>
+    );
+  }
+
+  if (screen === "suggestions") {
+    const clubProfile: Profile = { ...profile, club_id: needs[0].club_id, clubs: needs[0].clubs };
+    return (
+      <AppShell profile={clubProfile} locale={locale} badge={1}>
+        <ClubSuggestionsView
+          locale={locale}
+          needs={[needs[0]]}
+          players={suggestionPlayers}
+          matches={clubMatches}
+          files={new Map()}
+          done={query.done}
+        />
+      </AppShell>
+    );
+  }
+
+  if (screen === "cockpit" || screen === "cockpit-empty") {
+    const empty = screen === "cockpit-empty";
+    return (
+      <AppShell profile={profile} locale={locale} badge={empty ? 0 : 2}>
+        <ClubCockpit
+          locale={locale}
+          clubName="HSG Musterstadt"
+          league="2. Bundesliga"
+          personName="Maria"
+          roster={empty ? [] : players}
+          needs={empty ? [] : [needs[0], needs[4], needs[5]]}
+          openSuggestions={empty ? 0 : 2}
+          planningSeason={planningSeasons(1)[1]}
+        />
+      </AppShell>
+    );
+  }
+
+  if (screen === "need-detail") {
+    const need = { ...needs[0], description: "Linkshänder für den rechten Rückraum, der sofort Spielanteile übernehmen kann.", budget_amount: 4500, budget_currency: "EUR" };
+    const labels = needProfileLabels(need, "de");
+    return (
+      <AppShell profile={adminProfile} locale="de">
+        <div className="space-y-6">
+          <NeedHero need={need} locale="de" />
+          <AdminNeedMatchesView need={need} players={kwPlayers} matches={sampleMatches} photos={new Map()} />
+          <section className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+            <NeedFacts
+              title="Anforderungsprofil"
+              empty="-"
+              rows={[
+                { label: "Beschreibung", value: need.description, wide: true },
+                { label: "Angriffspositionen", value: chips(labels.attackPositions) },
+                { label: "Spielertyp", value: chips(labels.playerTypes) },
+                { label: "Anvisierte Rolle", value: chips(labels.targetRoles) },
+                { label: "Alter", value: "22–28 Jahre" }
+              ]}
+            />
+            <NeedFacts title="Budget & Status" empty="-" rows={[{ label: "Budget", value: "4.500 € / Monat" }]} />
+          </section>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (screen === "inbox") {
+    const tab = (query.tab as InboxTab | undefined) ?? "offen";
+    return (
+      <AppShell profile={adminProfile} locale="de" badge={2}>
+        <AdminInboxView tab={tab} matches={inboxMatches} needs={needs} players={kwPlayers} contacts={inboxContacts} />
+      </AppShell>
+    );
+  }
+
+  if (screen === "email") {
+    const site = "http://127.0.0.1:3000";
+    const kind = query.kind ?? "suggestion";
+    const frenchNeed = needs[3];
+    const email =
+      kind === "invite"
+        ? buildInviteEmail({ name: "Maria", organisation: "HSG Musterstadt", link: `${site}/auth/confirm`, locale: "de" }, site)
+        : kind === "reset"
+          ? buildResetEmail({ link: `${site}/auth/confirm`, locale: "en" }, site)
+          : kind === "need"
+        ? buildNewNeedEmail(needs[0], site)
+        : kind === "answer"
+          ? buildAnswerEmail(needs[2], suggestionPlayers[0], inboxMatches[1], ["lars@example.com"], site)
+          : kind === "reminder"
+            ? buildReminderEmail([needs[4], { ...needs[4], id: "x", attack_positions: ["RL"], season: "2027/28" }], site)
+            : kind === "suggestion-fr"
+              ? buildSuggestionEmail(frenchNeed, suggestionPlayers[3], 78, site)
+              : buildSuggestionEmail(needs[0], suggestionPlayers[0], 100, site);
+    return (
+      <div style={{ background: "#e5e7eb", padding: 16 }}>
+        <p style={{ font: "600 13px system-ui", margin: "0 0 8px" }}>Betreff: {email.subject}</p>
+        <iframe title="email" srcDoc={email.html} style={{ width: "100%", height: 1000, border: 0, background: "#fff" }} />
+      </div>
+    );
+  }
+
   if (screen === "error") {
     const errorCopy = guideCopy[locale].error;
     return (
@@ -234,6 +495,40 @@ export default async function VisualPreview({
             submitLabel={formCopy.submitCreate}
             prefill={{ attack_positions: ["RR"], season: nextSeasonLabel }}
             locale={locale}
+          />
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (screen === "import" || screen === "import-preview") {
+    const ti = squadImportCopy[locale];
+    const contract = (years: number) => `${start + years}-06-30`;
+    const previewState: SquadImportState = {
+      status: "preview",
+      fileName: "Kaderliste_2026-27.xlsx",
+      rows: [
+        { line: 4, row: { first_name: "Lukas", last_name: "Beispiel", jersey_number: 1, position: "TW", secondary_positions: [], defense_positions: [], contract_until: contract(2), notes: null } },
+        { line: 5, row: { first_name: "Jonas", last_name: "Muster", jersey_number: 7, position: "RR", secondary_positions: ["RA"], defense_positions: [3, 4], contract_until: contract(1), notes: null } },
+        { line: 6, row: { first_name: "Felix", last_name: "Probe", jersey_number: 11, position: "RM", secondary_positions: [], defense_positions: [3], contract_until: contract(3), notes: null } },
+        { line: 7, row: { first_name: "Ben", last_name: "Vorlage", jersey_number: 18, position: "KM", secondary_positions: [], defense_positions: [3, 4], contract_until: contract(1), notes: null } },
+        { line: 8, row: { first_name: "Paul", last_name: "Exempel", jersey_number: 23, position: "LA", secondary_positions: [], defense_positions: [1], contract_until: contract(2), notes: null } }
+      ],
+      skipped: [
+        { line: 9, label: "Tim Sample", issue: "duplicate" },
+        { line: 10, label: "Nico Test", issue: "contract", value: "verlängert?" }
+      ]
+    };
+    return (
+      <AppShell profile={profile} locale={locale}>
+        <div className="space-y-6">
+          <PageHeader eyebrow={profile.clubs!.name} title={ti.title} description={ti.intro} />
+          <SquadImportScreen
+            t={ti}
+            locale={locale}
+            previewAction={previewSquadImportAction}
+            commitAction={commitSquadImportAction}
+            initialState={screen === "import-preview" ? previewState : undefined}
           />
         </div>
       </AppShell>

@@ -1,17 +1,14 @@
-import Link from "next/link";
 import { Flash, flashKind } from "@/components/ui/flash";
+import { AdminNeedMatches } from "@/features/matching/admin-need-matches";
 import { guideCopy } from "@/lib/guide-i18n";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
-import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
-import { Edit, History, Lock, MessageSquarePlus } from "lucide-react";
+import { Building2, Edit, History, Lock, MessageSquarePlus } from "lucide-react";
 import { Button, LinkButton } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/form";
-import { PageHeader } from "@/components/ui/page-header";
 import { createAdminNoteAction } from "@/features/admin/productivity-actions";
-import { NeedBadges } from "@/features/player-needs/need-badges";
-import { TagList, needHeadline, needProfileLabels } from "@/features/player-needs/need-summary";
-import { PRIORITY_LABELS, STATUS_LABELS } from "@/lib/constants";
+import { needHeadline, needProfileLabels } from "@/features/player-needs/need-summary";
+import { NeedFacts, NeedHero, chips } from "@/features/player-needs/need-hero";
 import { requireAdmin } from "@/lib/auth";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { AdminNote, AuditLog, PlayerNeedWithClub } from "@/types/domain";
@@ -30,7 +27,7 @@ export default async function AdminNeedDetailPage({
   const [{ data }, { data: noteRows }, { data: auditLogRows }] = await Promise.all([
     supabase
       .from("player_needs")
-      .select("*, clubs!inner(id,name,country,league,city,website,created_at,updated_at), player_need_confidential(note)")
+      .select("*, clubs!inner(id,name,country,league,city,website,logo_path,created_at,updated_at), player_need_confidential(note)")
       .eq("id", id)
       .single(),
     supabase
@@ -59,88 +56,74 @@ export default async function AdminNeedDetailPage({
     <div className="space-y-6">
       <Breadcrumbs items={[{ label: "Bedarfe", href: "/admin" }, { label: need.clubs.name, href: `/admin/clubs/${need.clubs.id}` }, { label: needHeadline(need) }]} />
       <Flash message={flashKind(query.done) === "created" ? guideCopy.de.flash.needCreated : flashKind(query.done) === "updated" ? guideCopy.de.flash.needUpdated : null} />
-      <PageHeader
-        eyebrow={need.clubs.name}
-        title={`${needHeadline(need)} · ${need.season}`}
-        description={`${need.clubs.league} · ${need.clubs.city} · benötigt ab ${formatDate(need.needed_from_date)}`}
+
+      <NeedHero
+        need={need}
+        locale="de"
         actions={
-          <LinkButton href={`/admin/needs/${need.id}/edit`} variant="accent">
-            <Edit className="h-4 w-4" aria-hidden="true" />
-            Bearbeiten
-          </LinkButton>
+          <>
+            <LinkButton href={`/admin/needs/${need.id}/edit`} variant="accent">
+              <Edit className="h-4 w-4" aria-hidden="true" />
+              Bearbeiten
+            </LinkButton>
+            <LinkButton href={`/admin/clubs/${need.clubs.id}`} variant="secondary">
+              <Building2 className="h-4 w-4" aria-hidden="true" />
+              Verein
+            </LinkButton>
+          </>
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <SummaryItem label="Verein" value={need.clubs.name} />
-        <SummaryItem label="Bedarf" value={needHeadline(need)} />
-        <SummaryItem label="Saison" value={need.season} />
-        <SummaryItem label="Status" value={STATUS_LABELS[need.status]} />
-        <SummaryItem label="Priorität" value={PRIORITY_LABELS[need.priority]} />
-      </section>
+      <AdminNeedMatches supabase={supabase} need={need} done={query.done} error={query.error} />
 
-      <section className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
-        <div className="panel p-5">
-          <div className="flex flex-wrap gap-2">
-            <NeedBadges need={need} />
+      <section className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+        <NeedFacts
+          title="Anforderungsprofil"
+          empty="Der Verein hat keine weiteren Anforderungen angegeben."
+          rows={[
+            { label: "Beschreibung", value: need.description, wide: true },
+            ...(isCoach
+              ? [{ label: "Trainerrolle", value: labels.coachRole }]
+              : [
+                  { label: "Angriffspositionen", value: chips(labels.attackPositions) },
+                  { label: "Abwehrpositionen", value: chips(labels.defensePositions) },
+                  { label: "Spielertyp", value: chips(labels.playerTypes) },
+                  { label: "Anvisierte Rolle", value: chips(labels.targetRoles) },
+                  { label: "Alter", value: formatRange(need.age_min, need.age_max) },
+                  { label: "Größe min.", value: need.height_min ? `${need.height_min} cm` : null },
+                  { label: "Weitere Merkmale", value: need.player_type, wide: true }
+                ]),
+            { label: "Sprachkenntnisse", value: chips(labels.languages) },
+            { label: "Nationalität", value: need.nationality_preference },
+            { label: "Liga-Erfahrung", value: need.league_experience },
+            { label: "Vertragsstatus", value: need.contract_status_preference }
+          ]}
+        />
+
+        <div className="flex flex-col gap-5">
+          <NeedFacts
+            title="Budget & Status"
+            empty="Keine Angaben zu Budget oder Status."
+            rows={[
+              { label: "Budget", value: need.budget_amount ? formatCurrency(need.budget_amount, need.budget_currency) : null },
+              { label: "Budgetnotiz", value: need.budget_note, wide: true },
+              { label: "Statusnotiz", value: need.status_note, wide: true },
+              { label: "Abgeschlossen am", value: need.closed_at ? formatDate(need.closed_at) : null }
+            ]}
+          />
+          <div className="panel flex items-start gap-3 border-l-[3px] border-l-navy-950 p-5">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center bg-navy-950 text-white">
+              <Lock className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
+              <h2 className="section-heading">Vertraulich · nur KW Sports &amp; Verein</h2>
+              <p className="mt-2 whitespace-pre-wrap text-sm text-navy-950">{confidentialNote || "Keine vertrauliche Notiz."}</p>
+            </div>
           </div>
-          <dl className="mt-5 space-y-4">
-            <InfoRow label="Verein" value={<Link href={`/admin/clubs/${need.clubs.id}`}>{need.clubs.name}</Link>} />
-            <InfoRow label="Liga" value={need.clubs.league} />
-            <InfoRow label="Art" value={labels.needType} />
-            {isCoach ? (
-              <InfoRow label="Trainerrolle" value={labels.coachRole || "-"} />
-            ) : (
-              <>
-                <InfoRow label="Angriffspositionen" value={<TagList items={labels.attackPositions} />} />
-                <InfoRow label="Abwehrpositionen" value={<TagList items={labels.defensePositions} />} />
-              </>
-            )}
-            <InfoRow label="Saison" value={need.season} />
-            <InfoRow label="Benötigt ab" value={formatDate(need.needed_from_date)} />
-            <InfoRow label="Budget" value={formatCurrency(need.budget_amount, need.budget_currency)} />
-            <InfoRow label="Abgeschlossen am" value={need.closed_at ? formatDate(need.closed_at) : "-"} />
-          </dl>
-        </div>
-
-        <div className="panel p-5">
-          <h2 className="section-heading">Profil</h2>
-          <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-            <InfoRow label="Beschreibung" value={need.description || "-"} wide />
-            {isCoach ? null : (
-              <>
-                <InfoRow label="Spielertyp" value={<TagList items={labels.playerTypes} />} wide />
-                <InfoRow label="Anvisierte Rolle" value={<TagList items={labels.targetRoles} />} wide />
-                <InfoRow label="Weitere Merkmale" value={need.player_type || "-"} wide />
-                <InfoRow label="Alter" value={formatRange(need.age_min, need.age_max)} />
-                <InfoRow label="Größe min." value={need.height_min ? `${need.height_min} cm` : "-"} />
-              </>
-            )}
-            <InfoRow label="Sprachkenntnisse" value={<TagList items={labels.languages} />} wide />
-            <InfoRow label="Nationalität" value={need.nationality_preference || "-"} />
-            <InfoRow label="Liga-Erfahrung" value={need.league_experience || "-"} />
-            <InfoRow label="Vertragsstatus" value={need.contract_status_preference || "-"} />
-            <InfoRow label="Statusnotiz" value={need.status_note || "-"} wide />
-            <InfoRow label="Budgetnotiz" value={need.budget_note || "-"} wide />
-          </dl>
-        </div>
-      </section>
-
-      <section className="panel flex items-start gap-3 p-5">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-navy-950 text-white">
-          <Lock className="h-4 w-4" aria-hidden="true" />
-        </span>
-        <div className="min-w-0">
-          <h2 className="section-heading">Vertraulich · nur KW Sports &amp; Verein</h2>
-          <p className="mt-2 whitespace-pre-wrap text-sm text-navy-950">{confidentialNote || "-"}</p>
         </div>
       </section>
 
       <section className="panel overflow-hidden">
-        <div className="flex gap-2 border-b border-slate-200 bg-slate-50/80 px-5 py-3 text-xs font-black uppercase text-slate-500">
-          <span className="rounded-md bg-white px-3 py-2 text-navy-950 shadow-sm">Notizen</span>
-          <span className="px-3 py-2">Verlauf</span>
-        </div>
         <div className="grid gap-5 p-5 lg:grid-cols-[1.05fr_0.95fr]">
           <section>
             <div className="flex items-center gap-2">
@@ -203,29 +186,11 @@ export default async function AdminNeedDetailPage({
   );
 }
 
-function SummaryItem({ label, value }: { label: string; value: ReactNode }) {
-  return (
-    <div className="metric-card px-4 py-3">
-      <p className="metric-kicker">{label}</p>
-      <p className="mt-1 truncate text-base font-black text-navy-950">{value}</p>
-    </div>
-  );
-}
-
-function InfoRow({ label, value, wide = false }: { label: string; value: ReactNode; wide?: boolean }) {
-  return (
-    <div className={wide ? "sm:col-span-2" : undefined}>
-      <dt className="text-xs font-semibold uppercase text-slate-500">{label}</dt>
-      <dd className="mt-1 text-sm font-medium text-navy-950 [&_a]:text-navy-700 [&_a]:underline">{value}</dd>
-    </div>
-  );
-}
-
 function formatRange(min: number | null, max: number | null) {
-  if (min && max) return `${min}-${max}`;
-  if (min) return `ab ${min}`;
-  if (max) return `bis ${max}`;
-  return "-";
+  if (min && max) return `${min}–${max} Jahre`;
+  if (min) return `ab ${min} Jahre`;
+  if (max) return `bis ${max} Jahre`;
+  return null;
 }
 
 function describeAuditEntry(entry: AuditLog) {

@@ -52,6 +52,15 @@ create table if not exists storage.objects (
 
 alter table storage.objects enable row level security;
 
+-- Same helper Supabase ships: folder segments of an object path ("a/b/c.pdf" -> {a,b}).
+create or replace function storage.foldername(name text)
+returns text[]
+language sql
+immutable
+as $$
+  select (string_to_array(name, '/'))[1:greatest(array_length(string_to_array(name, '/'), 1) - 1, 0)];
+$$;
+
 grant usage on schema public, auth, storage to anon, authenticated, service_role;
 grant execute on function auth.uid() to anon, authenticated, service_role;
 

@@ -121,6 +121,9 @@ type AgencyCopy = {
     contractStatus: string;
     statusNote: string;
     budgetNote: string;
+    profileEmpty: string;
+    conditions: string;
+    conditionsEmpty: string;
     rangeFrom: string;
     rangeTo: string;
   };
@@ -253,6 +256,9 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       contractStatus: "Vertragsstatus",
       statusNote: "Statusnotiz",
       budgetNote: "Budgetnotiz",
+      profileEmpty: "Der Verein hat keine weiteren Anforderungen angegeben.",
+      conditions: "Rahmen",
+      conditionsEmpty: "Keine Angaben zu Budget oder Status.",
       rangeFrom: "ab",
       rangeTo: "bis"
     }
@@ -383,6 +389,9 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       contractStatus: "Contract status",
       statusNote: "Status note",
       budgetNote: "Budget note",
+      profileEmpty: "The club has not specified further requirements.",
+      conditions: "Conditions",
+      conditionsEmpty: "No budget or status details.",
       rangeFrom: "from",
       rangeTo: "up to"
     }
@@ -513,6 +522,9 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       contractStatus: "Situation contractuelle",
       statusNote: "Note de statut",
       budgetNote: "Note budget",
+      profileEmpty: "Le club n’a pas précisé d’autres exigences.",
+      conditions: "Cadre",
+      conditionsEmpty: "Pas d’indications sur le budget ou le statut.",
       rangeFrom: "à partir de",
       rangeTo: "jusqu'à"
     }
@@ -643,6 +655,9 @@ export const agencyCopy: Record<ClubLocale, AgencyCopy> = {
       contractStatus: "Situación contractual",
       statusNote: "Nota de estado",
       budgetNote: "Nota de presupuesto",
+      profileEmpty: "El club no ha indicado más requisitos.",
+      conditions: "Condiciones",
+      conditionsEmpty: "Sin datos de presupuesto o estado.",
       rangeFrom: "desde",
       rangeTo: "hasta"
     }

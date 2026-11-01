@@ -6,7 +6,7 @@ import type { RosterPlayer } from "@/types/domain";
 export default async function SquadPage({
   searchParams
 }: {
-  searchParams: Promise<{ season?: string; view?: string; done?: string }>;
+  searchParams: Promise<{ season?: string; view?: string; done?: string; count?: string }>;
 }) {
   const { supabase, profile } = await requireClubUser();
   const locale = await getClubLocale();
@@ -26,6 +26,7 @@ export default async function SquadPage({
       seasonParam={params.season}
       viewParam={params.view}
       done={params.done}
+      importedCount={Math.max(0, Math.min(200, Number.parseInt(params.count ?? "", 10) || 0))}
     />
   );
 }

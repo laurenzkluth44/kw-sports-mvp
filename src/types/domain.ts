@@ -133,3 +133,56 @@ export type RosterPlayer = {
   created_at: string;
   updated_at: string;
 };
+
+export type NeedMatchStatus = "freigegeben" | "interessiert" | "kein_interesse";
+
+export type KwPlayer = {
+  id: string;
+  kind: NeedType;
+  first_name: string;
+  last_name: string;
+  birth_date: string | null;
+  nationality: string | null;
+  attack_positions: AttackPosition[];
+  defense_positions: DefensePosition[];
+  coach_roles: CoachRole[];
+  handedness: "links" | "rechts" | "beidhaendig" | null;
+  height_cm: number | null;
+  current_club: string | null;
+  current_league: string | null;
+  contract_until: string | null;
+  available_from: string | null;
+  languages: Language[];
+  player_types: PlayerType[];
+  league_experience: string | null;
+  profile: string | null;
+  video_url: string | null;
+  photo_path: string | null;
+  cv_path: string | null;
+  consent_at: string | null;
+  visible_to_clubs: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type MatchReasonKey = "position" | "coach_role" | "availability" | "age" | "height" | "languages" | "player_types" | "league";
+
+/** Why a player fits a need. Language-neutral: `value` is a code or number, labels come from matching-i18n. */
+export type MatchReason = { key: MatchReasonKey; ok: boolean | null; value?: string };
+
+export type NeedMatch = {
+  id: string;
+  need_id: string;
+  player_id: string;
+  status: NeedMatchStatus;
+  score: number;
+  reasons: MatchReason[];
+  club_note: string | null;
+  released_at: string;
+  released_by: string | null;
+  responded_at: string | null;
+  responded_by: string | null;
+  handled_at: string | null;
+  created_at: string;
+  updated_at: string;
+};

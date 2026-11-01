@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { notifyKwNewNeed } from "@/lib/email/notifications";
 import { requireAdmin, requireClubUser, type AuthedContext } from "@/lib/auth";
 import {
   isValidDateString,
@@ -56,6 +58,7 @@ function statusTimestamps(status: string | undefined, formData?: FormData) {
 
 export async function createClubNeedAction(formData: FormData) {
   const { supabase, profile } = await requireClubUser();
+  let createdId: string | null = null;
 
   try {
     const payload = parseNeedFormData(formData);
@@ -71,11 +74,16 @@ export async function createClubNeedAction(formData: FormData) {
       .single();
 
     if (error || !data) throw error;
+    createdId = data.id;
     if (confidentialNote) await saveConfidentialNote(supabase, data.id, confidentialNote);
   } catch (error) {
     redirect(`/club/needs/new?error=${needFormErrorCode(error)}`);
   }
 
+  if (createdId) {
+    const id = createdId;
+    after(() => notifyKwNewNeed(id));
+  }
   revalidatePath("/club");
   redirect("/club?done=created");
 }
@@ -242,4 +250,22 @@ export async function updateAdminNeedAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath(`/admin/needs/${id}`);
   redirect(`/admin/needs/${id}?done=updated`);
+}
+
+/** "Noch aktuell": confirms one need (id) or all of the club's open needs at once. */
+export async function confirmClubNeedsAction(formData: FormData) {
+  const { supabase, profile } = await requireClubUser();
+  const id = String(formData.get("id") || "").trim();
+
+  let query = supabase
+    .from("player_needs")
+    .update({ last_confirmed_at: new Date().toISOString() })
+    .eq("club_id", profile.club_id!)
+    .in("status", ["offen", "in_gespraechen"]);
+  if (id) query = query.eq("id", id);
+  const { error } = await query;
+
+  if (error) redirect("/club?error=status");
+  revalidatePath("/club");
+  redirect("/club?done=confirmed");
 }
