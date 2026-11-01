@@ -41,18 +41,21 @@ export default async function ClubDashboardPage({
   const roster = (rosterRows ?? []) as RosterPlayer[];
   const planningSeason = planningSeasons(1)[1];
 
+  const typedNeeds = (needs ?? []) as PlayerNeed[];
+  const activeNeeds = typedNeeds.filter((need) => need.status === "offen" || need.status === "in_gespraechen");
+  const activeIds = new Set(activeNeeds.map((need) => need.id));
+
+  // Unanswered suggestions only count as "new" while the need is still open.
   const suggestionsByNeed = new Map<string, { total: number; open: number }>();
   (matchRows ?? []).forEach((row) => {
     const entry = suggestionsByNeed.get(row.need_id) ?? { total: 0, open: 0 };
     entry.total += 1;
-    if (row.status === "freigegeben") entry.open += 1;
+    if (row.status === "freigegeben" && activeIds.has(row.need_id)) entry.open += 1;
     suggestionsByNeed.set(row.need_id, entry);
   });
   const openSuggestions = [...suggestionsByNeed.values()].reduce((sum, entry) => sum + entry.open, 0);
   const cockpit = cockpitCopy[locale];
 
-  const typedNeeds = (needs ?? []) as PlayerNeed[];
-  const activeNeeds = typedNeeds.filter((need) => need.status === "offen" || need.status === "in_gespraechen");
   const closedNeeds = typedNeeds.filter((need) => need.status === "besetzt");
   const staleCount = typedNeeds.filter(
     (need) => (need.status === "offen" || need.status === "in_gespraechen") && isStaleNeed(need.last_confirmed_at)

@@ -39,11 +39,12 @@ export function ClubNeedView({
   const d = agencyCopy[locale].detail;
   const m = matchCopy[locale];
   const visible = matches.filter((match) => players.has(match.player_id));
-  const open = visible.filter((match) => match.status === "freigegeben");
+  const closed = need.status === "besetzt" || need.status === "archiviert";
+  // Once the need is filled or archived, unanswered suggestions are moot: no "new" badge, no answer buttons.
+  const open = closed ? [] : visible.filter((match) => match.status === "freigegeben");
   const answered = visible.filter((match) => match.status !== "freigegeben");
   const labels = needProfileLabels(need, locale);
   const isCoach = need.need_type === "trainer";
-  const closed = need.status === "besetzt" || need.status === "archiviert";
   const stale = isStale(need);
   const here = `/club/needs/${need.id}`;
   const confidentialNote = need.player_need_confidential?.note;
@@ -131,14 +132,14 @@ export function ClubNeedView({
           ) : null}
         </div>
 
-        {visible.length === 0 ? (
+        {open.length + answered.length === 0 ? (
           <div className="flex items-start gap-3 border border-dashed border-slate-300 bg-white px-5 py-5 text-sm text-slate-600">
             <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-brand-500" aria-hidden="true" />
             <p>{closed ? t.suggestionsClosed : t.suggestionsEmpty}</p>
           </div>
         ) : (
           <>
-            <p className="text-sm text-slate-600">{t.suggestionsIntro}</p>
+            <p className="text-sm text-slate-600">{closed ? t.suggestionsClosed : t.suggestionsIntro}</p>
             {open.map(card)}
             {answered.length > 0 ? (
               <details className="group" open={open.length === 0}>
