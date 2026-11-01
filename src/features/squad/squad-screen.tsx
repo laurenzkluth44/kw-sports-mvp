@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, CalendarClock, Lock, Pencil, Plus, Users, type LucideIcon } from "lucide-react";
+import { AlertTriangle, ArrowRight, CalendarClock, FileSpreadsheet, Lock, Pencil, Plus, Users, type LucideIcon } from "lucide-react";
 import { LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
@@ -20,6 +20,7 @@ import { BoardLegend, TacticsBoard, type BoardSlot } from "@/features/squad/tact
 import { CLUB_POSITION_LABELS, CLUB_POSITION_SHORT_LABELS, defensePositionLabel, type ClubLocale } from "@/lib/club-i18n";
 import { DEFENSE_POSITIONS } from "@/lib/constants";
 import { squadCopy, type SquadCopy } from "@/lib/squad-i18n";
+import { squadImportCopy } from "@/lib/squad-import-i18n";
 import { cn, formatDate } from "@/lib/utils";
 import type { AttackPosition, DefensePosition, RosterPlayer } from "@/types/domain";
 
@@ -32,7 +33,8 @@ export function SquadScreen({
   locale,
   seasonParam,
   viewParam,
-  done
+  done,
+  importedCount
 }: {
   players: RosterPlayer[];
   clubName?: string | null;
@@ -40,6 +42,7 @@ export function SquadScreen({
   seasonParam?: string;
   viewParam?: string;
   done?: string;
+  importedCount?: number;
 }) {
   const t = squadCopy[locale];
   const seasons = planningSeasons(2);
@@ -53,7 +56,13 @@ export function SquadScreen({
   const openCount = gaps.filter((gap) => gap.status === "gap").length;
   const expiringCount = players.filter((player) => contractState(player) === "expiring").length;
 
-  const flash = done === "created" || done === "saved" || done === "deleted" ? t.flash[done] : null;
+  const ti = squadImportCopy[locale];
+  const flash =
+    done === "created" || done === "saved" || done === "deleted"
+      ? t.flash[done]
+      : done === "imported" && importedCount
+        ? ti.done.replace("{n}", String(importedCount))
+        : null;
 
   return (
     <div className="space-y-6">
@@ -62,10 +71,16 @@ export function SquadScreen({
         title={t.page.title}
         description={t.page.description}
         actions={
-          <LinkButton href="/club/squad/new" variant="accent">
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            {t.page.addPlayer}
-          </LinkButton>
+          <div className="flex flex-wrap gap-2">
+            <LinkButton href="/club/squad/import" variant="secondary">
+              <FileSpreadsheet className="h-4 w-4" aria-hidden="true" />
+              {ti.button}
+            </LinkButton>
+            <LinkButton href="/club/squad/new" variant="accent">
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              {t.page.addPlayer}
+            </LinkButton>
+          </div>
         }
       />
 
@@ -81,10 +96,16 @@ export function SquadScreen({
           title={t.list.emptyTitle}
           body={t.list.emptyBody}
           action={
-            <LinkButton href="/club/squad/new" variant="accent">
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              {t.page.addPlayer}
-            </LinkButton>
+            <div className="flex flex-wrap justify-center gap-2">
+              <LinkButton href="/club/squad/import" variant="accent">
+                <FileSpreadsheet className="h-4 w-4" aria-hidden="true" />
+                {ti.button}
+              </LinkButton>
+              <LinkButton href="/club/squad/new" variant="secondary">
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                {t.page.addPlayer}
+              </LinkButton>
+            </div>
           }
         />
       ) : (

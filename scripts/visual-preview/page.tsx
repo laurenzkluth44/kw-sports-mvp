@@ -27,6 +27,9 @@ import { buildInviteEmail, buildResetEmail } from "@/lib/email/auth-emails";
 import { createRosterPlayerAction } from "@/features/squad/actions";
 import { PlayerForm } from "@/features/squad/player-form";
 import { SquadScreen } from "@/features/squad/squad-screen";
+import { commitSquadImportAction, previewSquadImportAction, type SquadImportState } from "@/features/squad/import-actions";
+import { SquadImportScreen } from "@/features/squad/import-screen";
+import { squadImportCopy } from "@/lib/squad-import-i18n";
 import { parseClubLocale } from "@/lib/club-i18n";
 import { seasonEndDate, seasonForDate, seasonLabel, seasonStartYear } from "@/lib/constants";
 import { clubCopy } from "@/lib/club-i18n";
@@ -492,6 +495,40 @@ export default async function VisualPreview({
             submitLabel={formCopy.submitCreate}
             prefill={{ attack_positions: ["RR"], season: nextSeasonLabel }}
             locale={locale}
+          />
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (screen === "import" || screen === "import-preview") {
+    const ti = squadImportCopy[locale];
+    const contract = (years: number) => `${start + years}-06-30`;
+    const previewState: SquadImportState = {
+      status: "preview",
+      fileName: "Kaderliste_2026-27.xlsx",
+      rows: [
+        { line: 4, row: { first_name: "Lukas", last_name: "Beispiel", jersey_number: 1, position: "TW", secondary_positions: [], defense_positions: [], contract_until: contract(2), notes: null } },
+        { line: 5, row: { first_name: "Jonas", last_name: "Muster", jersey_number: 7, position: "RR", secondary_positions: ["RA"], defense_positions: [3, 4], contract_until: contract(1), notes: null } },
+        { line: 6, row: { first_name: "Felix", last_name: "Probe", jersey_number: 11, position: "RM", secondary_positions: [], defense_positions: [3], contract_until: contract(3), notes: null } },
+        { line: 7, row: { first_name: "Ben", last_name: "Vorlage", jersey_number: 18, position: "KM", secondary_positions: [], defense_positions: [3, 4], contract_until: contract(1), notes: null } },
+        { line: 8, row: { first_name: "Paul", last_name: "Exempel", jersey_number: 23, position: "LA", secondary_positions: [], defense_positions: [1], contract_until: contract(2), notes: null } }
+      ],
+      skipped: [
+        { line: 9, label: "Tim Sample", issue: "duplicate" },
+        { line: 10, label: "Nico Test", issue: "contract", value: "verlängert?" }
+      ]
+    };
+    return (
+      <AppShell profile={profile} locale={locale}>
+        <div className="space-y-6">
+          <PageHeader eyebrow={profile.clubs!.name} title={ti.title} description={ti.intro} />
+          <SquadImportScreen
+            t={ti}
+            locale={locale}
+            previewAction={previewSquadImportAction}
+            commitAction={commitSquadImportAction}
+            initialState={screen === "import-preview" ? previewState : undefined}
           />
         </div>
       </AppShell>
