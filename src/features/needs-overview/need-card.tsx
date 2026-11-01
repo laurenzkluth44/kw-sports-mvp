@@ -101,13 +101,15 @@ export function NeedCard({
         </span>
       </div>
 
-      <div className="relative w-full overflow-hidden bg-navy-950" style={{ aspectRatio: COURT_ASPECT.mini }}>
+      {/* Compact strip: the court is drawn at ~70% width so cards stay short. */}
+      <div className="bg-navy-950 py-2">
+      <div className="relative mx-auto w-[72%] max-w-[260px] overflow-hidden" style={{ aspectRatio: COURT_ASPECT.mini }}>
         {isCoach ? (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span aria-hidden="true" className="absolute font-display text-[7rem] leading-none text-white/[0.07]">
+            <span aria-hidden="true" className="absolute font-display text-[5rem] leading-none text-white/[0.07]">
               COACH
             </span>
-            <span className="relative font-display text-3xl tracking-[0.02em] text-white">{needHeadline(need, locale)}</span>
+            <span className="relative font-display text-2xl tracking-[0.02em] text-white">{needHeadline(need, locale)}</span>
           </div>
         ) : (
           <>
@@ -121,8 +123,8 @@ export function NeedCard({
                   className={cn(
                     "absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 font-display leading-none text-white",
                     on
-                      ? "h-8 w-8 border-brand-500 bg-brand-500 text-[0.95rem] shadow-[0_0_0_5px_rgba(0,85,255,0.28)]"
-                      : "h-2.5 w-2.5 border-white/30"
+                      ? "h-7 w-7 border-brand-500 bg-brand-500 text-[0.85rem] shadow-[0_0_0_4px_rgba(0,85,255,0.28)]"
+                      : "h-2 w-2 border-white/30"
                   )}
                   style={attackSpot(position, "mini")}
                 >
@@ -134,7 +136,7 @@ export function NeedCard({
               <span
                 key={`d${position}`}
                 aria-hidden="true"
-                className="absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-white font-display text-[0.9rem] leading-none text-navy-950 shadow-[0_0_0_3px_rgba(0,85,255,0.6)]"
+                className="absolute flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-white font-display text-[0.8rem] leading-none text-navy-950 shadow-[0_0_0_3px_rgba(0,85,255,0.6)]"
                 style={defenseSpot(position, "mini")}
               >
                 {position}
@@ -147,6 +149,7 @@ export function NeedCard({
             ) : null}
           </>
         )}
+      </div>
       </div>
 
       <div className="flex flex-1 flex-col gap-3 px-4 pb-4 pt-4">

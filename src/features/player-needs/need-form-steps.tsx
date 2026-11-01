@@ -48,8 +48,12 @@ export function NeedFormSteps({
   const last = steps.length - 1;
 
   useEffect(() => {
-    if (shouldScroll.current) {
-      ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (shouldScroll.current && ref.current) {
+      // The app header is sticky, so scroll to just below it instead of to the very top.
+      const header = document.querySelector("header");
+      const offset = (header?.getBoundingClientRect().height ?? 0) + 16;
+      const top = ref.current.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
       shouldScroll.current = false;
     }
     if (pendingFocus.current) {
@@ -112,7 +116,7 @@ export function NeedFormSteps({
   }
 
   return (
-    <div ref={ref} className="scroll-mt-28">
+    <div ref={ref}>
       <nav aria-label={stepOfText(copy.stepOf, current + 1, steps.length)} className="grid grid-cols-2 gap-[2px] bg-slate-200 sm:grid-cols-4">
         {copy.steps.slice(0, steps.length).map((label, index) => (
           <button

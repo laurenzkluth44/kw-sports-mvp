@@ -103,7 +103,7 @@ export function NeedsOverview({
             </div>
             {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
             <HeroKpi value={shown.length} label={copy.kpiHits} />
             <HeroKpi value={openCount} label={copy.kpiOpen} />
             <HeroKpi value={highCount} label={copy.kpiHigh} />
@@ -293,7 +293,7 @@ export function NeedsOverview({
 function HeroKpi({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col gap-1 border-l-[3px] border-brand-500 pl-4">
-      <span className="font-display text-[3.25rem] leading-[0.9]">{value}</span>
+      <span className="font-display text-[2.75rem] leading-[0.9] sm:text-[3.25rem]">{value}</span>
       <span className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-white/70">{label}</span>
     </div>
   );
