@@ -205,65 +205,8 @@ function Preview({
           </Button>
         </header>
 
-        {state.rows.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[36rem] text-left text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50 text-[0.68rem] font-extrabold uppercase tracking-[0.12em] text-slate-500">
-                <tr>
-                  <th className="w-12 px-5 py-3">
-                    <input
-                      type="checkbox"
-                      aria-label={t.include}
-                      checked={allOn}
-                      onChange={() => setExcluded(allOn ? new Set(state.rows.map((item) => item.line)) : new Set())}
-                      className="h-4 w-4 accent-brand-500"
-                    />
-                  </th>
-                  <th className="px-2 py-3">{t.colNumber}</th>
-                  <th className="px-2 py-3">{t.colName}</th>
-                  <th className="px-2 py-3">{t.colPosition}</th>
-                  <th className="px-2 py-3">{t.colDefense}</th>
-                  <th className="px-5 py-3">{t.colContract}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {state.rows.map(({ line, row }) => {
-                  const on = !excluded.has(line);
-                  return (
-                    <tr key={line} className={cn("transition-colors", on ? "bg-white" : "bg-slate-50 text-slate-400")}>
-                      <td className="px-5 py-3">
-                        <input
-                          type="checkbox"
-                          aria-label={`${t.include}: ${row.first_name} ${row.last_name}`}
-                          checked={on}
-                          onChange={() => toggle(line)}
-                          className="h-4 w-4 accent-brand-500"
-                        />
-                      </td>
-                      <td className="px-2 py-3 font-display text-lg">{row.jersey_number ?? "–"}</td>
-                      <td className={cn("px-2 py-3 font-bold", !on && "line-through")}>
-                        {row.first_name} {row.last_name}
-                      </td>
-                      <td className="px-2 py-3">
-                        <span className={cn("px-2 py-0.5 text-[0.7rem] font-extrabold tracking-[0.1em]", on ? "bg-brand-500 text-white" : "bg-slate-200")}>
-                          {row.position}
-                        </span>
-                        {row.secondary_positions.length ? (
-                          <span className="ml-1.5 text-xs text-slate-500">+ {row.secondary_positions.join(" · ")}</span>
-                        ) : null}
-                      </td>
-                      <td className="px-2 py-3 text-slate-600">{row.defense_positions.length ? row.defense_positions.map((p) => `A${p}`).join(" · ") : "–"}</td>
-                      <td className="px-5 py-3 tabular-nums">{formatDate(row.contract_until, locale)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : null}
-
         {state.skipped.length > 0 ? (
-          <div className="border-t border-amber-200 bg-amber-50/70 px-5 py-4">
+          <div className="border-b border-amber-200 bg-amber-50/70 px-5 py-4">
             <h3 className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.12em] text-amber-900">
               <AlertTriangle className="h-4 w-4" aria-hidden="true" />
               {state.skipped.length === 1 ? t.skippedTitleOne : fill(t.skippedTitle, { n: state.skipped.length })}
@@ -281,14 +224,71 @@ function Preview({
             </ul>
           </div>
         ) : null}
+        {state.rows.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-slate-200 bg-slate-50 text-[0.68rem] font-extrabold uppercase tracking-[0.12em] text-slate-500">
+                <tr>
+                  <th className="w-10 py-3 pl-4 pr-1 sm:w-12 sm:px-5">
+                    <input
+                      type="checkbox"
+                      aria-label={t.include}
+                      checked={allOn}
+                      onChange={() => setExcluded(allOn ? new Set(state.rows.map((item) => item.line)) : new Set())}
+                      className="h-4 w-4 accent-brand-500"
+                    />
+                  </th>
+                  <th className="hidden px-2 py-3 sm:table-cell">{t.colNumber}</th>
+                  <th className="px-2 py-3">{t.colName}</th>
+                  <th className="px-2 py-3">{t.colPosition}</th>
+                  <th className="hidden px-2 py-3 md:table-cell">{t.colDefense}</th>
+                  <th className="py-3 pl-2 pr-4 sm:px-5">{t.colContract}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {state.rows.map(({ line, row }) => {
+                  const on = !excluded.has(line);
+                  return (
+                    <tr key={line} className={cn("transition-colors", on ? "bg-white" : "bg-slate-50 text-slate-400")}>
+                      <td className="py-3 pl-4 pr-1 sm:px-5">
+                        <input
+                          type="checkbox"
+                          aria-label={`${t.include}: ${row.first_name} ${row.last_name}`}
+                          checked={on}
+                          onChange={() => toggle(line)}
+                          className="h-4 w-4 accent-brand-500"
+                        />
+                      </td>
+                      <td className="hidden px-2 py-3 font-display text-lg sm:table-cell">{row.jersey_number ?? "–"}</td>
+                      <td className={cn("px-2 py-3 font-bold", !on && "line-through")}>
+                        {row.first_name} {row.last_name}
+                      </td>
+                      <td className="px-2 py-3">
+                        <span className={cn("px-2 py-0.5 text-[0.7rem] font-extrabold tracking-[0.1em]", on ? "bg-brand-500 text-white" : "bg-slate-200")}>
+                          {row.position}
+                        </span>
+                        {row.secondary_positions.length ? (
+                          <span className="ml-1.5 hidden text-xs text-slate-500 sm:inline">+ {row.secondary_positions.join(" · ")}</span>
+                        ) : null}
+                      </td>
+                      <td className="hidden px-2 py-3 text-slate-600 md:table-cell">{row.defense_positions.length ? row.defense_positions.map((p) => `A${p}`).join(" · ") : "–"}</td>
+                      <td className="whitespace-nowrap py-3 pl-2 pr-4 tabular-nums sm:px-5">{formatDate(row.contract_until, locale)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+
       </section>
 
-      <form action={commitAction} className="sticky bottom-0 z-10 -mx-1 flex flex-wrap items-center justify-end gap-3 border-t border-slate-200 bg-white/95 px-5 py-4 shadow-[0_-8px_24px_rgba(10,10,10,0.06)] backdrop-blur">
+      <form action={commitAction} className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-8px_24px_rgba(10,10,10,0.06)] backdrop-blur sm:gap-3 sm:px-5 sm:py-4">
         <input type="hidden" name="rows" value={JSON.stringify(chosen)} />
-        <LinkButton href="/club/squad" variant="secondary">
+        <LinkButton href="/club/squad" variant="secondary" className="px-3 sm:px-4">
           {t.cancel}
         </LinkButton>
-        <SubmitButton variant="accent" disabled={count === 0} pendingLabel={t.importing}>
+        <SubmitButton variant="accent" disabled={count === 0} pendingLabel={t.importing} className="flex-1 sm:flex-none">
           <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
           {count === 1 ? t.importOne : fill(t.import, { n: count })}
         </SubmitButton>
