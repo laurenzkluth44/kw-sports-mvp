@@ -1,5 +1,6 @@
 import { Flash, flashKind } from "@/components/ui/flash";
 import { AdminNeedMatches } from "@/features/matching/admin-need-matches";
+import { AdminNeedOutcome } from "@/features/matching/admin-need-outcome";
 import { guideCopy } from "@/lib/guide-i18n";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { notFound } from "next/navigation";
@@ -11,7 +12,7 @@ import { needHeadline, needProfileLabels } from "@/features/player-needs/need-su
 import { NeedFacts, NeedHero, chips } from "@/features/player-needs/need-hero";
 import { requireAdmin } from "@/lib/auth";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import type { AdminNote, AuditLog, PlayerNeedWithClub } from "@/types/domain";
+import type { AdminNote, AuditLog, KwPlayer, NeedOutcome, PlayerNeedWithClub } from "@/types/domain";
 
 export default async function AdminNeedDetailPage({
   params,
@@ -24,7 +25,7 @@ export default async function AdminNeedDetailPage({
   const query = await searchParams;
   const { supabase } = await requireAdmin();
 
-  const [{ data }, { data: noteRows }, { data: auditLogRows }] = await Promise.all([
+  const [{ data }, { data: noteRows }, { data: auditLogRows }, { data: outcomeRow }, { data: playerRows }, { data: matchRows }] = await Promise.all([
     supabase
       .from("player_needs")
       .select("*, clubs!inner(id,name,country,league,city,website,logo_path,created_at,updated_at), player_need_confidential(note)")
@@ -40,7 +41,10 @@ export default async function AdminNeedDetailPage({
       .select("*, users(*)")
       .eq("player_need_id", id)
       .order("created_at", { ascending: false })
-      .limit(12)
+      .limit(12),
+    supabase.from("need_outcomes").select("*").eq("need_id", id).maybeSingle(),
+    supabase.from("kw_players").select("*").order("last_name"),
+    supabase.from("need_matches").select("player_id").eq("need_id", id)
   ]);
 
   if (!data) notFound();
@@ -72,6 +76,15 @@ export default async function AdminNeedDetailPage({
             </LinkButton>
           </>
         }
+      />
+
+      <AdminNeedOutcome
+        need={need}
+        outcome={(outcomeRow ?? null) as NeedOutcome | null}
+        players={(playerRows ?? []) as KwPlayer[]}
+        matchedPlayerIds={(matchRows ?? []).map((row) => row.player_id)}
+        done={query.done}
+        error={query.error}
       />
 
       <AdminNeedMatches supabase={supabase} need={need} done={query.done} error={query.error} />

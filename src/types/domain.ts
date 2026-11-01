@@ -136,6 +136,18 @@ export type RosterPlayer = {
 
 export type NeedMatchStatus = "freigegeben" | "interessiert" | "kein_interesse";
 
+/** How a need was filled. Private to KW Sports and the club (never shown to agencies). */
+export type NeedFillSource = "kw_sports" | "andere_agentur" | "eigene_suche" | "intern";
+
+export type NeedOutcome = {
+  need_id: string;
+  filled_via: NeedFillSource;
+  kw_player_id: string | null;
+  noted_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type KwPlayer = {
   id: string;
   kind: NeedType;

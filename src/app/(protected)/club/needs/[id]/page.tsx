@@ -21,7 +21,7 @@ export default async function ClubNeedPage({
   const { supabase, profile } = await requireClubUser();
   const locale = await getClubLocale();
 
-  const [{ data }, { data: matchRows }] = await Promise.all([
+  const [{ data }, { data: matchRows }, { data: outcome }] = await Promise.all([
     supabase
       .from("player_needs")
       .select("*, clubs!inner(id,name,country,league,city,website,logo_path,created_at,updated_at), player_need_confidential(note)")
@@ -29,7 +29,8 @@ export default async function ClubNeedPage({
       .eq("club_id", profile.club_id!)
       .maybeSingle(),
     // Access rules only return matches for this club's needs and players KW released.
-    supabase.from("need_matches").select("*").eq("need_id", id).order("score", { ascending: false })
+    supabase.from("need_matches").select("*").eq("need_id", id).order("score", { ascending: false }),
+    supabase.from("need_outcomes").select("filled_via").eq("need_id", id).maybeSingle()
   ]);
   if (!data) notFound();
 
@@ -46,5 +47,5 @@ export default async function ClubNeedPage({
     60 * 30
   );
 
-  return <ClubNeedView need={need} matches={matches} players={players} files={files} locale={locale} query={query} />;
+  return <ClubNeedView need={need} matches={matches} players={players} files={files} locale={locale} query={query} filledVia={outcome?.filled_via ?? null} />;
 }

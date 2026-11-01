@@ -389,14 +389,16 @@ export default async function VisualPreview({
     );
   }
 
-  if (screen === "club-need") {
+  if (screen === "club-need" || screen === "club-need-filled") {
+    const filled = screen === "club-need-filled";
     const clubProfile: Profile = { ...profile, club_id: needs[0].club_id, clubs: needs[0].clubs };
     const need = {
       ...needs[0],
       description: "Linkshänder für den rechten Rückraum, der sofort Spielanteile übernehmen kann.",
       budget_amount: 4500,
       budget_currency: "EUR",
-      last_confirmed_at: daysAgo(40),
+      last_confirmed_at: filled ? daysAgo(2) : daysAgo(40),
+      status: filled ? ("besetzt" as const) : needs[0].status,
       player_need_confidential: { note: "Unser RR verlässt uns im Sommer, bitte noch nicht öffentlich." }
     };
     return (
@@ -408,6 +410,7 @@ export default async function VisualPreview({
           files={new Map()}
           locale={locale}
           query={{ done: query.done }}
+          filledVia={filled ? "kw_sports" : null}
         />
       </AppShell>
     );

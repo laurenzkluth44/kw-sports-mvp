@@ -5,7 +5,7 @@ import { sendEmail } from "@/lib/email/send";
 import { getSiteUrl } from "@/lib/site-url";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { formatDate } from "@/lib/utils";
-import type { Club, KwPlayer, NeedMatch, PlayerNeed } from "@/types/domain";
+import type { Club, KwPlayer, NeedFillSource, NeedMatch, PlayerNeed } from "@/types/domain";
 
 /**
  * Event emails. Called after the user's action has succeeded (via next/server `after`), they read
@@ -95,6 +95,51 @@ export function notifyKwNewNeed(needId: string) {
     const need = await loadNeed(admin, needId);
     if (!need) return;
     await sendEmail({ to: await kwRecipients(admin), ...buildNewNeedEmail(need) });
+  });
+}
+
+// ---------------------------------------------------------------- KW: a club filled a need
+
+const FILL_SOURCE_DE: Record<NeedFillSource, string> = {
+  kw_sports: "über KW Sports",
+  andere_agentur: "über eine andere Agentur",
+  eigene_suche: "durch eigene Suche",
+  intern: "aus dem eigenen Kader / Nachwuchs"
+};
+
+export function buildFilledEmail(need: PlayerNeed & { clubs: Club }, source: NeedFillSource | null, site = getSiteUrl()) {
+  const headline = needHeadline(need, "de");
+  const how = source ? FILL_SOURCE_DE[source] : "ohne Angabe";
+  const viaKw = source === "kw_sports";
+  const { html, text } = renderEmail(
+    {
+      preheader: `${need.clubs.name} hat ${headline} besetzt (${how}).`,
+      eyebrow: viaKw ? "Platzierung über KW Sports" : "Bedarf besetzt",
+      title: viaKw ? `Platzierung: ${need.clubs.name} · ${headline}` : `${need.clubs.name} hat ${headline} besetzt`,
+      intro: viaKw
+        ? "Der Verein meldet die Position als über KW Sports besetzt. Bitte in der Plattform den Spieler zuordnen, damit die Platzierung in der Auswertung zählt."
+        : `Der Verein meldet die Position als besetzt (${how}). Offene Vorschläge für diesen Bedarf sind damit erledigt.`,
+      rows: [
+        { label: "Verein", value: `${need.clubs.name} · ${need.clubs.league}` },
+        { label: "Position", value: headline },
+        { label: "Saison", value: need.season },
+        { label: "Besetzt", value: how }
+      ],
+      cta: { label: "Bedarf öffnen", href: `${site}/admin/needs/${need.id}` },
+      footer: "KW Club Hub · interne Benachrichtigung"
+    },
+    site
+  );
+  return { subject: `${viaKw ? "Platzierung" : "Besetzt"}: ${need.clubs.name} · ${headline}`, html, text };
+}
+
+export function notifyKwNeedFilled(needId: string, source: NeedFillSource | null) {
+  return safely("need filled", async () => {
+    const admin = adminClientOrNull();
+    if (!admin) return;
+    const need = await loadNeed(admin, needId);
+    if (!need) return;
+    await sendEmail({ to: await kwRecipients(admin), ...buildFilledEmail(need, source) });
   });
 }
 

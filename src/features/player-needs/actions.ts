@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
-import { notifyKwNewNeed } from "@/lib/email/notifications";
+import { notifyKwNeedFilled, notifyKwNewNeed } from "@/lib/email/notifications";
 import { requireAdmin, requireClubUser, type AuthedContext } from "@/lib/auth";
 import {
   isValidDateString,
@@ -13,6 +13,7 @@ import {
   parseNeedFormData,
   parseStatus
 } from "@/features/player-needs/form-schema";
+import type { NeedFillSource } from "@/types/domain";
 
 function readId(formData: FormData) {
   const id = String(formData.get("id") || "").trim();
@@ -24,6 +25,13 @@ function readId(formData: FormData) {
 function clubReturnPath(formData: FormData) {
   const value = String(formData.get("return_to") || "");
   return /^\/club\/needs\/[0-9a-f-]{36}$/i.test(value) ? value : "/club";
+}
+
+const FILL_SOURCES = ["kw_sports", "andere_agentur", "eigene_suche", "intern"] as const;
+
+function readFillSource(formData: FormData): NeedFillSource | null {
+  const value = String(formData.get("filled_via") || "");
+  return (FILL_SOURCES as readonly string[]).includes(value) ? (value as NeedFillSource) : null;
 }
 
 function readOptionalNote(formData: FormData, key: string) {
@@ -123,9 +131,12 @@ export async function updateClubNeedStatusAction(formData: FormData) {
   const { supabase, profile } = await requireClubUser();
   const id = readId(formData);
   const back = clubReturnPath(formData);
+  const filledVia = readFillSource(formData);
+  let notifyFilled = false;
 
   try {
     const status = parseStatus(formData);
+    const { data: before } = await supabase.from("player_needs").select("status").eq("id", id).eq("club_id", profile.club_id!).maybeSingle();
     const { error } = await supabase
       .from("player_needs")
       .update({
@@ -137,11 +148,24 @@ export async function updateClubNeedStatusAction(formData: FormData) {
       .eq("club_id", profile.club_id!);
 
     if (error) throw error;
+
+    // "Besetzt – durch wen?" lives in its own table that agencies can't read.
+    if (status === "besetzt" && filledVia) {
+      const { error: outcomeError } = await supabase
+        .from("need_outcomes")
+        .upsert({ need_id: id, filled_via: filledVia, noted_by: profile.id }, { onConflict: "need_id" });
+      if (outcomeError) throw outcomeError;
+    } else if (status === "offen" || status === "in_gespraechen") {
+      await supabase.from("need_outcomes").delete().eq("need_id", id);
+    }
+    notifyFilled = status === "besetzt" && before?.status !== "besetzt";
   } catch {
     redirect(`${back}?error=status`);
   }
 
+  if (notifyFilled) after(() => notifyKwNeedFilled(id, filledVia));
   revalidatePath("/club", "layout");
+  revalidatePath("/admin", "layout");
   redirect(`${back}?done=status`);
 }
 

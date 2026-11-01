@@ -15,7 +15,7 @@ import { cockpitCopy } from "@/lib/cockpit-i18n";
 import { guideCopy } from "@/lib/guide-i18n";
 import { matchCopy } from "@/lib/match-i18n";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import type { KwPlayer, NeedMatch, PlayerNeedWithClub } from "@/types/domain";
+import type { KwPlayer, NeedFillSource, NeedMatch, PlayerNeedWithClub } from "@/types/domain";
 
 /** The club's own need page as a pure view (also used by the screenshot preview). */
 export function ClubNeedView({
@@ -24,7 +24,8 @@ export function ClubNeedView({
   players,
   files,
   locale,
-  query
+  query,
+  filledVia
 }: {
   need: PlayerNeedWithClub & { player_need_confidential?: { note: string | null } | null };
   matches: NeedMatch[];
@@ -32,6 +33,7 @@ export function ClubNeedView({
   files: Map<string, string>;
   locale: ClubLocale;
   query: { done?: string; error?: string };
+  filledVia?: NeedFillSource | null;
 }) {
   const t = clubNeedCopy[locale];
   const d = agencyCopy[locale].detail;
@@ -114,7 +116,7 @@ export function ClubNeedView({
         </section>
       ) : null}
 
-      <ClubNeedStatus need={need} locale={locale} returnTo={here} />
+      <ClubNeedStatus need={need} locale={locale} returnTo={here} filledVia={filledVia} />
 
       <section id="kw-spieler" className="scroll-mt-32 space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-2 border-b-2 border-navy-950 pb-2">

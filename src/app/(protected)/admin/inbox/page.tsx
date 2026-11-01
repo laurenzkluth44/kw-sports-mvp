@@ -1,6 +1,6 @@
 import { AdminInboxView, INBOX_TABS, type InboxTab } from "@/features/matching/admin-inbox";
 import { requireAdmin } from "@/lib/auth";
-import type { KwPlayer, NeedMatch, PlayerNeedWithClub, Profile } from "@/types/domain";
+import type { KwPlayer, NeedFillSource, NeedMatch, PlayerNeedWithClub, Profile } from "@/types/domain";
 
 export default async function AdminInboxPage({
   searchParams
@@ -11,7 +11,10 @@ export default async function AdminInboxPage({
   const params = await searchParams;
   const tab: InboxTab = INBOX_TABS.find((key) => key === params.tab) ?? "offen";
 
-  const { data: matchRows } = await supabase.from("need_matches").select("*");
+  const [{ data: matchRows }, { data: outcomeRows }] = await Promise.all([
+    supabase.from("need_matches").select("*"),
+    supabase.from("need_outcomes").select("need_id, filled_via")
+  ]);
   const matches = (matchRows ?? []) as unknown as NeedMatch[];
   const needIds = [...new Set(matches.map((match) => match.need_id))];
   const playerIds = [...new Set(matches.map((match) => match.player_id))];
@@ -44,6 +47,7 @@ export default async function AdminInboxPage({
       contacts={contacts}
       done={params.done}
       error={params.error}
+      outcomes={(outcomeRows ?? []) as { need_id: string; filled_via: NeedFillSource }[]}
     />
   );
 }
