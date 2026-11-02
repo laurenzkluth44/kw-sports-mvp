@@ -10,7 +10,7 @@ import { ClubCrest, NeedCard, clubInitials, clubLogoUrl } from "@/features/needs
 import { overviewCopy } from "@/lib/overview-i18n";
 import { requireAdmin } from "@/lib/auth";
 import { cn, formatDate } from "@/lib/utils";
-import type { Club, KwPlayer, NeedMatchStatus, PlayerNeedWithClub, Profile } from "@/types/domain";
+import type { Club, KwPlayer, NeedFillSource, NeedMatchStatus, PlayerNeedWithClub, Profile } from "@/types/domain";
 
 const CLUB_COLUMNS = "id,name,country,league,city,website,logo_path,created_at,updated_at";
 
@@ -38,9 +38,13 @@ export default async function AdminClubDetailPage({
   const typedNeeds = needs as PlayerNeedWithClub[];
   const typedUsers = users as Profile[];
   const needIds = typedNeeds.map((need) => need.id);
-  const { data: matchRows } = needIds.length
-    ? await supabase.from("need_matches").select("need_id, player_id, status").in("need_id", needIds)
-    : { data: [] };
+  const [{ data: matchRows }, { data: outcomeRows }] = needIds.length
+    ? await Promise.all([
+        supabase.from("need_matches").select("need_id, player_id, status").in("need_id", needIds),
+        supabase.from("need_outcomes").select("need_id, filled_via").in("need_id", needIds)
+      ])
+    : [{ data: [] }, { data: [] }];
+  const placements = ((outcomeRows ?? []) as { filled_via: NeedFillSource }[]).filter((row) => row.filled_via === "kw_sports").length;
   const matches = (matchRows ?? []) as { need_id: string; player_id: string; status: NeedMatchStatus }[];
   const { info: kwInfo } = buildKwInfo(typedNeeds, (playerRows ?? []) as KwPlayer[], matches);
 
@@ -98,11 +102,12 @@ export default async function AdminClubDetailPage({
             </LinkButton>
           </div>
         </div>
-        <dl className="relative grid grid-cols-2 border-t border-white/10 sm:grid-cols-5">
+        <dl className="relative grid grid-cols-2 border-t border-white/10 sm:grid-cols-3 lg:grid-cols-6">
           <HeroStat label="Aktive Bedarfe" value={active.length} />
           <HeroStat label="Besetzt" value={typedNeeds.filter((need) => need.status === "besetzt").length} />
           <HeroStat label="KW-Vorschläge" value={matches.length} />
           <HeroStat label="Interessiert" value={interested} highlight={interested > 0} />
+          <HeroStat label="Über KW besetzt" value={placements} highlight={placements > 0} />
           <HeroStat label="Nutzer" value={typedUsers.length} warn={typedUsers.length === 0} />
         </dl>
       </section>
@@ -215,7 +220,7 @@ export default async function AdminClubDetailPage({
 
 function HeroStat({ label, value, highlight, warn }: { label: string; value: number; highlight?: boolean; warn?: boolean }) {
   return (
-    <div className="border-l border-t border-white/10 px-5 py-4 first:border-l-0 sm:border-t-0">
+    <div className="border-l border-t border-white/10 px-5 py-4 first:border-l-0 lg:border-t-0">
       <dt className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-white/55">{label}</dt>
       <dd className={cn("mt-1 font-display text-3xl leading-none", highlight ? "text-brand-300" : warn ? "text-amber-300" : "text-white")}>{value}</dd>
     </div>

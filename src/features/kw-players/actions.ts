@@ -12,6 +12,7 @@ import type { Json } from "@/types/database";
 import type { KwPlayer, PlayerNeed } from "@/types/domain";
 
 const BUCKET = "kw-players";
+const UUID = /^[0-9a-f-]{36}$/i;
 const MAX_CV_BYTES = 10 * 1024 * 1024;
 const MAX_PHOTO_BYTES = 3 * 1024 * 1024;
 const PHOTO_TYPES: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
@@ -245,4 +246,44 @@ export async function setMatchHandledAction(formData: FormData) {
   if (tab) query.set("tab", tab);
   query.set(error ? "error" : "done", error ? "inbox" : handled ? "handled" : "reopened");
   redirect(`/admin/inbox?${query.toString()}`);
+}
+
+const FILL_SOURCES = ["kw_sports", "andere_agentur", "eigene_suche", "intern"] as const;
+
+/** KW records or corrects how a need was filled, and which KW player it was. Internal only. */
+export async function setNeedOutcomeAction(formData: FormData) {
+  const { supabase, profile } = await requireAdmin();
+  const needId = String(formData.get("need_id") || "");
+  const source = String(formData.get("filled_via") || "");
+  const playerId = String(formData.get("kw_player_id") || "");
+  if (!UUID.test(needId)) redirect("/admin");
+
+  let error: unknown = null;
+  if (!source) {
+    ({ error } = await supabase.from("need_outcomes").delete().eq("need_id", needId));
+  } else if ((FILL_SOURCES as readonly string[]).includes(source)) {
+    ({ error } = await supabase.from("need_outcomes").upsert(
+      {
+        need_id: needId,
+        filled_via: source as (typeof FILL_SOURCES)[number],
+        kw_player_id: source === "kw_sports" && UUID.test(playerId) ? playerId : null,
+        noted_by: profile.id
+      },
+      { onConflict: "need_id" }
+    ));
+  }
+  if (error) console.error("Outcome update failed", error);
+
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/needs/${needId}?${error ? "error=outcome" : "done=outcome"}#ergebnis`);
+}
+
+/** "Daten sind aktuell": KW confirms a profile without changing anything; resets the freshness clock. */
+export async function confirmKwPlayerAction(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = String(formData.get("id") || "");
+  if (!UUID.test(id)) redirect("/admin/players");
+  const { error } = await supabase.from("kw_players").update({ updated_at: new Date().toISOString() }).eq("id", id);
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/players/${id}/edit?${error ? "error=save" : "done=confirmed"}`);
 }

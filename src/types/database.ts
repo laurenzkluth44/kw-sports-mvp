@@ -5,6 +5,7 @@ import type {
   DefensePosition,
   Language,
   League,
+  NeedFillSource,
   NeedMatchStatus,
   NeedType,
   PlayerNeedStatus,
@@ -353,6 +354,48 @@ export type Database = {
           }
         ];
       };
+      need_outcomes: {
+        Row: {
+          need_id: string;
+          filled_via: NeedFillSource;
+          kw_player_id: string | null;
+          noted_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          need_id: string;
+          filled_via: NeedFillSource;
+          kw_player_id?: string | null;
+          noted_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          need_id?: string;
+          filled_via?: NeedFillSource;
+          kw_player_id?: string | null;
+          noted_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "need_outcomes_need_id_fkey";
+            columns: ["need_id"];
+            isOneToOne: true;
+            referencedRelation: "player_needs";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "need_outcomes_kw_player_id_fkey";
+            columns: ["kw_player_id"];
+            isOneToOne: false;
+            referencedRelation: "kw_players";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       roster_players: {
         Row: {
           id: string;
@@ -566,6 +609,7 @@ export type Database = {
     };
     Enums: {
       need_match_status: NeedMatchStatus;
+      need_fill_source: NeedFillSource;
       app_role: AppRole;
       club_league: League;
       attack_position: AttackPosition;

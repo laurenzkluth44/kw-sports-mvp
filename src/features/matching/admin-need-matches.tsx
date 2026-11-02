@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Send, Undo2, UserRound } from "lucide-react";
+import { Clock3, Send, Undo2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { releaseNeedMatchAction, withdrawNeedMatchAction } from "@/features/kw-players/actions";
 import { signedFileUrls } from "@/features/kw-players/files";
+import { playerFreshness } from "@/features/kw-players/freshness";
 import { kwPlayerHeadline } from "@/features/kw-players/kw-player-card";
 import { rankPlayersForNeed } from "@/features/matching/engine";
 import { MatchReasons, scoreTone } from "@/features/matching/match-reasons";
@@ -57,7 +58,8 @@ export function AdminNeedMatchesView({
 }) {
   const byId = new Map(players.map((player) => [player.id, player]));
   const releasedIds = new Set(matches.map((match) => match.player_id));
-  const suggestions = rankPlayersForNeed(need, players).filter((result) => !releasedIds.has(result.player.id)).slice(0, 8);
+  const closed = need.status === "besetzt" || need.status === "archiviert";
+  const suggestions = closed ? [] : rankPlayersForNeed(need, players).filter((result) => !releasedIds.has(result.player.id)).slice(0, 8);
 
   return (
     <section id="kw-spieler" className="panel scroll-mt-28 overflow-hidden">
@@ -125,12 +127,18 @@ export function AdminNeedMatchesView({
         <h3 className="section-heading mb-3">Vorschläge des Systems</h3>
         {suggestions.length === 0 ? (
           <p className="text-sm text-slate-600">
-            {players.length === 0
-              ? "Noch keine Spieler in der Datenbank."
-              : "Kein weiterer KW-Spieler passt zur gesuchten Position bzw. Trainerrolle."}{" "}
-            <Link href="/admin/players/new" className="font-bold">
-              Spieler anlegen
-            </Link>
+            {closed ? (
+              "Der Bedarf ist geschlossen. Es werden keine neuen Spieler vorgeschlagen."
+            ) : (
+              <>
+                {players.length === 0
+                  ? "Noch keine Spieler in der Datenbank."
+                  : "Kein weiterer KW-Spieler passt zur gesuchten Position bzw. Trainerrolle."}{" "}
+                <Link href="/admin/players/new" className="font-bold">
+                  Spieler anlegen
+                </Link>
+              </>
+            )}
           </p>
         ) : (
           <ul className="flex flex-col gap-3">
@@ -153,6 +161,18 @@ export function AdminNeedMatchesView({
                     </span>
                   </p>
                   <MatchReasons reasons={reasons} locale="de" />
+                  {(() => {
+                    const fresh = playerFreshness(player);
+                    return fresh.stale ? (
+                      <Link
+                        href={`/admin/players/${player.id}/edit`}
+                        className="inline-flex items-center gap-1 bg-amber-50 px-2 py-0.5 text-xs font-bold text-amber-900 ring-1 ring-amber-200 hover:bg-amber-100"
+                      >
+                        <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
+                        {fresh.label}: vor dem Freigeben prüfen
+                      </Link>
+                    ) : null;
+                  })()}
                 </div>
                 {player.visible_to_clubs ? (
                   <form action={releaseNeedMatchAction}>

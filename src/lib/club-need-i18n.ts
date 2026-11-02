@@ -1,5 +1,5 @@
 import type { ClubLocale } from "@/lib/club-i18n";
-import type { PlayerNeedStatus } from "@/types/domain";
+import type { NeedFillSource, PlayerNeedStatus } from "@/types/domain";
 
 /** The club's own need page and need cards. Plain strings with {n}, safe for client components. */
 type ClubNeedCopy = {
@@ -25,6 +25,9 @@ type ClubNeedCopy = {
   addNeed: string;
   addNeedHint: string;
   closedTitle: string;
+  filledQuestion: string;
+  filledChange: string;
+  filledVia: Record<NeedFillSource, string>;
 };
 
 export const clubNeedCopy: Record<ClubLocale, ClubNeedCopy> = {
@@ -55,7 +58,15 @@ export const clubNeedCopy: Record<ClubLocale, ClubNeedCopy> = {
     stale: "Bitte bestätigen",
     addNeed: "Neuer Bedarf",
     addNeedHint: "Position oder Trainerrolle melden",
-    closedTitle: "Geschlossene Bedarfe"
+    closedTitle: "Geschlossene Bedarfe",
+    filledQuestion: "Wie habt ihr die Position besetzt?",
+    filledChange: "ändern",
+    filledVia: {
+      kw_sports: "Über KW Sports",
+      andere_agentur: "Über eine andere Agentur",
+      eigene_suche: "Eigene Suche",
+      intern: "Aus dem eigenen Kader / Nachwuchs"
+    }
   },
   en: {
     edit: "Edit",
@@ -84,7 +95,15 @@ export const clubNeedCopy: Record<ClubLocale, ClubNeedCopy> = {
     stale: "Please confirm",
     addNeed: "New need",
     addNeedHint: "Report a position or coaching role",
-    closedTitle: "Closed needs"
+    closedTitle: "Closed needs",
+    filledQuestion: "How did you fill the position?",
+    filledChange: "change",
+    filledVia: {
+      kw_sports: "Through KW Sports",
+      andere_agentur: "Through another agency",
+      eigene_suche: "Our own search",
+      intern: "From our own squad / youth"
+    }
   },
   fr: {
     edit: "Modifier",
@@ -113,7 +132,15 @@ export const clubNeedCopy: Record<ClubLocale, ClubNeedCopy> = {
     stale: "À confirmer",
     addNeed: "Nouveau besoin",
     addNeedHint: "Signaler un poste ou un rôle d’entraîneur",
-    closedTitle: "Besoins clôturés"
+    closedTitle: "Besoins clôturés",
+    filledQuestion: "Comment avez-vous pourvu le poste ?",
+    filledChange: "modifier",
+    filledVia: {
+      kw_sports: "Via KW Sports",
+      andere_agentur: "Via une autre agence",
+      eigene_suche: "Notre propre recherche",
+      intern: "Effectif / centre de formation"
+    }
   },
   es: {
     edit: "Editar",
@@ -142,6 +169,14 @@ export const clubNeedCopy: Record<ClubLocale, ClubNeedCopy> = {
     stale: "Por confirmar",
     addNeed: "Nueva necesidad",
     addNeedHint: "Indicar un puesto o un rol de entrenador",
-    closedTitle: "Necesidades cerradas"
+    closedTitle: "Necesidades cerradas",
+    filledQuestion: "¿Cómo habéis cubierto el puesto?",
+    filledChange: "cambiar",
+    filledVia: {
+      kw_sports: "A través de KW Sports",
+      andere_agentur: "A través de otra agencia",
+      eigene_suche: "Búsqueda propia",
+      intern: "Plantilla propia / cantera"
+    }
   }
 };

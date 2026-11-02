@@ -35,7 +35,9 @@ export function ClubSuggestionsView({
   const groups = needs
     .map((need) => {
       const own = visible.filter((match) => match.need_id === need.id);
-      const open = own.filter((match) => match.status === "freigegeben").sort(byScore);
+      const active = need.status === "offen" || need.status === "in_gespraechen";
+      // Unanswered suggestions for a filled or archived need are moot; only answers stay visible.
+      const open = active ? own.filter((match) => match.status === "freigegeben").sort(byScore) : [];
       const answered = own.filter((match) => match.status !== "freigegeben").sort(byScore);
       return { need, open, answered };
     })

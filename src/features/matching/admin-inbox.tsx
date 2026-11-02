@@ -7,7 +7,7 @@ import { setMatchHandledAction } from "@/features/kw-players/actions";
 import { kwPlayerHeadline } from "@/features/kw-players/kw-player-card";
 import { needHeadline } from "@/features/player-needs/need-summary";
 import { cn, formatDate } from "@/lib/utils";
-import type { KwPlayer, NeedMatch, PlayerNeedWithClub, Profile } from "@/types/domain";
+import type { KwPlayer, NeedFillSource, NeedMatch, PlayerNeedWithClub, Profile } from "@/types/domain";
 
 export const INBOX_TABS = ["offen", "wartet", "erledigt", "abgesagt"] as const;
 export type InboxTab = (typeof INBOX_TABS)[number];
@@ -26,8 +26,9 @@ const TAB_HINTS: Record<InboxTab, string> = {
   abgesagt: "Absagen mit Begründung helfen, die nächsten Vorschläge besser zu treffen."
 };
 
-export function inboxTabOf(match: NeedMatch): InboxTab {
-  if (match.status === "freigegeben") return "wartet";
+export function inboxTabOf(match: NeedMatch, needClosed = false): InboxTab {
+  // A suggestion for a need that is already filled or archived is no longer waiting for anything.
+  if (match.status === "freigegeben") return needClosed ? "erledigt" : "wartet";
   if (match.status === "kein_interesse") return "abgesagt";
   return match.handled_at ? "erledigt" : "offen";
 }
@@ -43,6 +44,7 @@ export function AdminInboxView({
   contacts,
   done,
   error,
+  outcomes = [],
   now = Date.now()
 }: {
   tab: InboxTab;
@@ -53,17 +55,26 @@ export function AdminInboxView({
   contacts: Map<string, Profile[]>;
   done?: string;
   error?: string;
+  /** How filled needs were filled (KW-internal). */
+  outcomes?: { need_id: string; filled_via: NeedFillSource }[];
   now?: number;
 }) {
   const needById = new Map(needs.map((need) => [need.id, need]));
   const playerById = new Map(players.map((player) => [player.id, player]));
   const known = matches.filter((match) => needById.has(match.need_id) && playerById.has(match.player_id));
-  const counts = Object.fromEntries(INBOX_TABS.map((key) => [key, known.filter((match) => inboxTabOf(match) === key).length])) as Record<
+  const closed = (match: NeedMatch) => {
+    const status = needById.get(match.need_id)?.status;
+    return status === "besetzt" || status === "archiviert";
+  };
+  const tabOf = (match: NeedMatch) => inboxTabOf(match, closed(match));
+  const counts = Object.fromEntries(INBOX_TABS.map((key) => [key, known.filter((match) => tabOf(match) === key).length])) as Record<
     InboxTab,
     number
   >;
+  const placements = outcomes.filter((outcome) => outcome.filled_via === "kw_sports").length;
+  const interestedTotal = known.filter((match) => match.status === "interessiert").length;
   const rows = known
-    .filter((match) => inboxTabOf(match) === tab)
+    .filter((match) => tabOf(match) === tab)
     .sort((a, b) =>
       tab === "wartet"
         ? a.released_at.localeCompare(b.released_at)
@@ -77,6 +88,17 @@ export function AdminInboxView({
         title="Antworten der Vereine"
         description="Was die Vereine zu deinen Spielervorschlägen sagen, auf einen Blick."
       />
+
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <InboxStat label="Vorschläge gesendet" value={known.length} />
+        <InboxStat label="Interesse gemeldet" value={interestedTotal} sub={known.length ? `${Math.round((interestedTotal / known.length) * 100)} % der Vorschläge` : undefined} />
+        <InboxStat label="Besetzt über KW Sports" value={placements} highlight={placements > 0} />
+        <InboxStat
+          label="Anteil KW an Besetzungen"
+          value={outcomes.length ? `${Math.round((placements / outcomes.length) * 100)} %` : "–"}
+          sub={outcomes.length ? `${placements} von ${outcomes.length} gemeldeten` : "Noch keine Besetzung gemeldet"}
+        />
+      </section>
 
       <Flash message={done === "handled" ? "Als erledigt markiert." : done === "reopened" ? "Wieder geöffnet." : null} />
       {error ? <div className="alert-error">Das hat nicht geklappt. Bitte erneut versuchen.</div> : null}
@@ -140,6 +162,8 @@ export function AdminInboxView({
                 <div className="min-w-0 space-y-2">
                   {match.club_note ? (
                     <p className="border-l-2 border-brand-500 pl-3 text-sm italic text-slate-700">„{match.club_note}“</p>
+                  ) : match.status === "freigegeben" && closed(match) ? (
+                    <p className="text-sm text-slate-500">Bedarf geschlossen, ohne Antwort des Vereins.</p>
                   ) : tab === "wartet" ? (
                     <p className={cn("text-sm font-semibold", waitingDays >= 7 ? "text-amber-700" : "text-slate-500")}>
                       {waitingDays <= 0 ? "Heute freigegeben" : waitingDays === 1 ? "Seit 1 Tag offen" : `Seit ${waitingDays} Tagen offen`}
@@ -170,7 +194,7 @@ export function AdminInboxView({
                   >
                     Zum Bedarf →
                   </Link>
-                  {tab === "offen" || tab === "erledigt" ? (
+                  {tab === "offen" || (tab === "erledigt" && match.status !== "freigegeben") ? (
                     <form action={setMatchHandledAction}>
                       <input type="hidden" name="match_id" value={match.id} />
                       <input type="hidden" name="handled" value={tab === "offen" ? "1" : "0"} />
@@ -191,6 +215,16 @@ export function AdminInboxView({
           })}
         </ul>
       )}
+    </div>
+  );
+}
+
+function InboxStat({ label, value, sub, highlight }: { label: string; value: number | string; sub?: string; highlight?: boolean }) {
+  return (
+    <div className={cn("border-l-[3px] border-brand-500 px-4 py-3 shadow-card", highlight ? "bg-brand-500 text-white" : "bg-white")}>
+      <p className={cn("text-[0.62rem] font-bold uppercase tracking-[0.16em]", highlight ? "text-white/80" : "text-slate-500")}>{label}</p>
+      <p className="mt-1 font-display text-3xl leading-none">{value}</p>
+      {sub ? <p className={cn("mt-1 text-xs", highlight ? "text-white/80" : "text-slate-500")}>{sub}</p> : null}
     </div>
   );
 }

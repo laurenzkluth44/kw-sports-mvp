@@ -211,7 +211,7 @@ function kwPlayer(index: number, extra: Partial<KwPlayer>): KwPlayer {
     consent_at: "2026-10-01",
     visible_to_clubs: true,
     created_at: "2026-10-01T00:00:00Z",
-    updated_at: "2026-10-01T00:00:00Z",
+    updated_at: daysAgo(12),
     ...extra
   };
 }
@@ -220,7 +220,7 @@ const kwPlayers: KwPlayer[] = [
   kwPlayer(1, { first_name: "Jonas", last_name: "Brenner", birth_date: "2001-05-12", attack_positions: ["RR"], handedness: "links", height_cm: 192, current_club: "TV Beispielstadt", current_league: "2. Bundesliga", contract_until: `${start + 1}-06-30`, languages: ["de", "en"], player_types: ["wurfstark"], cv_path: "x/cv.pdf" }),
   kwPlayer(2, { first_name: "Mats", last_name: "Lindgren", birth_date: "2002-02-02", attack_positions: ["RR", "RA"], handedness: "links", height_cm: 188, current_club: "IK Exempel", current_league: "Håndboldligaen", available_from: `${start + 1}-07-01`, languages: ["en", "sv"], player_types: ["eins_gegen_eins"], cv_path: "x/cv.pdf" }),
   kwPlayer(3, { first_name: "Karim", last_name: "Haddad", birth_date: "1993-08-20", attack_positions: ["RR"], height_cm: 196, current_club: "HC Muster", current_league: "1. Bundesliga", contract_until: `${start + 2}-06-30`, languages: ["de", "fr"], player_types: ["wurfstark"], visible_to_clubs: false, consent_at: null }),
-  kwPlayer(4, { first_name: "Tom", last_name: "Weber", birth_date: "2003-03-03", attack_positions: ["RL", "RM"], height_cm: 190, current_club: "SG Probe", current_league: "3. Liga Süd", contract_until: `${start}-06-30`, languages: ["de"], player_types: ["spielstark"] }),
+  kwPlayer(4, { first_name: "Tom", last_name: "Weber", birth_date: "2003-03-03", attack_positions: ["RL", "RM"], height_cm: 190, current_club: "SG Probe", current_league: "3. Liga Süd", contract_until: `${start}-06-30`, languages: ["de"], player_types: ["spielstark"], updated_at: daysAgo(120) }),
   kwPlayer(5, { kind: "trainer", first_name: "Marco", last_name: "Stein", birth_date: "1985-11-01", coach_roles: ["co_trainer", "athletiktrainer"], current_club: "HSV Beispiel", current_league: "2. Bundesliga", languages: ["de", "en"] })
 ];
 
@@ -389,14 +389,16 @@ export default async function VisualPreview({
     );
   }
 
-  if (screen === "club-need") {
+  if (screen === "club-need" || screen === "club-need-filled") {
+    const filled = screen === "club-need-filled";
     const clubProfile: Profile = { ...profile, club_id: needs[0].club_id, clubs: needs[0].clubs };
     const need = {
       ...needs[0],
       description: "Linkshänder für den rechten Rückraum, der sofort Spielanteile übernehmen kann.",
       budget_amount: 4500,
       budget_currency: "EUR",
-      last_confirmed_at: daysAgo(40),
+      last_confirmed_at: filled ? daysAgo(2) : daysAgo(40),
+      status: filled ? ("besetzt" as const) : needs[0].status,
       player_need_confidential: { note: "Unser RR verlässt uns im Sommer, bitte noch nicht öffentlich." }
     };
     return (
@@ -408,6 +410,7 @@ export default async function VisualPreview({
           files={new Map()}
           locale={locale}
           query={{ done: query.done }}
+          filledVia={filled ? "kw_sports" : null}
         />
       </AppShell>
     );

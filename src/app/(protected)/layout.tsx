@@ -12,8 +12,9 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
   if (profile.role === "club") {
     const { count } = await supabase
       .from("need_matches")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "freigegeben");
+      .select("id, player_needs!inner(status)", { count: "exact", head: true })
+      .eq("status", "freigegeben")
+      .in("player_needs.status", ["offen", "in_gespraechen"]);
     badge = count ?? 0;
   } else if (profile.role === "admin") {
     const { count } = await supabase

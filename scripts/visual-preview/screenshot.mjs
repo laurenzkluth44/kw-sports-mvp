@@ -42,6 +42,8 @@ const shots = [
   { name: "club-cockpit-empty", path: "/visual-preview/cockpit-empty", width: 1280 },
   { name: "club-need-desktop", path: "/visual-preview/club-need", width: 1280 },
   { name: "club-need-mobile", path: "/visual-preview/club-need?lang=en", width: 390 },
+  { name: "club-need-filled-choice", path: "/visual-preview/club-need", width: 1280, click: "[role=group] details summary" },
+  { name: "club-need-filled", path: "/visual-preview/club-need-filled", width: 1280 },
   { name: "admin-inbox-desktop", path: "/visual-preview/inbox", width: 1280 },
   { name: "admin-inbox-waiting", path: "/visual-preview/inbox?tab=wartet", width: 1280 },
   { name: "email-suggestion", path: "/visual-preview/email?kind=suggestion", width: 680 },

@@ -15,7 +15,7 @@ import { cockpitCopy } from "@/lib/cockpit-i18n";
 import { guideCopy } from "@/lib/guide-i18n";
 import { matchCopy } from "@/lib/match-i18n";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import type { KwPlayer, NeedMatch, PlayerNeedWithClub } from "@/types/domain";
+import type { KwPlayer, NeedFillSource, NeedMatch, PlayerNeedWithClub } from "@/types/domain";
 
 /** The club's own need page as a pure view (also used by the screenshot preview). */
 export function ClubNeedView({
@@ -24,7 +24,8 @@ export function ClubNeedView({
   players,
   files,
   locale,
-  query
+  query,
+  filledVia
 }: {
   need: PlayerNeedWithClub & { player_need_confidential?: { note: string | null } | null };
   matches: NeedMatch[];
@@ -32,16 +33,18 @@ export function ClubNeedView({
   files: Map<string, string>;
   locale: ClubLocale;
   query: { done?: string; error?: string };
+  filledVia?: NeedFillSource | null;
 }) {
   const t = clubNeedCopy[locale];
   const d = agencyCopy[locale].detail;
   const m = matchCopy[locale];
   const visible = matches.filter((match) => players.has(match.player_id));
-  const open = visible.filter((match) => match.status === "freigegeben");
+  const closed = need.status === "besetzt" || need.status === "archiviert";
+  // Once the need is filled or archived, unanswered suggestions are moot: no "new" badge, no answer buttons.
+  const open = closed ? [] : visible.filter((match) => match.status === "freigegeben");
   const answered = visible.filter((match) => match.status !== "freigegeben");
   const labels = needProfileLabels(need, locale);
   const isCoach = need.need_type === "trainer";
-  const closed = need.status === "besetzt" || need.status === "archiviert";
   const stale = isStale(need);
   const here = `/club/needs/${need.id}`;
   const confidentialNote = need.player_need_confidential?.note;
@@ -114,7 +117,7 @@ export function ClubNeedView({
         </section>
       ) : null}
 
-      <ClubNeedStatus need={need} locale={locale} returnTo={here} />
+      <ClubNeedStatus need={need} locale={locale} returnTo={here} filledVia={filledVia} />
 
       <section id="kw-spieler" className="scroll-mt-32 space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-2 border-b-2 border-navy-950 pb-2">
@@ -129,14 +132,14 @@ export function ClubNeedView({
           ) : null}
         </div>
 
-        {visible.length === 0 ? (
+        {open.length + answered.length === 0 ? (
           <div className="flex items-start gap-3 border border-dashed border-slate-300 bg-white px-5 py-5 text-sm text-slate-600">
             <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-brand-500" aria-hidden="true" />
             <p>{closed ? t.suggestionsClosed : t.suggestionsEmpty}</p>
           </div>
         ) : (
           <>
-            <p className="text-sm text-slate-600">{t.suggestionsIntro}</p>
+            <p className="text-sm text-slate-600">{closed ? t.suggestionsClosed : t.suggestionsIntro}</p>
             {open.map(card)}
             {answered.length > 0 ? (
               <details className="group" open={open.length === 0}>
