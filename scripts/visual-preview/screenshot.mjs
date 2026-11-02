@@ -30,6 +30,9 @@ const shots = [
   { name: "login-desktop-error", path: "/login?error=invalid", width: 1440 },
   { name: "login-mobile", path: "/login", width: 390 },
   { name: "kw-players-desktop", path: "/visual-preview/players", width: 1280 },
+  { name: "bulk-upload-empty", path: "/visual-preview/bulk-upload", width: 1280 },
+  { name: "bulk-upload-desktop", path: "/visual-preview/bulk-upload", width: 1280, files: ["20261027_KW_CV_Jonas_Brenner_DE.pdf", "20261027_KW_CV_Jonas_Brenner_EN.pdf", "athlete-mats-lindgren.jpg", "Haddad.png", "20260721_KW_CV_Tom_Weber.docx", "scan_0042.pdf"] },
+  { name: "bulk-upload-mobile", path: "/visual-preview/bulk-upload", width: 390, files: ["20261027_KW_CV_Jonas_Brenner_DE.pdf", "20261027_KW_CV_Jonas_Brenner_EN.pdf", "athlete-mats-lindgren.jpg", "Haddad.png", "20260721_KW_CV_Tom_Weber.docx", "scan_0042.pdf"] },
   { name: "kw-player-form-desktop", path: "/visual-preview/player-form", width: 1280 },
   { name: "kw-matches-desktop", path: "/visual-preview/matches", width: 1280 },
   { name: "kw-matches-mobile", path: "/visual-preview/matches", width: 390 },
@@ -68,6 +71,14 @@ for (const shot of shots) {
   if (!response || (response.status() >= 400 && response.status() !== shot.expectStatus)) {
     console.error(`::error::${shot.path} returned ${response?.status()}`);
     process.exitCode = 1;
+  }
+  if (shot.files) {
+    // Bulk upload: feed dummy files into the file input, the page assigns them by name.
+    const mime = { pdf: "application/pdf", jpg: "image/jpeg", png: "image/png", docx: "application/octet-stream" };
+    await page.locator("input[type=file]").setInputFiles(
+      shot.files.map((name) => ({ name, mimeType: mime[name.split(".").pop()], buffer: Buffer.alloc(180_000 + name.length * 9_000) }))
+    );
+    await page.waitForTimeout(300);
   }
   if (shot.click) {
     await page.locator(shot.click).first().click();

@@ -287,3 +287,54 @@ export async function confirmKwPlayerAction(formData: FormData) {
   revalidatePath("/admin", "layout");
   redirect(`/admin/players/${id}/edit?${error ? "error=save" : "done=confirmed"}`);
 }
+
+export type BulkUploadResult = { ok: true } | { ok: false; error: "file" | "save" };
+
+/**
+ * One file of a bulk upload (CV or photo) for one player. The page calls it once per file,
+ * so each request stays far below the server action body limit.
+ */
+export async function uploadPlayerFileAction(formData: FormData): Promise<BulkUploadResult> {
+  const { supabase } = await requireAdmin();
+  const id = String(formData.get("id") || "");
+  const kind = formData.get("kind");
+  const file = formData.get("file");
+  if (!UUID.test(id) || (kind !== "cv" && kind !== "photo") || !(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "file" };
+  }
+
+  let path: string;
+  let contentType: string;
+  if (kind === "cv") {
+    if (file.type !== "application/pdf" || file.size > MAX_CV_BYTES) return { ok: false, error: "file" };
+    path = `${id}/cv.pdf`;
+    contentType = "application/pdf";
+  } else {
+    const ext = PHOTO_TYPES[file.type];
+    if (!ext || file.size > MAX_PHOTO_BYTES) return { ok: false, error: "file" };
+    path = `${id}/photo.${ext}`;
+    contentType = file.type;
+  }
+
+  try {
+    const { data: player } = await supabase.from("kw_players").select("photo_path").eq("id", id).maybeSingle();
+    if (!player) return { ok: false, error: "save" };
+    const { error } = await supabase.storage.from(BUCKET).upload(path, file, { contentType, upsert: true });
+    if (error) throw error;
+    // A photo in another format would leave the old file behind (photo.png next to photo.jpg).
+    if (kind === "photo" && player.photo_path && player.photo_path !== path) {
+      await supabase.storage.from(BUCKET).remove([player.photo_path]);
+    }
+    const { error: rowError } = await supabase
+      .from("kw_players")
+      .update(kind === "cv" ? { cv_path: path } : { photo_path: path })
+      .eq("id", id);
+    if (rowError) throw rowError;
+  } catch (error) {
+    console.error("Bulk upload failed", error);
+    return { ok: false, error: "save" };
+  }
+
+  revalidatePath("/admin/players");
+  return { ok: true };
+}

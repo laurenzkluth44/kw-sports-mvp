@@ -13,6 +13,7 @@ import { createClubNeedAction } from "@/features/player-needs/actions";
 import { NeedForm } from "@/features/player-needs/need-form";
 import { createKwPlayerAction } from "@/features/kw-players/actions";
 import { KwPlayerCard } from "@/features/kw-players/kw-player-card";
+import { BulkUpload } from "@/features/kw-players/bulk-upload";
 import { KwPlayerForm } from "@/features/kw-players/kw-player-form";
 import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
 import { AdminInboxView, type InboxTab } from "@/features/matching/admin-inbox";
@@ -350,6 +351,27 @@ export default async function VisualPreview({
               <KwPlayerCard key={player.id} player={player} />
             ))}
           </section>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (screen === "bulk-upload") {
+    return (
+      <AppShell profile={adminProfile} locale="de">
+        <div className="space-y-6">
+          <Breadcrumbs items={[{ label: "Spielerdatenbank", href: "/admin/players" }, { label: "CVs & Fotos hochladen" }]} />
+          <PageHeader eyebrow="Spielerdatenbank" title="CVs & Fotos hochladen" description="Zieh alle Dateien auf einmal hier rein. Die Plattform erkennt den Spieler am Dateinamen." />
+          <BulkUpload
+            players={kwPlayers.map((player) => ({
+              id: player.id,
+              first_name: player.first_name,
+              last_name: player.last_name,
+              kind: player.kind,
+              has_photo: Boolean(player.photo_path),
+              has_cv: Boolean(player.cv_path)
+            }))}
+          />
         </div>
       </AppShell>
     );

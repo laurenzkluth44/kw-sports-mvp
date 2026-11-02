@@ -28,11 +28,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
-      - name: Unit tests (matching engine, password rules, squad import, profile freshness)
+      - name: Unit tests (matching engine, password rules, squad import, profile freshness, bulk file matching)
         run: |
           node --experimental-strip-types scripts/tests/engine.test.ts
           node --experimental-strip-types scripts/tests/import.test.ts
           node --experimental-strip-types scripts/tests/freshness.test.ts
+          node --experimental-strip-types scripts/tests/bulk-match.test.ts
       - run: npm run lint
       - name: Build
         run: |
