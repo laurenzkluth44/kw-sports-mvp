@@ -14,11 +14,11 @@ export function authConfirmLink(tokenHash: string, type: "invite" | "recovery", 
 
 const inviteCopy = {
   de: {
-    subject: (org: string) => `Dein Zugang zu KW Sports Club Needs${org ? ` · ${org}` : ""}`,
+    subject: (org: string) => `Dein Zugang zu KW Club Hub${org ? ` · ${org}` : ""}`,
     eyebrow: "Einladung",
-    title: "Willkommen bei Club Needs",
+    title: "Willkommen bei KW Club Hub",
     intro: (name: string, org: string) =>
-      `Hallo ${name}, KW Sports hat ${org ? `dich für ${org}` : "dich"} zu Club Needs eingeladen: der Plattform für Kaderplanung und Spielergesuche. Lege jetzt dein Passwort fest.`,
+      `Hallo ${name}, KW Sports hat ${org ? `dich für ${org}` : "dich"} zu KW Club Hub eingeladen: der Plattform für Kaderplanung und Spielergesuche. Lege jetzt dein Passwort fest.`,
     steps: "Schritt",
     step1: "Passwort festlegen",
     step2: "Kader eintragen und Lücken sehen",
@@ -28,11 +28,11 @@ const inviteCopy = {
     footer: "KW Sports GmbH · kwsports.de · Du bekommst diese E-Mail, weil KW Sports dich eingeladen hat."
   },
   en: {
-    subject: (org: string) => `Your access to KW Sports Club Needs${org ? ` · ${org}` : ""}`,
+    subject: (org: string) => `Your access to KW Club Hub${org ? ` · ${org}` : ""}`,
     eyebrow: "Invitation",
-    title: "Welcome to Club Needs",
+    title: "Welcome to KW Club Hub",
     intro: (name: string, org: string) =>
-      `Hi ${name}, KW Sports invited you${org ? ` for ${org}` : ""} to Club Needs: the platform for squad planning and player requests. Set your password now.`,
+      `Hi ${name}, KW Sports invited you${org ? ` for ${org}` : ""} to KW Club Hub: the platform for squad planning and player requests. Set your password now.`,
     steps: "Step",
     step1: "Set your password",
     step2: "Add your squad and see the gaps",
@@ -71,7 +71,7 @@ export function buildInviteEmail(
 
 const resetCopy = {
   de: {
-    subject: "Neues Passwort für KW Sports Club Needs",
+    subject: "Neues Passwort für KW Club Hub",
     eyebrow: "Passwort",
     title: "Neues Passwort festlegen",
     intro: "Du hast einen Link zum Zurücksetzen deines Passworts angefordert. Klicke auf den Button und lege ein neues Passwort fest.",
@@ -80,7 +80,7 @@ const resetCopy = {
     footer: "KW Sports GmbH · kwsports.de"
   },
   en: {
-    subject: "New password for KW Sports Club Needs",
+    subject: "New password for KW Club Hub",
     eyebrow: "Password",
     title: "Set a new password",
     intro: "You requested a link to reset your password. Click the button and choose a new password.",

@@ -19,7 +19,9 @@ import {
 import { CLUB_DEFENSE_GROUP_LABELS, CLUB_NEED_TYPE_LABELS } from "@/lib/club-i18n";
 import { overviewCopy } from "@/lib/overview-i18n";
 import { requireAdmin } from "@/lib/auth";
-import type { PlayerNeedWithClub } from "@/types/domain";
+import { KwQueueBanner } from "@/features/matching/kw-queue-banner";
+import { buildKwInfo } from "@/features/matching/kw-queue";
+import type { KwPlayer, NeedMatchStatus, PlayerNeedWithClub } from "@/types/domain";
 
 const CLUB_COLUMNS = "id,name,country,league,city,website,logo_path,created_at,updated_at";
 
@@ -41,8 +43,21 @@ export default async function AdminDashboardPage({
     .select(`*, clubs!inner(${CLUB_COLUMNS})`)
     .order("created_at", { ascending: false });
 
-  const { data = [] } = await applyNeedFilters(query, { ...filters, position: undefined });
-  const needs = data as PlayerNeedWithClub[];
+  const [{ data = [] }, { data: playerRows }, { data: matchRows }] = await Promise.all([
+    applyNeedFilters(query, { ...filters, position: undefined }),
+    supabase.from("kw_players").select("*"),
+    supabase.from("need_matches").select("need_id, player_id, status")
+  ]);
+  const allNeeds = data as PlayerNeedWithClub[];
+
+  // KW work queue: per need, how many consented KW players fit and haven't been sent yet.
+  const { info: kwInfo, queue } = buildKwInfo(
+    allNeeds,
+    (playerRows ?? []) as KwPlayer[],
+    (matchRows ?? []) as { need_id: string; player_id: string; status: NeedMatchStatus }[]
+  );
+  const queueOnly = params.kw === "offen";
+  const needs = queueOnly ? queue : allNeeds;
   const { data: inboxRows = [] } = await supabase
     .from("player_needs")
     .select(`*, clubs!inner(${CLUB_COLUMNS})`)
@@ -84,7 +99,13 @@ export default async function AdminDashboardPage({
           </LinkButton>
         </>
       }
-      quickFilters={<AdminQuickFilters activeFilters={filters} />}
+      kwInfo={kwInfo}
+      quickFilters={
+        <>
+          <KwQueueBanner count={queue.length} active={queueOnly} filtersQuery={exportQuery} />
+          <AdminQuickFilters activeFilters={filters} />
+        </>
+      }
       inbox={<AdminNeedsInbox needs={inboxNeeds} />}
       summary={<AdminVisualSummary needs={summaryNeeds} />}
       filterFields={

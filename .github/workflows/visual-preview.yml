@@ -41,7 +41,13 @@ jobs:
       - name: Build
         run: |
           set -o pipefail
-          npm run build 2>&1 | tee build.log
+          # Google Fonts occasionally times out during the build (next/font). Retry only that case.
+          for attempt in 1 2 3; do
+            if npm run build 2>&1 | tee build.log; then exit 0; fi
+            grep -q "next/font" build.log || exit 1
+            echo "Font download failed, retrying ($attempt/3)…"; sleep 15
+          done
+          exit 1
       - name: Report build errors
         if: failure()
         run: |
@@ -66,6 +72,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           echo "Screenshots for ${GITHUB_REF_NAME} @ ${SHA}" > README.md
+          # Images only: tell Vercel not to try (and fail) to deploy this branch.
+          echo '{ "git": { "deploymentEnabled": false } }' > vercel.json
           git add -A
           git commit -q -m "Screenshots for ${SHA}"
           git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" visual-previews

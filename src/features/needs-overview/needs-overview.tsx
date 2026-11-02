@@ -7,7 +7,7 @@ import { COURT_ASPECT, CourtLines, attackSpot } from "@/features/court/court";
 import { filtersToQuery, type AdminNeedFilters } from "@/features/admin/filters";
 import { NeedBadges } from "@/features/player-needs/need-badges";
 import { NeedPositionCell } from "@/features/player-needs/need-summary";
-import { NeedCard } from "@/features/needs-overview/need-card";
+import { KwStrip, NeedCard, type NeedKwInfo } from "@/features/needs-overview/need-card";
 import { ATTACK_POSITIONS } from "@/lib/constants";
 import { CLUB_POSITION_LABELS, CLUB_POSITION_SHORT_LABELS, type ClubLocale } from "@/lib/club-i18n";
 import type { OverviewCopy } from "@/lib/overview-i18n";
@@ -42,7 +42,8 @@ export function NeedsOverview({
   inbox,
   summary,
   detailHref,
-  clubHref
+  clubHref,
+  kwInfo
 }: {
   basePath: "/admin" | "/agency";
   locale: ClubLocale;
@@ -59,6 +60,8 @@ export function NeedsOverview({
   summary: ReactNode;
   detailHref: (needId: string) => string;
   clubHref?: (clubId: string) => string;
+  /** KW admin only: matching numbers per need id. Never passed for agencies. */
+  kwInfo?: Record<string, NeedKwInfo>;
 }) {
   const position = filters.position;
   const shown = (position ? needs.filter((need) => need.attack_positions.includes(position)) : needs)
@@ -235,7 +238,7 @@ export function NeedsOverview({
       ) : view === "cards" ? (
         <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {shown.map((need) => (
-            <NeedCard key={need.id} need={need} href={detailHref(need.id)} locale={locale} copy={copy} />
+            <NeedCard key={need.id} need={need} href={detailHref(need.id)} locale={locale} copy={copy} kw={kwInfo?.[need.id]} />
           ))}
         </section>
       ) : (
@@ -261,7 +264,12 @@ export function NeedsOverview({
                 <p className="text-sm font-medium text-slate-700">{need.clubs.league}</p>
                 <NeedPositionCell need={need} locale={locale} />
                 <p className="text-sm text-slate-700">{need.season}</p>
-                <NeedBadges need={need} locale={locale} />
+                <div className="space-y-2">
+                  <NeedBadges need={need} locale={locale} />
+                  {kwInfo?.[need.id] ? (
+                    <KwStrip kw={kwInfo[need.id]} closed={need.status === "besetzt" || need.status === "archiviert"} className="px-2 py-1" />
+                  ) : null}
+                </div>
                 <LinkButton href={detailHref(need.id)} variant="secondary" className="h-10 w-10 px-0" title={copy.open}>
                   <Eye className="h-4 w-4" aria-hidden="true" />
                   <span className="sr-only">{copy.open}</span>

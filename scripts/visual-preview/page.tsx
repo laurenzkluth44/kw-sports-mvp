@@ -18,6 +18,10 @@ import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
 import { AdminInboxView, type InboxTab } from "@/features/matching/admin-inbox";
 import { ClubSuggestionsView } from "@/features/matching/club-suggestions";
 import { ClubCockpit } from "@/features/club/cockpit";
+import { ClubNeedCard, NewNeedTile } from "@/features/club/club-need-card";
+import { ClubNeedView } from "@/features/club/club-need-view";
+import { buildKwInfo } from "@/features/matching/kw-queue";
+import { KwQueueBanner } from "@/features/matching/kw-queue-banner";
 import { NeedFacts, NeedHero, chips } from "@/features/player-needs/need-hero";
 import { needProfileLabels } from "@/features/player-needs/need-summary";
 import { planningSeasons } from "@/features/squad/squad-model";
@@ -311,6 +315,7 @@ export default async function VisualPreview({
 
   if (screen === "needs" || screen === "agency") {
     const isAdmin = screen === "needs";
+    const adminKw = buildKwInfo(needs, kwPlayers, sampleMatches);
     const overviewLocale = isAdmin ? "de" : locale;
     return (
       <AppShell profile={isAdmin ? adminProfile : agencyProfile} locale={overviewLocale}>
@@ -323,9 +328,10 @@ export default async function VisualPreview({
           needs={needs}
           filters={normalizeAdminNeedFilters(query)}
           agencyCount={isAdmin ? 2 : undefined}
+          kwInfo={isAdmin ? adminKw.info : undefined}
           detailHref={(id) => `#${id}`}
           filterFields={<p className="text-sm text-slate-500">[Filterfelder]</p>}
-          quickFilters={null}
+          quickFilters={isAdmin ? <KwQueueBanner count={adminKw.queue.length} active={false} filtersQuery="" /> : null}
           inbox={null}
           summary={<p className="text-sm text-slate-500">[Auswertung]</p>}
         />
@@ -383,6 +389,30 @@ export default async function VisualPreview({
     );
   }
 
+  if (screen === "club-need") {
+    const clubProfile: Profile = { ...profile, club_id: needs[0].club_id, clubs: needs[0].clubs };
+    const need = {
+      ...needs[0],
+      description: "Linkshänder für den rechten Rückraum, der sofort Spielanteile übernehmen kann.",
+      budget_amount: 4500,
+      budget_currency: "EUR",
+      last_confirmed_at: daysAgo(40),
+      player_need_confidential: { note: "Unser RR verlässt uns im Sommer, bitte noch nicht öffentlich." }
+    };
+    return (
+      <AppShell profile={clubProfile} locale={locale} badge={1}>
+        <ClubNeedView
+          need={need}
+          matches={clubMatches}
+          players={new Map(suggestionPlayers.map((player) => [player.id, player]))}
+          files={new Map()}
+          locale={locale}
+          query={{ done: query.done }}
+        />
+      </AppShell>
+    );
+  }
+
   if (screen === "cockpit" || screen === "cockpit-empty") {
     const empty = screen === "cockpit-empty";
     return (
@@ -397,6 +427,19 @@ export default async function VisualPreview({
           openSuggestions={empty ? 0 : 2}
           planningSeason={planningSeasons(1)[1]}
         />
+        {empty ? null : (
+          <section className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {[needs[0], needs[4], needs[5]].map((need, index) => (
+              <ClubNeedCard
+                key={need.id}
+                need={need}
+                locale={locale}
+                suggestions={index === 0 ? { total: 3, open: 2 } : undefined}
+              />
+            ))}
+            <NewNeedTile locale={locale} />
+          </section>
+        )}
       </AppShell>
     );
   }

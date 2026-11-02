@@ -20,6 +20,12 @@ function readId(formData: FormData) {
   return id;
 }
 
+/** Where a club action goes back to: its own need page when it came from there, else the start page. */
+function clubReturnPath(formData: FormData) {
+  const value = String(formData.get("return_to") || "");
+  return /^\/club\/needs\/[0-9a-f-]{36}$/i.test(value) ? value : "/club";
+}
+
 function readOptionalNote(formData: FormData, key: string) {
   const value = String(formData.get(key) || "").trim();
   return value ? value : null;
@@ -84,8 +90,8 @@ export async function createClubNeedAction(formData: FormData) {
     const id = createdId;
     after(() => notifyKwNewNeed(id));
   }
-  revalidatePath("/club");
-  redirect("/club?done=created");
+  revalidatePath("/club", "layout");
+  redirect(createdId ? `/club/needs/${createdId}?done=created` : "/club?done=created");
 }
 
 export async function updateClubNeedAction(formData: FormData) {
@@ -109,13 +115,14 @@ export async function updateClubNeedAction(formData: FormData) {
     redirect(`/club/needs/${id}/edit?error=${needFormErrorCode(error)}`);
   }
 
-  revalidatePath("/club");
-  redirect("/club?done=updated");
+  revalidatePath("/club", "layout");
+  redirect(`/club/needs/${id}?done=updated`);
 }
 
 export async function updateClubNeedStatusAction(formData: FormData) {
   const { supabase, profile } = await requireClubUser();
   const id = readId(formData);
+  const back = clubReturnPath(formData);
 
   try {
     const status = parseStatus(formData);
@@ -131,11 +138,11 @@ export async function updateClubNeedStatusAction(formData: FormData) {
 
     if (error) throw error;
   } catch {
-    redirect("/club?error=status");
+    redirect(`${back}?error=status`);
   }
 
-  revalidatePath("/club");
-  redirect("/club?done=status");
+  revalidatePath("/club", "layout");
+  redirect(`${back}?done=status`);
 }
 
 export async function duplicateClubNeedAction(formData: FormData) {
@@ -256,6 +263,7 @@ export async function updateAdminNeedAction(formData: FormData) {
 export async function confirmClubNeedsAction(formData: FormData) {
   const { supabase, profile } = await requireClubUser();
   const id = String(formData.get("id") || "").trim();
+  const back = clubReturnPath(formData);
 
   let query = supabase
     .from("player_needs")
@@ -265,7 +273,7 @@ export async function confirmClubNeedsAction(formData: FormData) {
   if (id) query = query.eq("id", id);
   const { error } = await query;
 
-  if (error) redirect("/club?error=status");
-  revalidatePath("/club");
-  redirect("/club?done=confirmed");
+  if (error) redirect(`${back}?error=status`);
+  revalidatePath("/club", "layout");
+  redirect(`${back}?done=confirmed`);
 }

@@ -38,7 +38,7 @@ export function AppShell({
   const logoutLabel = profile.role === "admin" ? "Logout" : profile.role === "agency" ? agencyApp.logout : t.logout;
   const tagline =
     profile.role === "admin"
-      ? "Kaderbedarf Datenbank"
+      ? "Kaderplanung & Spielervermittlung"
       : profile.role === "agency"
         ? profile.agency_name || agencyApp.tagline
         : profile.clubs?.name || t.tagline;
@@ -77,7 +77,7 @@ export function AppShell({
               />
               <span className="min-w-0 border-l border-white/15 pl-3">
                 <span className="block whitespace-nowrap font-display text-lg uppercase leading-none tracking-[0.02em] sm:text-xl md:text-2xl">
-                  Club Needs
+                  Club Hub
                 </span>
                 <span className="mt-0.5 block truncate text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-brand-300">
                   {tagline}

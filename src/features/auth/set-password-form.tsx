@@ -131,7 +131,7 @@ export function SetPasswordForm({ copy, mode = "invite" }: { copy: SetPasswordCo
     window.location.replace(await resolvePostPasswordPath(supabase));
   }
 
-  const clubTitle = clubName ?? agencyName ?? "Club Needs";
+  const clubTitle = clubName ?? agencyName ?? "KW Club Hub";
   const hasClubLogo = Boolean(logoUrl) && !logoFailed;
   // Spinner while the invite session resolves, or while the club logo is still downloading.
   const showSpinner = loading || (hasClubLogo && !logoLoaded);

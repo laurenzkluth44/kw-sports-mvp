@@ -26,6 +26,8 @@ export type OverviewCopy = {
   analysis: string;
   from: string;
   age: string;
+  ageFrom: string;
+  ageTo: string;
   heightMin: string;
   updated: string;
   stale: string;
@@ -61,6 +63,8 @@ export const overviewCopy: Record<ClubLocale, OverviewCopy> = {
     analysis: "Auswertung",
     from: "ab",
     age: "Jahre",
+    ageFrom: "ab",
+    ageTo: "bis",
     heightMin: "ab",
     updated: "aktualisiert",
     stale: "Bitte bestätigen",
@@ -94,6 +98,8 @@ export const overviewCopy: Record<ClubLocale, OverviewCopy> = {
     analysis: "Analysis",
     from: "from",
     age: "years",
+    ageFrom: "from",
+    ageTo: "up to",
     heightMin: "min.",
     updated: "updated",
     stale: "Needs confirming",
@@ -127,6 +133,8 @@ export const overviewCopy: Record<ClubLocale, OverviewCopy> = {
     analysis: "Analyse",
     from: "dès le",
     age: "ans",
+    ageFrom: "à partir de",
+    ageTo: "jusqu’à",
     heightMin: "min.",
     updated: "mis à jour",
     stale: "À confirmer",
@@ -160,6 +168,8 @@ export const overviewCopy: Record<ClubLocale, OverviewCopy> = {
     analysis: "Análisis",
     from: "desde",
     age: "años",
+    ageFrom: "desde",
+    ageTo: "hasta",
     heightMin: "mín.",
     updated: "actualizado",
     stale: "Por confirmar",

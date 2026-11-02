@@ -41,7 +41,7 @@ export function ClubCrest({ name, logoUrl, size = "md" }: { name: string; logoUr
     );
   }
   return (
-    <span className={cn("flex shrink-0 items-center justify-center rounded-full bg-navy-950 font-display leading-none text-white", box)}>
+    <span className={cn("flex shrink-0 items-center justify-center rounded-full bg-navy-950 font-display leading-none text-white ring-2 ring-white/25", box)}>
       {clubInitials(name)}
     </span>
   );
@@ -56,23 +56,41 @@ function detailLine(need: PlayerNeedWithClub, locale: ClubLocale, copy: Overview
   const parts = [`${copy.from} ${formatDate(need.needed_from_date, locale)}`];
   if (need.need_type === "spieler") {
     if (need.age_min !== null || need.age_max !== null) {
-      parts.push(`${need.age_min ?? "–"}–${need.age_max ?? "–"} ${copy.age}`);
+      parts.push(
+        need.age_min !== null && need.age_max !== null
+          ? `${need.age_min}–${need.age_max} ${copy.age}`
+          : need.age_min !== null
+            ? `${copy.ageFrom} ${need.age_min} ${copy.age}`
+            : `${copy.ageTo} ${need.age_max} ${copy.age}`
+      );
     }
     if (need.height_min !== null) parts.push(`${copy.heightMin} ${need.height_min} cm`);
   }
   return parts.join(" · ");
 }
 
+/** KW-internal matching numbers for one need. Only ever passed in on KW admin pages, never for agencies. */
+export type NeedKwInfo = {
+  /** Releasable KW players that fit and haven't been sent yet. */
+  fit: number;
+  /** Best match score among those. */
+  best: number;
+  sent: number;
+  interested: number;
+};
+
 export function NeedCard({
   need,
   href,
   locale,
-  copy
+  copy,
+  kw
 }: {
   need: PlayerNeedWithClub;
   href: string;
   locale: ClubLocale;
   copy: OverviewCopy;
+  kw?: NeedKwInfo;
 }) {
   const isCoach = need.need_type === "trainer";
   const labels = needProfileLabels(need, locale);
@@ -104,6 +122,7 @@ export function NeedCard({
       <div className="bg-navy-950 py-2">
         <NeedCourt need={need} locale={locale} className="mx-auto w-[72%] max-w-[260px]" />
       </div>
+      {kw ? <KwStrip kw={kw} closed={need.status === "besetzt" || need.status === "archiviert"} /> : null}
 
       <div className="flex flex-1 flex-col gap-3 px-4 pb-4 pt-4">
         <div className="flex items-baseline justify-between gap-3">
@@ -222,6 +241,32 @@ export function NeedCourt({
           ) : null}
         </>
       )}
+    </div>
+  );
+}
+
+/** Admin-only strip under the court: where KW can place a player right now. */
+export function KwStrip({ kw, closed, className }: { kw: NeedKwInfo; closed?: boolean; className?: string }) {
+  const opportunity = !closed && kw.sent === 0 && kw.fit > 0;
+  const parts: string[] = [];
+  if (kw.sent > 0) parts.push(`${kw.sent} gesendet`);
+  if (kw.interested > 0) parts.push(`${kw.interested} interessiert`);
+  if (kw.fit > 0 && !closed) parts.push(kw.sent > 0 ? `+${kw.fit} weitere passend` : `${kw.fit} passende KW-Spieler · bis ${kw.best} %`);
+  const text = parts.join(" · ") || (closed ? "Keine KW-Vorschläge" : "Kein passender KW-Spieler");
+
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 px-4 py-2 text-[0.72rem] font-bold",
+        opportunity ? "bg-brand-500 text-white" : kw.interested > 0 ? "bg-brand-50 text-brand-800" : "bg-slate-50 text-slate-500",
+        className
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className={cn("h-2 w-2 shrink-0 rotate-45", opportunity ? "bg-white" : kw.sent > 0 || kw.fit > 0 ? "bg-brand-500" : "bg-slate-300")}
+      />
+      <span className="truncate">{text}</span>
     </div>
   );
 }

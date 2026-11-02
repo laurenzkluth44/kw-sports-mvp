@@ -14,7 +14,8 @@ export function ClubSuggestionCard({
   photoUrl,
   cvUrl,
   locale,
-  highlight
+  highlight,
+  returnTo
 }: {
   match: NeedMatch;
   player: KwPlayer;
@@ -22,6 +23,8 @@ export function ClubSuggestionCard({
   cvUrl?: string | null;
   locale: ClubLocale;
   highlight?: boolean;
+  /** Need page to come back to after answering. */
+  returnTo?: string;
 }) {
   const t = matchCopy[locale];
   const isNew = match.status === "freigegeben";
@@ -120,7 +123,7 @@ export function ClubSuggestionCard({
 
         <div className="mt-auto border-t border-slate-200 pt-5">
           {isNew ? (
-            <AnswerForm match={match} locale={locale} />
+            <AnswerForm match={match} locale={locale} returnTo={returnTo} />
           ) : (
             <div className="space-y-3">
               <p
@@ -146,7 +149,7 @@ export function ClubSuggestionCard({
                   {t.change}
                 </summary>
                 <div className="pt-3">
-                  <AnswerForm match={match} locale={locale} />
+                  <AnswerForm match={match} locale={locale} returnTo={returnTo} />
                 </div>
               </details>
             </div>
@@ -157,12 +160,13 @@ export function ClubSuggestionCard({
   );
 }
 
-function AnswerForm({ match, locale }: { match: NeedMatch; locale: ClubLocale }) {
+function AnswerForm({ match, locale, returnTo }: { match: NeedMatch; locale: ClubLocale; returnTo?: string }) {
   const t = matchCopy[locale];
   const noteId = `note-${match.id}`;
   return (
     <form action={respondToMatchAction} className="space-y-3">
       <input type="hidden" name="match_id" value={match.id} />
+      {returnTo ? <input type="hidden" name="return_to" value={returnTo} /> : null}
       <label htmlFor={noteId} className="block text-sm font-bold text-navy-950">
         {t.question}
       </label>

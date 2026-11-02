@@ -81,7 +81,7 @@ export function buildNewNeedEmail(need: PlayerNeed & { clubs: Club }, site = get
         { label: "Priorität", value: PRIORITY_DE[need.priority] ?? need.priority }
       ],
       cta: { label: "Passende Spieler ansehen", href: `${site}/admin/needs/${need.id}#kw-spieler` },
-      footer: "KW Sports Club Needs · interne Benachrichtigung"
+      footer: "KW Club Hub · interne Benachrichtigung"
     },
     site
   );
@@ -112,7 +112,7 @@ const suggestionCopy = {
     need: "Euer Bedarf",
     cta: "Vorschlag ansehen",
     outro: "Vertraulich: Der Vorschlag ist nur für euren Verein sichtbar.",
-    footer: "Ihr bekommt diese E-Mail, weil euer Verein KW Sports Club Needs nutzt."
+    footer: "Ihr bekommt diese E-Mail, weil euer Verein KW Club Hub nutzt."
   },
   en: {
     subject: (headline: string) => `New player suggestion from KW Sports · ${headline}`,
@@ -125,7 +125,7 @@ const suggestionCopy = {
     need: "Your need",
     cta: "View suggestion",
     outro: "Confidential: this suggestion is visible to your club only.",
-    footer: "You receive this email because your club uses KW Sports Club Needs."
+    footer: "You receive this email because your club uses KW Club Hub."
   },
   fr: {
     subject: (headline: string) => `Nouvelle proposition de KW Sports · ${headline}`,
@@ -138,7 +138,7 @@ const suggestionCopy = {
     need: "Votre besoin",
     cta: "Voir la proposition",
     outro: "Confidentiel : visible uniquement par votre club.",
-    footer: "Vous recevez cet e-mail car votre club utilise KW Sports Club Needs."
+    footer: "Vous recevez cet e-mail car votre club utilise KW Club Hub."
   },
   es: {
     subject: (headline: string) => `Nueva propuesta de KW Sports · ${headline}`,
@@ -151,7 +151,7 @@ const suggestionCopy = {
     need: "Vuestra necesidad",
     cta: "Ver propuesta",
     outro: "Confidencial: solo visible para vuestro club.",
-    footer: "Recibís este correo porque vuestro club usa KW Sports Club Needs."
+    footer: "Recibís este correo porque vuestro club usa KW Club Hub."
   }
 } as const;
 
@@ -239,7 +239,7 @@ export function buildAnswerEmail(
       ],
       quote: match.club_note,
       cta: { label: "Zur Inbox", href: `${site}/admin/inbox` },
-      footer: "KW Sports Club Needs · interne Benachrichtigung"
+      footer: "KW Club Hub · interne Benachrichtigung"
     },
     site
   );
