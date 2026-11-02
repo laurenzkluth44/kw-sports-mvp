@@ -221,7 +221,7 @@ export default async function AdminClubDetailPage({
 function HeroStat({ label, value, highlight, warn }: { label: string; value: number; highlight?: boolean; warn?: boolean }) {
   return (
     <div className="border-l border-t border-white/10 px-5 py-4 first:border-l-0 lg:border-t-0">
-      <dt className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-white/55">{label}</dt>
+      <dt className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-white/70">{label}</dt>
       <dd className={cn("mt-1 font-display text-3xl leading-none", highlight ? "text-brand-300" : warn ? "text-amber-300" : "text-white")}>{value}</dd>
     </div>
   );

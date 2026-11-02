@@ -73,7 +73,7 @@ export function ClubSuggestionsView({
         <p className="eyebrow eyebrow-light relative">{t.eyebrow}</p>
         <h1 className="relative mt-2 font-display text-[2.5rem] uppercase leading-[0.9] sm:text-[3.5rem]">{t.title}</h1>
         <p className="relative mt-3 max-w-2xl text-sm leading-6 text-white/75">{t.intro}</p>
-        <p className="relative mt-4 inline-flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-brand-300">
+        <p className="relative mt-4 inline-flex items-center gap-2 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-brand-300">
           <Lock className="h-3.5 w-3.5" aria-hidden="true" />
           {t.confidential}
         </p>
@@ -98,18 +98,18 @@ export function ClubSuggestionsView({
           <section key={need.id} id={`need-${need.id}`} className="scroll-mt-32 space-y-4">
             <div className="flex flex-wrap items-end justify-between gap-2 border-b-2 border-navy-950 pb-2">
               <div>
-                <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-slate-500">{t.forNeed}</p>
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-slate-500">{t.forNeed}</p>
                 <h2 className="font-display text-[1.9rem] uppercase leading-none text-navy-950">
                   <Link href={`/club/needs/${need.id}`} className="hover:text-brand-600">
                     {needHeadline(need, locale)}
                   </Link>
-                  <span className="ml-3 text-lg text-slate-400">
+                  <span className="ml-3 text-lg text-slate-500">
                     {need.season} · {formatDate(need.needed_from_date, locale)}
                   </span>
                 </h2>
               </div>
               {open.length > 0 ? (
-                <span className="bg-brand-500 px-2 py-1 text-[0.68rem] font-extrabold uppercase tracking-[0.12em] text-white">
+                <span className="bg-brand-500 px-2 py-1 text-[0.7rem] font-extrabold uppercase tracking-[0.12em] text-white">
                   {fill(t.newCount, open.length)}
                 </span>
               ) : null}

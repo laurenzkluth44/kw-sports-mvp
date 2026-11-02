@@ -115,7 +115,7 @@ export function CourtPositionPicker({
                       style={attackSpot(position, "full")}
                     >
                       <span className={markerClass(on)}>{attackShort[position]}</span>
-                      <span className="hidden whitespace-nowrap text-[0.68rem] font-semibold text-white/80 sm:block">
+                      <span className="hidden whitespace-nowrap text-[0.7rem] font-semibold text-white/80 sm:block">
                         {attackLabels[position].split(" · ").pop()}
                       </span>
                     </button>
@@ -134,7 +134,7 @@ export function CourtPositionPicker({
                       style={defenseSpot(position, "full")}
                     >
                       <span className={markerClass(on)}>{position}</span>
-                      <span className="hidden whitespace-nowrap text-[0.68rem] font-semibold text-white/80 sm:block">
+                      <span className="hidden whitespace-nowrap text-[0.7rem] font-semibold text-white/80 sm:block">
                         {defenseLabels[position].split(" · ").pop()}
                       </span>
                     </button>
@@ -197,7 +197,7 @@ function SelectedRow({
         <span className="font-display text-2xl leading-none text-brand-600">{code}</span>
         <span className="min-w-0">
           <span className="block truncate text-sm font-bold text-navy-950">{label}</span>
-          <span className="block text-[0.65rem] font-bold uppercase tracking-[0.12em] text-slate-500">{group}</span>
+          <span className="block text-[0.7rem] font-bold uppercase tracking-[0.12em] text-slate-500">{group}</span>
         </span>
       </span>
       <button

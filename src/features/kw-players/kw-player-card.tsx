@@ -68,7 +68,7 @@ export function KwPlayerCard({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <span className="bg-brand-500 px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-[0.16em]">
+            <span className="bg-brand-500 px-2 py-0.5 text-[0.7rem] font-bold uppercase tracking-[0.16em]">
               {kwPlayerHeadline(player, locale)}
             </span>
             {topRight}
@@ -97,7 +97,7 @@ export function KwPlayerCard({
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5 border-l border-white/10 px-4 py-3 first:border-l-0">
-      <dt className="text-[0.6rem] font-bold uppercase tracking-[0.16em] text-white/55">{label}</dt>
+      <dt className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-white/70">{label}</dt>
       <dd className="font-display text-xl leading-none">{value}</dd>
     </div>
   );

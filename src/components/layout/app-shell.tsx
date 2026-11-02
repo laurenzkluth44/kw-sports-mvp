@@ -79,7 +79,7 @@ export function AppShell({
                 <span className="block whitespace-nowrap font-display text-lg uppercase leading-none tracking-[0.02em] sm:text-xl md:text-2xl">
                   Club Hub
                 </span>
-                <span className="mt-0.5 block truncate text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-brand-300">
+                <span className="mt-0.5 block truncate text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-brand-300">
                   {tagline}
                 </span>
               </span>

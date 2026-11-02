@@ -164,7 +164,7 @@ export default async function AdminUsersPage({
                 )}
               >
                 {label}
-                <span className={cn("px-1.5 py-0.5 text-[0.65rem]", role === value ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-600")}>
+                <span className={cn("px-1.5 py-0.5 text-[0.7rem]", role === value ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-600")}>
                   {count}
                 </span>
               </Link>
@@ -199,7 +199,7 @@ export default async function AdminUsersPage({
                     </a>
                   </div>
                 </div>
-                <span className={cn("w-fit px-2 py-1 text-[0.65rem] font-extrabold uppercase tracking-[0.12em]", ROLE_TAG[user.role])}>
+                <span className={cn("w-fit px-2 py-1 text-[0.7rem] font-extrabold uppercase tracking-[0.12em]", ROLE_TAG[user.role])}>
                   {ROLE_NAMES[user.role]}
                 </span>
                 <AccessCell user={user} supabaseUrl={supabaseUrl} />
@@ -222,7 +222,7 @@ function AccessCell({ user, supabaseUrl }: { user: Profile; supabaseUrl: string 
   }
 
   if (user.role === "admin") {
-    return <p className="text-sm text-slate-400">KW Sports</p>;
+    return <p className="text-sm text-slate-500">KW Sports</p>;
   }
 
   return <ClubCell club={user.clubs ?? null} supabaseUrl={supabaseUrl} />;
@@ -230,7 +230,7 @@ function AccessCell({ user, supabaseUrl }: { user: Profile; supabaseUrl: string 
 
 function ClubCell({ club, supabaseUrl }: { club: Club | null; supabaseUrl: string }) {
   if (!club) {
-    return <p className="text-sm text-slate-400">–</p>;
+    return <p className="text-sm text-slate-500">–</p>;
   }
 
   const logoUrl = club.logo_path && supabaseUrl
@@ -278,7 +278,7 @@ function initials(value: string) {
 function Kpi({ label, value, sub }: { label: string; value: number; sub?: string }) {
   return (
     <div className="border-l-[3px] border-brand-500 bg-white px-4 py-3 shadow-card">
-      <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-slate-500">{label}</p>
+      <p className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-slate-500">{label}</p>
       <p className="mt-1 font-display text-3xl leading-none text-navy-950">{value}</p>
       {sub ? <p className="mt-1 text-xs text-slate-500">{sub}</p> : null}
     </div>

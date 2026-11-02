@@ -113,7 +113,7 @@ export function NeedCard({
             {need.clubs.league} · {need.clubs.city}
           </p>
         </div>
-        <span className={cn("whitespace-nowrap px-2 py-1 text-[0.65rem] font-extrabold uppercase tracking-[0.12em]", PRIORITY_TAG[need.priority])}>
+        <span className={cn("whitespace-nowrap px-2 py-1 text-[0.7rem] font-extrabold uppercase tracking-[0.12em]", PRIORITY_TAG[need.priority])}>
           {CLUB_PRIORITY_LABELS[locale][need.priority]}
         </span>
       </div>

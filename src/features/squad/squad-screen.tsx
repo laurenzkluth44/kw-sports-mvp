@@ -318,7 +318,7 @@ function GapsPanel({
                 <div className="flex items-center gap-2">
                   <span
                     className={cn(
-                      "rounded-sm border px-1.5 py-0.5 text-[0.62rem] font-extrabold uppercase tracking-[0.1em]",
+                      "rounded-sm border px-1.5 py-0.5 text-[0.7rem] font-extrabold uppercase tracking-[0.1em]",
                       statusChip[row.status]
                     )}
                   >
@@ -402,7 +402,7 @@ function PlanningMatrix({
                       >
                         {slot.main.length}
                         {slot.secondary.length > 0 ? (
-                          <span className="font-sans text-[0.65rem] font-bold">+{slot.secondary.length}</span>
+                          <span className="font-sans text-[0.7rem] font-bold">+{slot.secondary.length}</span>
                         ) : null}
                       </span>
                     </td>
@@ -434,7 +434,7 @@ function PlayerList({
     <section id="players" className="panel scroll-mt-28 overflow-hidden">
       <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-4">
         <h2 className="section-heading">
-          {t.list.title} <span className="text-slate-400">· {players.length}</span>
+          {t.list.title} <span className="text-slate-500">· {players.length}</span>
         </h2>
       </div>
 
@@ -458,7 +458,7 @@ function PlayerList({
                     aria-hidden="true"
                   />
                   {CLUB_POSITION_LABELS[locale][position]}
-                  <span className="text-slate-400">· {group.length}</span>
+                  <span className="text-slate-500">· {group.length}</span>
                 </p>
                 <Link
                   href={`/club/squad/new?position=${position}`}
@@ -470,7 +470,7 @@ function PlayerList({
               </div>
 
               {group.length === 0 ? (
-                <p className="px-5 pb-4 pt-1 text-sm text-slate-400">{t.list.emptyGroup}</p>
+                <p className="px-5 pb-4 pt-1 text-sm text-slate-500">{t.list.emptyGroup}</p>
               ) : (
                 <ul className="pb-2">
                   {group.map((player) => {
@@ -491,7 +491,7 @@ function PlayerList({
                             {state !== "running" ? (
                               <span
                                 className={cn(
-                                  "rounded-sm border px-1.5 py-0.5 text-[0.6rem] font-extrabold uppercase tracking-[0.1em]",
+                                  "rounded-sm border px-1.5 py-0.5 text-[0.7rem] font-extrabold uppercase tracking-[0.1em]",
                                   state === "expired" ? "border-red-200 bg-red-50 text-red-700" : "border-amber-200 bg-amber-50 text-amber-800"
                                 )}
                               >

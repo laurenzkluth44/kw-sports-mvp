@@ -52,14 +52,14 @@ export function ClubSuggestionCard({
         className="h-full"
         topRight={
           isNew ? (
-            <span className="shrink-0 bg-white px-2 py-0.5 text-[0.62rem] font-extrabold uppercase tracking-[0.14em] text-navy-950">
+            <span className="shrink-0 bg-white px-2 py-0.5 text-[0.7rem] font-extrabold uppercase tracking-[0.14em] text-navy-950">
               {t.statusNew}
             </span>
           ) : null
         }
         footer={
           <div className="flex items-center justify-between gap-3">
-            <span className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-white/55">{t.fit}</span>
+            <span className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-white/70">{t.fit}</span>
             <span className={cn("px-2.5 py-1 font-display text-2xl leading-none", match.score >= 80 ? "bg-brand-500 text-white" : "bg-white text-navy-950")}>{match.score}%</span>
           </div>
         }
@@ -77,7 +77,7 @@ export function ClubSuggestionCard({
           <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
             {facts.map((fact) => (
               <div key={fact.label}>
-                <dt className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-slate-500">{fact.label}</dt>
+                <dt className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-slate-500">{fact.label}</dt>
                 <dd className="mt-0.5 text-sm font-semibold text-navy-950">{fact.value}</dd>
               </div>
             ))}

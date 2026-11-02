@@ -168,7 +168,7 @@ export function NeedsOverview({
                           ? "bg-white text-navy-950 shadow-[0_0_0_4px_#0055FF]"
                           : count > 0
                             ? "bg-brand-500 text-white shadow-blueGlow"
-                            : "border-2 border-dashed border-white/35 text-white/60"
+                            : "border-2 border-dashed border-white/35 text-white/70"
                       )}
                     >
                       {count}
@@ -204,7 +204,7 @@ export function NeedsOverview({
                   <SlidersHorizontal className="h-4 w-4 text-brand-500" aria-hidden="true" />
                   {copy.moreFilters}
                   {advancedActive > 0 ? (
-                    <span className="bg-brand-500 px-1.5 py-0.5 text-[0.65rem] text-white">{copy.activeFilters(advancedActive)}</span>
+                    <span className="bg-brand-500 px-1.5 py-0.5 text-[0.7rem] text-white">{copy.activeFilters(advancedActive)}</span>
                   ) : null}
                 </span>
                 <span aria-hidden="true" className="text-lg text-slate-400 transition-transform group-open:rotate-45">

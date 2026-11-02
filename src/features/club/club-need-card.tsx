@@ -36,7 +36,7 @@ export function ClubNeedCard({
       <div className="relative bg-navy-950 py-2">
         <NeedCourt need={need} locale={locale} className="mx-auto w-[72%] max-w-[240px]" />
         {suggestions && suggestions.open > 0 ? (
-          <span className="absolute right-2 top-2 inline-flex items-center gap-1 bg-brand-500 px-2 py-1 text-[0.65rem] font-extrabold uppercase tracking-[0.1em] text-white">
+          <span className="absolute right-2 top-2 inline-flex items-center gap-1 bg-brand-500 px-2 py-1 text-[0.7rem] font-extrabold uppercase tracking-[0.1em] text-white">
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             {suggestions.open === 1 ? t.newCountOne : fill(t.newCount, suggestions.open)}
           </span>
@@ -50,7 +50,7 @@ export function ClubNeedCard({
               <p className="mt-1 text-xs font-semibold text-slate-500">{defense}</p>
             ) : null}
           </div>
-          <span className={cn("whitespace-nowrap px-2 py-1 text-[0.62rem] font-extrabold uppercase tracking-[0.12em]", PRIORITY_TAG[need.priority])}>
+          <span className={cn("whitespace-nowrap px-2 py-1 text-[0.7rem] font-extrabold uppercase tracking-[0.12em]", PRIORITY_TAG[need.priority])}>
             {CLUB_PRIORITY_LABELS[locale][need.priority]}
           </span>
         </div>

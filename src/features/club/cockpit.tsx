@@ -241,13 +241,13 @@ export function ClubCockpit({
                         )}
                       >
                         <span className="font-display text-2xl leading-none sm:text-3xl">{count}</span>
-                        <span className="text-[0.62rem] font-extrabold tracking-[0.08em]">{position}</span>
+                        <span className="text-[0.7rem] font-extrabold tracking-[0.08em]">{position}</span>
                       </Link>
                     </li>
                   );
                 })}
               </ul>
-              <p className="mt-3 text-[0.68rem] text-slate-500">{t.boardLegend}</p>
+              <p className="mt-3 text-[0.7rem] text-slate-500">{t.boardLegend}</p>
             </>
           )}
         </div>
@@ -301,7 +301,7 @@ function Kpi({ label, value, href, tone = "default" }: { label: string; value: n
         tone === "warn" && "border-amber-500"
       )}
     >
-      <span className={cn("text-[0.62rem] font-bold uppercase tracking-[0.14em]", tone === "blue" ? "text-white/80" : "text-slate-500")}>
+      <span className={cn("text-[0.7rem] font-bold uppercase tracking-[0.14em]", tone === "blue" ? "text-white/80" : "text-slate-500")}>
         {label}
       </span>
       <span className="flex items-end justify-between">

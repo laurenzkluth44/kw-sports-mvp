@@ -70,7 +70,7 @@ export function AuthArena({
         </div>
       </div>
 
-      <footer className="relative flex flex-wrap justify-between gap-3 px-5 pb-6 pt-2 text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-white/50 sm:px-10 lg:px-12">
+      <footer className="relative flex flex-wrap justify-between gap-3 px-5 pb-6 pt-2 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-white/70 sm:px-10 lg:px-12">
         <span>{footer}</span>
         <a href="https://www.kwsports.de" className="text-white/70 hover:text-white">
           kwsports.de

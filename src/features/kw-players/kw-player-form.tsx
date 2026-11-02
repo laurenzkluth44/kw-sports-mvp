@@ -3,6 +3,7 @@ import { FileText, ImageIcon, Lock, Save } from "lucide-react";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { DateTextInput } from "@/components/ui/date-text-input";
 import { Field, Input, Select, Textarea } from "@/components/ui/form";
+import { FormSectionNav } from "@/components/ui/form-section-nav";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { CourtPositionPicker } from "@/features/player-needs/court-position-picker";
 import {
@@ -15,6 +16,7 @@ import {
 } from "@/lib/club-i18n";
 import { COACH_ROLES, DEFENSE_POSITIONS, LANGUAGES, LEAGUE_EXPERIENCE_SUGGESTIONS, PLAYER_TYPES } from "@/lib/constants";
 import { needFormFlowCopy } from "@/lib/need-form-i18n";
+import { cn } from "@/lib/utils";
 import type { DefensePosition, KwPlayer } from "@/types/domain";
 
 const ERRORS: Record<string, string> = {
@@ -42,11 +44,16 @@ export function KwPlayerForm({
   ) as Record<DefensePosition, string>;
 
   return (
-    <form action={action} className="panel need-form overflow-hidden">
+    <div className="grid gap-4 lg:grid-cols-[12.5rem_minmax(0,1fr)] lg:gap-6">
+      {/* "contents" on phones so the strip can stick for the whole form, not just its own box. */}
+      <div className="contents lg:block lg:pt-2">
+        <FormSectionNav label="Abschnitte" sections={SECTIONS} />
+      </div>
+    <form action={action} className="panel need-form">
       {player ? <input type="hidden" name="id" value={player.id} /> : null}
       {error && ERRORS[error] ? <div className="alert-error m-5 mb-0">{ERRORS[error]}</div> : null}
 
-      <Section title="Person">
+      <Section id="person" title="Person">
         <div className="grid gap-4 md:grid-cols-2">
           <ChipGroup
             legend="Art"
@@ -74,7 +81,7 @@ export function KwPlayerForm({
         </div>
       </Section>
 
-      <Section title="Positionen">
+      <Section id="positionen" title="Positionen">
         <div className="player-only">
           <CourtPositionPicker
             attackDefault={player?.attack_positions ?? []}
@@ -111,7 +118,7 @@ export function KwPlayerForm({
         />
       </Section>
 
-      <Section title="Verein & Verfügbarkeit">
+      <Section id="verein" title="Verein & Verfügbarkeit">
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Aktueller Verein" htmlFor="current_club">
             <Input id="current_club" name="current_club" defaultValue={player?.current_club ?? ""} />
@@ -136,7 +143,7 @@ export function KwPlayerForm({
         </div>
       </Section>
 
-      <Section title="Profil">
+      <Section id="profil" title="Profil">
         <div className="grid gap-5">
           <ChipGroup
             legend="Spielertyp"
@@ -160,7 +167,7 @@ export function KwPlayerForm({
         </div>
       </Section>
 
-      <Section title="Foto & CV">
+      <Section id="dateien" title="Foto & CV">
         <div className="grid gap-4 md:grid-cols-2">
           <FileField
             id="photo"
@@ -170,6 +177,8 @@ export function KwPlayerForm({
             icon={<ImageIcon className="h-4 w-4" aria-hidden="true" />}
             currentHref={photoUrl}
             currentLabel="Aktuelles Foto ansehen"
+            previewUrl={photoUrl}
+            missingHint={player && !photoUrl ? "Noch kein Foto. Vereine öffnen Profile mit Foto deutlich lieber." : undefined}
           />
           <FileField
             id="cv"
@@ -179,11 +188,12 @@ export function KwPlayerForm({
             icon={<FileText className="h-4 w-4" aria-hidden="true" />}
             currentHref={cvUrl}
             currentLabel="Aktuellen CV öffnen"
+            missingHint={player && !cvUrl ? "Noch kein CV. Ohne CV sieht der Verein nur das Kurzprofil." : undefined}
           />
         </div>
       </Section>
 
-      <Section title="Freigabe für Vereine">
+      <Section id="freigabe" title="Freigabe für Vereine">
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-navy-950 text-white">
             <Lock className="h-4 w-4" aria-hidden="true" />
@@ -210,19 +220,31 @@ export function KwPlayerForm({
         </div>
       </Section>
 
-      <div className="flex justify-end border-t border-slate-200 bg-slate-50 p-5">
-        <SubmitButton variant="accent" pendingLabel="Wird gespeichert...">
+      {/* Always reachable: no need to scroll to the end of a long form to save. */}
+      <div className="sticky bottom-0 z-10 flex items-center justify-between gap-3 border-t border-slate-200 bg-white/95 px-5 py-3 shadow-[0_-8px_24px_rgba(10,10,10,0.06)] backdrop-blur">
+        <p className="hidden text-xs text-slate-500 sm:block">{player ? `${player.first_name} ${player.last_name}` : "Neuer Spieler"}</p>
+        <SubmitButton variant="accent" pendingLabel="Wird gespeichert..." className="w-full sm:w-auto">
           <Save className="h-4 w-4" aria-hidden="true" />
           {player ? "Änderungen speichern" : "Spieler anlegen"}
         </SubmitButton>
       </div>
     </form>
+    </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+const SECTIONS = [
+  { id: "person", label: "Person" },
+  { id: "positionen", label: "Positionen" },
+  { id: "verein", label: "Verein & Vertrag" },
+  { id: "profil", label: "Profil" },
+  { id: "dateien", label: "Foto & CV" },
+  { id: "freigabe", label: "Freigabe" }
+];
+
+function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
-    <section className="border-b border-slate-200 px-5 py-5">
+    <section id={id} className="scroll-mt-36 border-b border-slate-200 px-5 py-5 md:scroll-mt-48">
       <h2 className="section-heading mb-4">{title}</h2>
       {children}
     </section>
@@ -236,7 +258,9 @@ function FileField({
   help,
   icon,
   currentHref,
-  currentLabel
+  currentLabel,
+  previewUrl,
+  missingHint
 }: {
   id: string;
   label: string;
@@ -245,9 +269,16 @@ function FileField({
   icon: ReactNode;
   currentHref?: string | null;
   currentLabel: string;
+  previewUrl?: string | null;
+  missingHint?: string;
 }) {
   return (
-    <div className="flex flex-col gap-2 border border-dashed border-slate-300 p-4">
+    <div className={cn("flex flex-col gap-2 border border-dashed p-4", missingHint ? "border-amber-300 bg-amber-50/60" : "border-slate-300")}>
+      {previewUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={previewUrl} alt="" className="h-24 w-[4.5rem] bg-slate-100 object-cover object-top" />
+      ) : null}
+      {missingHint ? <p className="text-sm font-semibold text-amber-900">{missingHint}</p> : null}
       <label htmlFor={id} className="field-label inline-flex items-center gap-2">
         {icon}
         {label}
