@@ -24,7 +24,7 @@ export function NeedHero({ need, locale, actions }: { need: PlayerNeedWithClub; 
     <section className="grid overflow-hidden bg-navy-950 text-white lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
       <div className="flex flex-col gap-5 p-5 sm:p-7">
         <div className="flex items-center gap-3">
-          <ClubCrest name={need.clubs.name} logoUrl={clubLogoUrl(need.clubs.logo_path)} />
+          <ClubCrest name={need.clubs.name} logoUrl={clubLogoUrl(need.clubs.logo_path)} tone="dark" />
           <div className="min-w-0">
             <p className="truncate font-bold">{need.clubs.name}</p>
             <p className="truncate text-xs text-white/70">

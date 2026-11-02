@@ -6,6 +6,10 @@ import { CLUB_PRIORITY_LABELS, CLUB_STATUS_LABELS, clubCopy, type ClubLocale } f
 import type { OverviewCopy } from "@/lib/overview-i18n";
 import { cn, formatDate } from "@/lib/utils";
 import type { PlayerNeedWithClub, Priority } from "@/types/domain";
+import { ClubCrest, clubLogoUrl } from "@/components/ui/club-crest";
+
+// Re-exported for existing imports; the crest lives in components/ui/club-crest.tsx.
+export { ClubCrest, clubInitials, clubLogoUrl } from "@/components/ui/club-crest";
 
 const STALE_DAYS = 30;
 
@@ -15,41 +19,10 @@ export const PRIORITY_TAG: Record<Priority, string> = {
   niedrig: "bg-slate-100 text-slate-600"
 };
 
-export function clubInitials(name: string) {
-  const words = name.split(/\s+/).filter(Boolean);
-  return words
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase();
-}
-
 export function isStale(need: Pick<PlayerNeedWithClub, "status" | "last_confirmed_at">, today = new Date()) {
   if (need.status === "besetzt" || need.status === "archiviert") return false;
   const confirmed = new Date(need.last_confirmed_at).getTime();
   return !Number.isNaN(confirmed) && today.getTime() - confirmed > STALE_DAYS * 24 * 60 * 60 * 1000;
-}
-
-export function ClubCrest({ name, logoUrl, size = "md" }: { name: string; logoUrl?: string | null; size?: "md" | "lg" }) {
-  const box = size === "lg" ? "h-14 w-14 text-2xl" : "h-11 w-11 text-lg";
-  if (logoUrl) {
-    return (
-      <span className={cn("flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-slate-200", box)}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={logoUrl} alt="" className="h-[80%] w-[80%] object-contain" />
-      </span>
-    );
-  }
-  return (
-    <span className={cn("flex shrink-0 items-center justify-center rounded-full bg-navy-950 font-display leading-none text-white ring-2 ring-white/25", box)}>
-      {clubInitials(name)}
-    </span>
-  );
-}
-
-export function clubLogoUrl(logoPath: string | null | undefined) {
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  return logoPath && base ? `${base}/storage/v1/object/public/club-logos/${logoPath}` : null;
 }
 
 function detailLine(need: PlayerNeedWithClub, locale: ClubLocale, copy: OverviewCopy) {

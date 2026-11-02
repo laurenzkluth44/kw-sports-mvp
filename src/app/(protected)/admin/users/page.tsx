@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Search, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
+import { ClubCrest } from "@/components/ui/club-crest";
 import { Flash } from "@/components/ui/flash";
 import { PageHeader } from "@/components/ui/page-header";
 import { ClubCascadeSelect } from "@/features/admin/club-cascade-select";
@@ -233,25 +234,11 @@ function ClubCell({ club, supabaseUrl }: { club: Club | null; supabaseUrl: strin
     return <p className="text-sm text-slate-500">–</p>;
   }
 
-  const logoUrl = club.logo_path && supabaseUrl
-    ? `${supabaseUrl}/storage/v1/object/public/club-logos/${club.logo_path}`
-    : null;
-  const initial = club.name.trim().slice(0, 1).toUpperCase();
+  const logoUrl = club.logo_path && supabaseUrl ? `${supabaseUrl}/storage/v1/object/public/club-logos/${club.logo_path}` : null;
 
   return (
     <div className="flex items-center gap-2.5">
-      {logoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={logoUrl}
-          alt=""
-          className="h-9 w-9 shrink-0 rounded-sm border border-slate-200 bg-white object-contain p-0.5"
-        />
-      ) : (
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-navy-950 font-display text-base leading-none text-white">
-          {initial}
-        </span>
-      )}
+      <ClubCrest name={club.name} logoUrl={logoUrl} size="sm" />
       <Link href={`/admin/clubs/${club.id}`} className="min-w-0 truncate text-sm font-semibold text-navy-950 hover:text-brand-600">
         {club.name}
       </Link>

@@ -71,7 +71,7 @@ export default async function AdminClubDetailPage({
         </span>
         <div className="relative flex flex-col gap-5 p-5 sm:p-7 lg:flex-row lg:items-end lg:justify-between">
           <div className="flex items-center gap-4">
-            <ClubCrest name={typedClub.name} logoUrl={logoUrl} size="lg" />
+            <ClubCrest name={typedClub.name} logoUrl={logoUrl} size="lg" tone="dark" />
             <div className="min-w-0">
               <p className="eyebrow eyebrow-light">{typedClub.league}</p>
               <h1 className="mt-2 font-display text-[2.6rem] uppercase leading-[0.9] sm:text-[3.4rem]">
