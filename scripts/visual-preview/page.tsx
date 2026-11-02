@@ -18,6 +18,7 @@ import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
 import { AdminInboxView, type InboxTab } from "@/features/matching/admin-inbox";
 import { ClubSuggestionsView } from "@/features/matching/club-suggestions";
 import { ClubCockpit } from "@/features/club/cockpit";
+import { ClubCrest } from "@/components/ui/club-crest";
 import { ClubNeedCard, NewNeedTile } from "@/features/club/club-need-card";
 import { ClubNeedView } from "@/features/club/club-need-view";
 import { buildKwInfo } from "@/features/matching/kw-queue";
@@ -385,6 +386,45 @@ export default async function VisualPreview({
           files={new Map()}
           done={query.done}
         />
+      </AppShell>
+    );
+  }
+
+  if (screen === "crests") {
+    // Fictional crests: one with a baked-in white background (like most JPG uploads), one transparent.
+    const svg = (body: string, bg: boolean) =>
+      `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${bg ? '<rect width="100" height="100" fill="#fff"/>' : ""}${body}</svg>`)}`;
+    const shield = svg('<path d="M50 6 L88 18 V50 C88 74 70 88 50 96 C30 88 12 74 12 50 V18 Z" fill="#b3122e"/><path d="M50 18 L76 26 V50 C76 66 64 76 50 82 Z" fill="#fff"/><text x="50" y="60" font-size="22" font-family="Arial" font-weight="700" text-anchor="middle" fill="#111">HM</text>', true);
+    const roundel = svg('<circle cx="50" cy="50" r="44" fill="#0b3d2e"/><circle cx="50" cy="50" r="34" fill="none" stroke="#e8c547" stroke-width="5"/><text x="50" y="58" font-size="24" font-family="Arial" font-weight="700" text-anchor="middle" fill="#e8c547">SW</text>', false);
+    const clubWithLogo: Profile = { ...profile, clubs: { ...profile.clubs!, logo_path: null } };
+    return (
+      <AppShell profile={clubWithLogo} locale="de" crestUrl={shield}>
+        <div className="space-y-6">
+          <section className="flex flex-wrap items-center gap-8 bg-navy-950 p-8 text-white">
+            <ClubCrest name="HSG Musterstadt" logoUrl={shield} size="xl" tone="dark" />
+            <ClubCrest name="SG Waldtal" logoUrl={roundel} size="xl" tone="dark" />
+            <ClubCrest name="TV Ohne Logo" size="xl" tone="dark" />
+            <ClubCrest name="HSG Musterstadt" logoUrl={shield} size="md" tone="dark" />
+            <ClubCrest name="SG Waldtal" logoUrl={roundel} size="sm" tone="dark" />
+          </section>
+          <section className="flex flex-wrap items-center gap-8 bg-white p-8">
+            <ClubCrest name="HSG Musterstadt" logoUrl={shield} size="lg" />
+            <ClubCrest name="SG Waldtal" logoUrl={roundel} size="lg" />
+            <ClubCrest name="TV Ohne Logo" size="lg" />
+            <ClubCrest name="HSG Musterstadt" logoUrl={shield} size="sm" />
+          </section>
+          <ClubCockpit
+            locale="de"
+            clubName="HSG Musterstadt"
+            league="2. Bundesliga"
+            logoUrl={shield}
+            personName="Maria"
+            roster={players}
+            needs={[needs[0]]}
+            openSuggestions={1}
+            planningSeason={planningSeasons(1)[1]}
+          />
+        </div>
       </AppShell>
     );
   }

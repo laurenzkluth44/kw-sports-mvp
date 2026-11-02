@@ -1,3 +1,4 @@
+import { ClubCrest } from "@/components/ui/club-crest";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { AlertTriangle, ArrowRight, CalendarClock, CheckCircle2, Plus, Sparkles, type LucideIcon } from "lucide-react";
@@ -163,19 +164,7 @@ export function ClubCockpit({
         </span>
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4 sm:gap-5">
-            {logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={logoUrl} alt="" className="h-16 w-16 shrink-0 bg-white object-contain p-1.5 sm:h-20 sm:w-20" />
-            ) : (
-              <span className="flex h-16 w-16 shrink-0 items-center justify-center border-2 border-brand-500 font-display text-2xl sm:h-20 sm:w-20 sm:text-3xl">
-                {clubName
-                  .split(" ")
-                  .map((word) => word[0])
-                  .join("")
-                  .slice(0, 3)
-                  .toUpperCase()}
-              </span>
-            )}
+            <ClubCrest name={clubName} logoUrl={logoUrl} size="xl" tone="dark" />
             <div className="min-w-0">
               {league ? (
                 <p className="eyebrow eyebrow-light">
@@ -241,13 +230,13 @@ export function ClubCockpit({
                         )}
                       >
                         <span className="font-display text-2xl leading-none sm:text-3xl">{count}</span>
-                        <span className="text-[0.62rem] font-extrabold tracking-[0.08em]">{position}</span>
+                        <span className="text-[0.7rem] font-extrabold tracking-[0.08em]">{position}</span>
                       </Link>
                     </li>
                   );
                 })}
               </ul>
-              <p className="mt-3 text-[0.68rem] text-slate-500">{t.boardLegend}</p>
+              <p className="mt-3 text-[0.7rem] text-slate-500">{t.boardLegend}</p>
             </>
           )}
         </div>
@@ -301,7 +290,7 @@ function Kpi({ label, value, href, tone = "default" }: { label: string; value: n
         tone === "warn" && "border-amber-500"
       )}
     >
-      <span className={cn("text-[0.62rem] font-bold uppercase tracking-[0.14em]", tone === "blue" ? "text-white/80" : "text-slate-500")}>
+      <span className={cn("text-[0.7rem] font-bold uppercase tracking-[0.14em]", tone === "blue" ? "text-white/80" : "text-slate-500")}>
         {label}
       </span>
       <span className="flex items-end justify-between">

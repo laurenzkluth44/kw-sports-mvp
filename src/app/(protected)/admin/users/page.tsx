@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Search, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form";
+import { ClubCrest } from "@/components/ui/club-crest";
 import { Flash } from "@/components/ui/flash";
 import { PageHeader } from "@/components/ui/page-header";
 import { ClubCascadeSelect } from "@/features/admin/club-cascade-select";
@@ -164,7 +165,7 @@ export default async function AdminUsersPage({
                 )}
               >
                 {label}
-                <span className={cn("px-1.5 py-0.5 text-[0.65rem]", role === value ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-600")}>
+                <span className={cn("px-1.5 py-0.5 text-[0.7rem]", role === value ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-600")}>
                   {count}
                 </span>
               </Link>
@@ -199,7 +200,7 @@ export default async function AdminUsersPage({
                     </a>
                   </div>
                 </div>
-                <span className={cn("w-fit px-2 py-1 text-[0.65rem] font-extrabold uppercase tracking-[0.12em]", ROLE_TAG[user.role])}>
+                <span className={cn("w-fit px-2 py-1 text-[0.7rem] font-extrabold uppercase tracking-[0.12em]", ROLE_TAG[user.role])}>
                   {ROLE_NAMES[user.role]}
                 </span>
                 <AccessCell user={user} supabaseUrl={supabaseUrl} />
@@ -222,7 +223,7 @@ function AccessCell({ user, supabaseUrl }: { user: Profile; supabaseUrl: string 
   }
 
   if (user.role === "admin") {
-    return <p className="text-sm text-slate-400">KW Sports</p>;
+    return <p className="text-sm text-slate-500">KW Sports</p>;
   }
 
   return <ClubCell club={user.clubs ?? null} supabaseUrl={supabaseUrl} />;
@@ -230,28 +231,14 @@ function AccessCell({ user, supabaseUrl }: { user: Profile; supabaseUrl: string 
 
 function ClubCell({ club, supabaseUrl }: { club: Club | null; supabaseUrl: string }) {
   if (!club) {
-    return <p className="text-sm text-slate-400">–</p>;
+    return <p className="text-sm text-slate-500">–</p>;
   }
 
-  const logoUrl = club.logo_path && supabaseUrl
-    ? `${supabaseUrl}/storage/v1/object/public/club-logos/${club.logo_path}`
-    : null;
-  const initial = club.name.trim().slice(0, 1).toUpperCase();
+  const logoUrl = club.logo_path && supabaseUrl ? `${supabaseUrl}/storage/v1/object/public/club-logos/${club.logo_path}` : null;
 
   return (
     <div className="flex items-center gap-2.5">
-      {logoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={logoUrl}
-          alt=""
-          className="h-9 w-9 shrink-0 rounded-sm border border-slate-200 bg-white object-contain p-0.5"
-        />
-      ) : (
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-navy-950 font-display text-base leading-none text-white">
-          {initial}
-        </span>
-      )}
+      <ClubCrest name={club.name} logoUrl={logoUrl} size="sm" />
       <Link href={`/admin/clubs/${club.id}`} className="min-w-0 truncate text-sm font-semibold text-navy-950 hover:text-brand-600">
         {club.name}
       </Link>
@@ -278,7 +265,7 @@ function initials(value: string) {
 function Kpi({ label, value, sub }: { label: string; value: number; sub?: string }) {
   return (
     <div className="border-l-[3px] border-brand-500 bg-white px-4 py-3 shadow-card">
-      <p className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-slate-500">{label}</p>
+      <p className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-slate-500">{label}</p>
       <p className="mt-1 font-display text-3xl leading-none text-navy-950">{value}</p>
       {sub ? <p className="mt-1 text-xs text-slate-500">{sub}</p> : null}
     </div>

@@ -27,6 +27,8 @@ const PRIORITY_ORDER = { hoch: 0, mittel: 1, niedrig: 2 } as const;
  * `needs` are already filtered by everything except the position, so the demand court
  * can show counts per position; the position filter is applied here.
  */
+const PAGE_SIZE = 24;
+
 export function NeedsOverview({
   basePath,
   locale,
@@ -43,7 +45,8 @@ export function NeedsOverview({
   summary,
   detailHref,
   clubHref,
-  kwInfo
+  kwInfo,
+  showAll = false
 }: {
   basePath: "/admin" | "/agency";
   locale: ClubLocale;
@@ -62,6 +65,8 @@ export function NeedsOverview({
   clubHref?: (clubId: string) => string;
   /** KW admin only: matching numbers per need id. Never passed for agencies. */
   kwInfo?: Record<string, NeedKwInfo>;
+  /** Render every result instead of the first PAGE_SIZE (the page stays light with many needs). */
+  showAll?: boolean;
 }) {
   const position = filters.position;
   const shown = (position ? needs.filter((need) => need.attack_positions.includes(position)) : needs)
@@ -80,6 +85,13 @@ export function NeedsOverview({
     const text = query.toString();
     return text ? `${basePath}?${text}` : basePath;
   };
+
+  const visible = showAll ? shown : shown.slice(0, PAGE_SIZE);
+  const hidden = shown.length - visible.length;
+  const allHref = (() => {
+    const base = href({});
+    return `${base}${base.includes("?") ? "&" : "?"}alle=1#ergebnisse`;
+  })();
 
   const advancedActive = (["country", "league", "season", "type", "defense", "status", "priority"] as const).filter(
     (key) => Boolean(filters[key])
@@ -156,7 +168,7 @@ export function NeedsOverview({
                           ? "bg-white text-navy-950 shadow-[0_0_0_4px_#0055FF]"
                           : count > 0
                             ? "bg-brand-500 text-white shadow-blueGlow"
-                            : "border-2 border-dashed border-white/35 text-white/60"
+                            : "border-2 border-dashed border-white/35 text-white/70"
                       )}
                     >
                       {count}
@@ -192,7 +204,7 @@ export function NeedsOverview({
                   <SlidersHorizontal className="h-4 w-4 text-brand-500" aria-hidden="true" />
                   {copy.moreFilters}
                   {advancedActive > 0 ? (
-                    <span className="bg-brand-500 px-1.5 py-0.5 text-[0.65rem] text-white">{copy.activeFilters(advancedActive)}</span>
+                    <span className="bg-brand-500 px-1.5 py-0.5 text-[0.7rem] text-white">{copy.activeFilters(advancedActive)}</span>
                   ) : null}
                 </span>
                 <span aria-hidden="true" className="text-lg text-slate-400 transition-transform group-open:rotate-45">
@@ -233,18 +245,19 @@ export function NeedsOverview({
       </section>
 
       {/* Results */}
+      <span id="ergebnisse" className="block scroll-mt-32" aria-hidden="true" />
       {shown.length === 0 ? (
         <div className="panel px-5 py-12 text-center text-sm text-slate-500">{copy.noResults}</div>
       ) : view === "cards" ? (
         <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {shown.map((need) => (
+          {visible.map((need) => (
             <NeedCard key={need.id} need={need} href={detailHref(need.id)} locale={locale} copy={copy} kw={kwInfo?.[need.id]} />
           ))}
         </section>
       ) : (
         <section className="panel overflow-hidden">
           <div className="divide-y divide-slate-200">
-            {shown.map((need) => (
+            {visible.map((need) => (
               <article
                 key={need.id}
                 className="data-row grid gap-4 lg:grid-cols-[1.25fr_0.8fr_0.7fr_0.6fr_1fr_auto] lg:items-center"
@@ -279,6 +292,14 @@ export function NeedsOverview({
           </div>
         </section>
       )}
+
+      {hidden > 0 ? (
+        <div className="flex justify-center">
+          <LinkButton href={allHref} variant="secondary">
+            {copy.showAll.replace("{n}", String(shown.length))}
+          </LinkButton>
+        </div>
+      ) : null}
 
       {inbox}
 

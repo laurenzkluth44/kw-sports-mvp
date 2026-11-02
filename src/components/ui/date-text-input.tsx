@@ -111,7 +111,7 @@ export function DateTextInput({
 
           <div className="grid grid-cols-7 gap-1 text-center">
             {weekdayLabels.map((weekday) => (
-              <span key={weekday} className="py-1 text-xs font-black uppercase text-slate-400">
+              <span key={weekday} className="py-1 text-xs font-black uppercase text-slate-500">
                 {weekday}
               </span>
             ))}

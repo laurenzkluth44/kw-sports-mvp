@@ -76,7 +76,7 @@ export function TacticsBoard({
                 {slot.count}
               </span>
               {slot.flexibleCount > 0 ? (
-                <span className="absolute -right-2 -top-1 rounded-full border border-white/20 bg-navy-800 px-1.5 py-0.5 text-[0.6rem] font-bold leading-none text-white">
+                <span className="absolute -right-2 -top-1 rounded-full border border-white/20 bg-navy-800 px-1.5 py-0.5 text-[0.7rem] font-bold leading-none text-white">
                   +{slot.flexibleCount}
                 </span>
               ) : null}
@@ -85,7 +85,7 @@ export function TacticsBoard({
               {slot.label}
             </span>
             {visibleNames.length > 0 ? (
-              <span className="mt-0.5 hidden w-full flex-col text-[0.68rem] leading-[1.3] text-slate-300 sm:flex">
+              <span className="mt-0.5 hidden w-full flex-col text-[0.7rem] leading-[1.3] text-slate-300 sm:flex">
                 {visibleNames.map((name, index) => (
                   <span key={`${slot.key}-${index}`} className="truncate">
                     {name}
@@ -158,7 +158,7 @@ export function BoardLegend({ ok, thin, gap, flexible }: { ok: string; thin: str
         <span className="h-3.5 w-3.5 rounded-full border-2 border-dashed border-red-400" aria-hidden="true" />
         {gap}
       </li>
-      <li className="text-slate-400 normal-case tracking-normal">{flexible}</li>
+      <li className="text-slate-500 normal-case tracking-normal">{flexible}</li>
     </ul>
   );
 }

@@ -71,7 +71,7 @@ export default async function AdminClubDetailPage({
         </span>
         <div className="relative flex flex-col gap-5 p-5 sm:p-7 lg:flex-row lg:items-end lg:justify-between">
           <div className="flex items-center gap-4">
-            <ClubCrest name={typedClub.name} logoUrl={logoUrl} size="lg" />
+            <ClubCrest name={typedClub.name} logoUrl={logoUrl} size="lg" tone="dark" />
             <div className="min-w-0">
               <p className="eyebrow eyebrow-light">{typedClub.league}</p>
               <h1 className="mt-2 font-display text-[2.6rem] uppercase leading-[0.9] sm:text-[3.4rem]">
@@ -221,7 +221,7 @@ export default async function AdminClubDetailPage({
 function HeroStat({ label, value, highlight, warn }: { label: string; value: number; highlight?: boolean; warn?: boolean }) {
   return (
     <div className="border-l border-t border-white/10 px-5 py-4 first:border-l-0 lg:border-t-0">
-      <dt className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-white/55">{label}</dt>
+      <dt className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-white/70">{label}</dt>
       <dd className={cn("mt-1 font-display text-3xl leading-none", highlight ? "text-brand-300" : warn ? "text-amber-300" : "text-white")}>{value}</dd>
     </div>
   );

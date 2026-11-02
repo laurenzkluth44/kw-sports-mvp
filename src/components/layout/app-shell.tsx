@@ -3,6 +3,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { Eye, FileDown, Inbox, LayoutDashboard, LogOut, Menu, Plus, Shield, Shirt, Sparkles, UserRound, Users } from "lucide-react";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { ClubCrest, clubLogoUrl } from "@/components/ui/club-crest";
 import { NavLinks, type NavItem } from "@/components/layout/nav-links";
 import { logoutAction } from "@/features/auth/actions";
 import { ROLE_LABELS } from "@/lib/constants";
@@ -19,12 +20,15 @@ export function AppShell({
   profile,
   locale,
   badge = 0,
+  crestUrl,
   children
 }: {
   profile: Profile;
   locale: ClubLocale;
   /** Club: unanswered KW suggestions. Admin: club answers not yet followed up. */
   badge?: number;
+  /** Only for the screenshot preview; real pages use the club's stored logo. */
+  crestUrl?: string;
   children: ReactNode;
 }) {
   const t = clubCopy[locale].app;
@@ -65,22 +69,31 @@ export function AppShell({
       <header className="sticky top-0 z-30 border-b border-white/10 bg-navy-950/95 text-white backdrop-blur">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 md:gap-4 md:py-4 lg:px-8">
           <div className="flex items-center justify-between gap-3">
-            <Link href={roleHome} prefetch={false} className="group flex min-w-0 items-center gap-3">
+            <Link href={roleHome} prefetch={false} className="group flex min-w-0 items-center gap-2.5 sm:gap-3">
               <Image
                 src="/kw-sports-logo-white.svg"
                 alt="KW Sports"
                 width={2557}
                 height={288}
-                className="h-4 w-auto shrink-0 sm:h-5 md:h-6"
+                className="h-3.5 w-auto shrink-0 sm:h-5 md:h-6"
                 priority
                 unoptimized
               />
-              <span className="min-w-0 border-l border-white/15 pl-3">
-                <span className="block whitespace-nowrap font-display text-lg uppercase leading-none tracking-[0.02em] sm:text-xl md:text-2xl">
-                  Club Hub
-                </span>
-                <span className="mt-0.5 block truncate text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-brand-300">
-                  {tagline}
+              <span className="flex min-w-0 items-center gap-2 border-l border-white/15 pl-2.5 sm:gap-3 sm:pl-3">
+                {/* Club users always see their own crest next to the product name. */}
+                {profile.role === "club" && profile.clubs ? (
+                  <ClubCrest name={profile.clubs.name} logoUrl={crestUrl ?? clubLogoUrl(profile.clubs.logo_path)} size="sm" tone="dark" className="md:hidden" />
+                ) : null}
+                {profile.role === "club" && profile.clubs ? (
+                  <ClubCrest name={profile.clubs.name} logoUrl={crestUrl ?? clubLogoUrl(profile.clubs.logo_path)} size="md" tone="dark" className="hidden md:inline-flex" />
+                ) : null}
+                <span className="min-w-0">
+                  <span className="block whitespace-nowrap font-display text-lg uppercase leading-none tracking-[0.02em] sm:text-xl md:text-2xl">
+                    Club Hub
+                  </span>
+                  <span className="mt-0.5 block truncate text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-brand-300">
+                    {tagline}
+                  </span>
                 </span>
               </span>
             </Link>
@@ -94,9 +107,13 @@ export function AppShell({
 
             {/* Mobile: one menu button instead of the stacked controls */}
             <details className="group md:hidden">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 border border-white/15 px-3 text-[0.72rem] font-extrabold uppercase tracking-[0.12em] [&::-webkit-details-marker]:hidden">
+              <summary
+                aria-label={menuLabel}
+                className="flex min-h-11 min-w-11 shrink-0 cursor-pointer list-none items-center justify-center gap-2 border border-white/15 px-3 text-[0.72rem] font-extrabold uppercase tracking-[0.12em] [&::-webkit-details-marker]:hidden"
+              >
                 <Menu className="h-4 w-4" aria-hidden="true" />
-                {menuLabel}
+                {/* Icon only on small phones so the crest, "Club Hub" and the club name fit. */}
+                <span className="hidden sm:inline">{menuLabel}</span>
               </summary>
               <div className="absolute inset-x-0 top-full border-b border-white/10 bg-navy-950 pb-4 shadow-cardHover">
                 <NavLinks items={nav} variant="menu" className="border-b border-white/10 py-2" />

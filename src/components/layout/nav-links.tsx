@@ -54,7 +54,7 @@ export function NavLinks({
                 {item.icon}
                 {item.label}
                 {item.badge ? (
-                  <span className="ml-0.5 inline-flex min-w-5 items-center justify-center bg-brand-500 px-1.5 py-0.5 text-[0.62rem] font-extrabold leading-none text-white">
+                  <span className="ml-0.5 inline-flex min-w-5 items-center justify-center bg-brand-500 px-1.5 py-0.5 text-[0.7rem] font-extrabold leading-none text-white">
                     {item.badge}
                   </span>
                 ) : null}

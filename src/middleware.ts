@@ -28,7 +28,10 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  await supabase.auth.getUser();
+  // Only keeps the session cookie fresh: getSession() reads the cookie locally and calls Supabase
+  // only when the access token has expired and needs a refresh. No access decision is made here;
+  // every protected page verifies the user with getUser() (see src/lib/auth.ts).
+  await supabase.auth.getSession();
 
   return response;
 }

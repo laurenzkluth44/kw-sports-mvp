@@ -143,7 +143,7 @@ export function MatchReasons({ reasons, locale, tone = "light" }: { reasons: Mat
                 ? reason.ok === true
                   ? "bg-brand-500/20 text-white"
                   : reason.ok === false
-                    ? "bg-white/5 text-white/60 line-through decoration-white/40"
+                    ? "bg-white/5 text-white/70 line-through decoration-white/40"
                     : "bg-white/5 text-white/70"
                 : reason.ok === true
                   ? "bg-brand-50 text-brand-700"

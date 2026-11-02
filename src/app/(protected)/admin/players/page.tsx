@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { CheckCircle2, Clock3, FileText, Plus, UserPlus } from "lucide-react";
+import { CheckCircle2, Clock3, FileText, ImageOff, Plus, UserPlus } from "lucide-react";
 import { LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Flash } from "@/components/ui/flash";
@@ -22,7 +22,7 @@ const FLASH: Record<string, string> = {
 export default async function AdminPlayersPage({
   searchParams
 }: {
-  searchParams: Promise<{ done?: string; position?: string; kind?: string; check?: string }>;
+  searchParams: Promise<{ done?: string; position?: string; kind?: string; check?: string; incomplete?: string }>;
 }) {
   const { supabase } = await requireAdmin();
   const params = await searchParams;
@@ -35,20 +35,26 @@ export default async function AdminPlayersPage({
   const freshness = new Map(all.map((player) => [player.id, playerFreshness(player, now)]));
   const toCheck = all.filter((player) => freshness.get(player.id)!.stale).length;
   const checkOnly = params.check === "1";
+  // Clubs open profiles with photo and CV far more often; these are the ones to complete first.
+  const isIncomplete = (player: KwPlayer) => !player.photo_path || !player.cv_path;
+  const incompleteCount = all.filter(isIncomplete).length;
+  const incompleteOnly = params.incomplete === "1";
   const players = all.filter(
     (player) =>
       (!position || player.attack_positions.includes(position)) &&
       (!kind || player.kind === kind) &&
-      (!checkOnly || freshness.get(player.id)!.stale)
+      (!checkOnly || freshness.get(player.id)!.stale) &&
+      (!incompleteOnly || isIncomplete(player))
   );
   const photos = await signedFileUrls(supabase, players.map((player) => player.photo_path));
   const released = all.filter((player) => player.visible_to_clubs).length;
 
-  const filterHref = (next: { position?: AttackPosition; kind?: string; check?: boolean }) => {
+  const filterHref = (next: { position?: AttackPosition; kind?: string; check?: boolean; incomplete?: boolean }) => {
     const query = new URLSearchParams();
     if (next.position) query.set("position", next.position);
     if (next.kind) query.set("kind", next.kind);
     if (next.check) query.set("check", "1");
+    if (next.incomplete) query.set("incomplete", "1");
     const text = query.toString();
     return text ? `/admin/players?${text}` : "/admin/players";
   };
@@ -70,7 +76,7 @@ export default async function AdminPlayersPage({
       <Flash message={params.done ? FLASH[params.done] : null} />
 
       <nav aria-label="Filter" className="flex flex-wrap gap-2">
-        <FilterChip href={filterHref({})} active={!position && !kind && !checkOnly}>
+        <FilterChip href={filterHref({})} active={!position && !kind && !checkOnly && !incompleteOnly}>
           Alle
         </FilterChip>
         {ATTACK_POSITIONS.map((code) => (
@@ -84,6 +90,11 @@ export default async function AdminPlayersPage({
         {toCheck > 0 || checkOnly ? (
           <FilterChip href={filterHref({ check: true })} active={checkOnly} tone="warn">
             Zu prüfen · {toCheck}
+          </FilterChip>
+        ) : null}
+        {incompleteCount > 0 || incompleteOnly ? (
+          <FilterChip href={filterHref({ incomplete: true })} active={incompleteOnly} tone="warn">
+            Foto oder CV fehlt · {incompleteCount}
           </FilterChip>
         ) : null}
       </nav>
@@ -116,7 +127,7 @@ export default async function AdminPlayersPage({
                 photoUrl={player.photo_path ? photos.get(player.photo_path) : null}
                 className="h-full"
                 footer={
-                  <div className="flex flex-wrap items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.1em]">
+                  <div className="flex flex-wrap items-center gap-2 text-[0.7rem] font-bold uppercase tracking-[0.1em]">
                     <span
                       className={cn(
                         "inline-flex items-center gap-1 px-2 py-1",
@@ -126,6 +137,12 @@ export default async function AdminPlayersPage({
                       {player.visible_to_clubs ? <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> : null}
                       {player.visible_to_clubs ? "Für Vereine freigegeben" : "Nicht freigegeben"}
                     </span>
+                    {player.photo_path ? null : (
+                      <span className="inline-flex items-center gap-1 bg-amber-400/20 px-2 py-1 text-amber-200">
+                        <ImageOff className="h-3.5 w-3.5" aria-hidden="true" />
+                        Foto fehlt
+                      </span>
+                    )}
                     <span className={cn("inline-flex items-center gap-1 px-2 py-1", player.cv_path ? "bg-white/10 text-white" : "bg-amber-400/20 text-amber-200")}>
                       <FileText className="h-3.5 w-3.5" aria-hidden="true" />
                       {player.cv_path ? "CV" : "CV fehlt"}

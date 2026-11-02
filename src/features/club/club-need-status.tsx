@@ -70,7 +70,7 @@ export function ClubNeedStatus({
                   <span className="flex w-full items-start justify-between gap-2">
                     <span className="flex flex-col gap-1">{label(status, active, help)}</span>
                     <ChevronDown
-                      className={cn("mt-0.5 h-4 w-4 shrink-0 transition-transform group-open:rotate-180", active ? "text-white/60" : "text-slate-400")}
+                      className={cn("mt-0.5 h-4 w-4 shrink-0 transition-transform group-open:rotate-180", active ? "text-white/70" : "text-slate-400")}
                       aria-hidden="true"
                     />
                   </span>

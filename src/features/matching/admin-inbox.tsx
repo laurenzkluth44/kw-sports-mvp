@@ -117,7 +117,7 @@ export function AdminInboxView({
             {TAB_LABELS[key]}
             <span
               className={cn(
-                "px-1.5 py-0.5 text-[0.62rem] leading-none",
+                "px-1.5 py-0.5 text-[0.7rem] leading-none",
                 key === tab ? (key === "offen" && counts[key] > 0 ? "bg-brand-500 text-white" : "bg-navy-950 text-white") : "bg-slate-100 text-slate-600"
               )}
             >
@@ -143,7 +143,7 @@ export function AdminInboxView({
             return (
               <li key={match.id} className="grid gap-4 px-5 py-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_auto] lg:items-center">
                 <div className="min-w-0">
-                  <p className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-slate-500">
+                  <p className="text-[0.7rem] font-bold uppercase tracking-[0.14em] text-slate-500">
                     {need.clubs.name} · {needHeadline(need, "de")} · {need.season}
                   </p>
                   <p className="mt-1 font-bold text-navy-950">
@@ -169,7 +169,7 @@ export function AdminInboxView({
                       {waitingDays <= 0 ? "Heute freigegeben" : waitingDays === 1 ? "Seit 1 Tag offen" : `Seit ${waitingDays} Tagen offen`}
                     </p>
                   ) : (
-                    <p className="text-sm text-slate-400">Keine Notiz</p>
+                    <p className="text-sm text-slate-500">Keine Notiz</p>
                   )}
                   {people.length > 0 ? (
                     <p className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
@@ -222,7 +222,7 @@ export function AdminInboxView({
 function InboxStat({ label, value, sub, highlight }: { label: string; value: number | string; sub?: string; highlight?: boolean }) {
   return (
     <div className={cn("border-l-[3px] border-brand-500 px-4 py-3 shadow-card", highlight ? "bg-brand-500 text-white" : "bg-white")}>
-      <p className={cn("text-[0.62rem] font-bold uppercase tracking-[0.16em]", highlight ? "text-white/80" : "text-slate-500")}>{label}</p>
+      <p className={cn("text-[0.7rem] font-bold uppercase tracking-[0.16em]", highlight ? "text-white/80" : "text-slate-500")}>{label}</p>
       <p className="mt-1 font-display text-3xl leading-none">{value}</p>
       {sub ? <p className={cn("mt-1 text-xs", highlight ? "text-white/80" : "text-slate-500")}>{sub}</p> : null}
     </div>

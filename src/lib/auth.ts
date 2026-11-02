@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { AppRole, Profile } from "@/types/domain";
@@ -13,7 +14,11 @@ export function getRoleHome(role: AppRole) {
   return "/club";
 }
 
-export async function getCurrentProfile(): Promise<AuthedContext | null> {
+/**
+ * Signed-in user + profile, verified with Supabase Auth. Wrapped in React `cache`, so the
+ * layout and the page of one request share a single check instead of running it twice.
+ */
+export const getCurrentProfile = cache(async (): Promise<AuthedContext | null> => {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user }
@@ -33,7 +38,7 @@ export async function getCurrentProfile(): Promise<AuthedContext | null> {
     supabase,
     profile: profile as Profile
   };
-}
+});
 
 export async function requireUser(): Promise<AuthedContext> {
   const context = await getCurrentProfile();

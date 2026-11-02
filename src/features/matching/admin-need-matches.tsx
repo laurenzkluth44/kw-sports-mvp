@@ -104,7 +104,7 @@ export function AdminNeedMatchesView({
                     {match.club_note ? <p className="mt-1 text-sm italic text-slate-700">„{match.club_note}“</p> : null}
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={cn("px-2 py-1 text-[0.68rem] font-extrabold uppercase tracking-[0.1em]", STATUS[match.status].className)}>
+                    <span className={cn("px-2 py-1 text-[0.7rem] font-extrabold uppercase tracking-[0.1em]", STATUS[match.status].className)}>
                       {STATUS[match.status].label}
                     </span>
                     <form action={withdrawNeedMatchAction}>

@@ -24,10 +24,10 @@ export function NeedHero({ need, locale, actions }: { need: PlayerNeedWithClub; 
     <section className="grid overflow-hidden bg-navy-950 text-white lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
       <div className="flex flex-col gap-5 p-5 sm:p-7">
         <div className="flex items-center gap-3">
-          <ClubCrest name={need.clubs.name} logoUrl={clubLogoUrl(need.clubs.logo_path)} />
+          <ClubCrest name={need.clubs.name} logoUrl={clubLogoUrl(need.clubs.logo_path)} tone="dark" />
           <div className="min-w-0">
             <p className="truncate font-bold">{need.clubs.name}</p>
-            <p className="truncate text-xs text-white/60">
+            <p className="truncate text-xs text-white/70">
               {need.clubs.league} · {need.clubs.city}
             </p>
           </div>
@@ -36,10 +36,10 @@ export function NeedHero({ need, locale, actions }: { need: PlayerNeedWithClub; 
         <div>
           <h1 className="font-display text-[2.8rem] uppercase leading-[0.88] sm:text-[3.8rem]">{needHeadline(need, locale)}</h1>
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className={cn("px-2 py-1 text-[0.68rem] font-extrabold uppercase tracking-[0.12em]", PRIORITY_TAG[need.priority])}>
+            <span className={cn("px-2 py-1 text-[0.7rem] font-extrabold uppercase tracking-[0.12em]", PRIORITY_TAG[need.priority])}>
               {CLUB_PRIORITY_LABELS[locale][need.priority]}
             </span>
-            <span className="inline-flex items-center gap-2 border border-white/15 px-2 py-1 text-[0.68rem] font-extrabold uppercase tracking-[0.12em]">
+            <span className="inline-flex items-center gap-2 border border-white/15 px-2 py-1 text-[0.7rem] font-extrabold uppercase tracking-[0.12em]">
               <span
                 aria-hidden="true"
                 className={cn(
@@ -50,7 +50,7 @@ export function NeedHero({ need, locale, actions }: { need: PlayerNeedWithClub; 
               {CLUB_STATUS_LABELS[locale][need.status]}
             </span>
             {stale ? (
-              <span className="bg-amber-400/15 px-2 py-1 text-[0.68rem] font-bold text-amber-200">{t.stale}</span>
+              <span className="bg-amber-400/15 px-2 py-1 text-[0.7rem] font-bold text-amber-200">{t.stale}</span>
             ) : null}
           </div>
         </div>
@@ -74,7 +74,7 @@ export function NeedHero({ need, locale, actions }: { need: PlayerNeedWithClub; 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <div className="border-l border-white/10 px-3 first:border-l-0 first:pl-0">
-      <dt className="text-[0.6rem] font-bold uppercase tracking-[0.16em] text-white/50">{label}</dt>
+      <dt className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-white/70">{label}</dt>
       <dd className="mt-1 font-display text-xl leading-none sm:text-2xl">{value}</dd>
     </div>
   );
@@ -92,7 +92,7 @@ export function NeedFacts({ title, rows, empty }: { title: string; rows: { label
         <dl className="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2">
           {filled.map((row) => (
             <div key={row.label} className={row.wide ? "sm:col-span-2" : undefined}>
-              <dt className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-slate-500">{row.label}</dt>
+              <dt className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-slate-500">{row.label}</dt>
               <dd className="mt-1 whitespace-pre-line text-sm font-medium leading-6 text-navy-950 [&_a]:text-brand-600 [&_a]:underline">
                 {row.value}
               </dd>

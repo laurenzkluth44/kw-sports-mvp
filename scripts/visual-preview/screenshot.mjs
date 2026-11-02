@@ -40,6 +40,8 @@ const shots = [
   { name: "club-cockpit-desktop", path: "/visual-preview/cockpit", width: 1280 },
   { name: "club-cockpit-mobile", path: "/visual-preview/cockpit?lang=en", width: 390 },
   { name: "club-cockpit-empty", path: "/visual-preview/cockpit-empty", width: 1280 },
+  { name: "crests-desktop", path: "/visual-preview/crests", width: 1280 },
+  { name: "crests-mobile", path: "/visual-preview/crests", width: 390 },
   { name: "club-need-desktop", path: "/visual-preview/club-need", width: 1280 },
   { name: "club-need-mobile", path: "/visual-preview/club-need?lang=en", width: 390 },
   { name: "club-need-filled-choice", path: "/visual-preview/club-need", width: 1280, click: "[role=group] details summary" },

@@ -126,7 +126,7 @@ export function ClubNeedView({
             <h2 className="mt-1 font-display text-[2rem] uppercase leading-none text-navy-950">{t.suggestionsTitle}</h2>
           </div>
           {open.length > 0 ? (
-            <span className="bg-brand-500 px-2 py-1 text-[0.68rem] font-extrabold uppercase tracking-[0.12em] text-white">
+            <span className="bg-brand-500 px-2 py-1 text-[0.7rem] font-extrabold uppercase tracking-[0.12em] text-white">
               {open.length === 1 ? t.newCountOne : t.newCount.replace("{n}", String(open.length))}
             </span>
           ) : null}

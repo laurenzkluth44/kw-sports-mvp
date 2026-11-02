@@ -227,7 +227,7 @@ function Preview({
         {state.rows.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50 text-[0.68rem] font-extrabold uppercase tracking-[0.12em] text-slate-500">
+              <thead className="border-b border-slate-200 bg-slate-50 text-[0.7rem] font-extrabold uppercase tracking-[0.12em] text-slate-500">
                 <tr>
                   <th className="w-10 py-3 pl-4 pr-1 sm:w-12 sm:px-5">
                     <input
