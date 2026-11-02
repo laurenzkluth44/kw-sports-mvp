@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { CheckCircle2, Clock3, FileText, ImageOff, Plus, UserPlus } from "lucide-react";
+import { CheckCircle2, Clock3, FileText, ImageOff, Plus, Upload, UserPlus } from "lucide-react";
 import { LinkButton } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Flash } from "@/components/ui/flash";
@@ -66,10 +66,16 @@ export default async function AdminPlayersPage({
         title="Spielerdatenbank"
         description={`${all.length} Spieler und Trainer · ${released} für Vereine freigegeben. Vereine sehen nur Spieler, die du für ihren Bedarf vorschlägst.`}
         actions={
-          <LinkButton href="/admin/players/new" variant="accent">
-            <UserPlus className="h-4 w-4" aria-hidden="true" />
-            Spieler anlegen
-          </LinkButton>
+          <>
+            <LinkButton href="/admin/players/upload" variant="secondary">
+              <Upload className="h-4 w-4" aria-hidden="true" />
+              CVs & Fotos hochladen
+            </LinkButton>
+            <LinkButton href="/admin/players/new" variant="accent">
+              <UserPlus className="h-4 w-4" aria-hidden="true" />
+              Spieler anlegen
+            </LinkButton>
+          </>
         }
       />
 
