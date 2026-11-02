@@ -28,6 +28,7 @@ export type OverviewCopy = {
   age: string;
   ageFrom: string;
   ageTo: string;
+  showAll: string;
   heightMin: string;
   updated: string;
   stale: string;
@@ -65,6 +66,7 @@ export const overviewCopy: Record<ClubLocale, OverviewCopy> = {
     age: "Jahre",
     ageFrom: "ab",
     ageTo: "bis",
+    showAll: "Alle {n} anzeigen",
     heightMin: "ab",
     updated: "aktualisiert",
     stale: "Bitte bestätigen",
@@ -100,6 +102,7 @@ export const overviewCopy: Record<ClubLocale, OverviewCopy> = {
     age: "years",
     ageFrom: "from",
     ageTo: "up to",
+    showAll: "Show all {n}",
     heightMin: "min.",
     updated: "updated",
     stale: "Needs confirming",
@@ -135,6 +138,7 @@ export const overviewCopy: Record<ClubLocale, OverviewCopy> = {
     age: "ans",
     ageFrom: "à partir de",
     ageTo: "jusqu’à",
+    showAll: "Afficher les {n}",
     heightMin: "min.",
     updated: "mis à jour",
     stale: "À confirmer",
@@ -170,6 +174,7 @@ export const overviewCopy: Record<ClubLocale, OverviewCopy> = {
     age: "años",
     ageFrom: "desde",
     ageTo: "hasta",
+    showAll: "Mostrar las {n}",
     heightMin: "mín.",
     updated: "actualizado",
     stale: "Por confirmar",

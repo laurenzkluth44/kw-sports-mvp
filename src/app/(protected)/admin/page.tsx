@@ -43,10 +43,13 @@ export default async function AdminDashboardPage({
     .select(`*, clubs!inner(${CLUB_COLUMNS})`)
     .order("created_at", { ascending: false });
 
-  const [{ data = [] }, { data: playerRows }, { data: matchRows }] = await Promise.all([
+  // All five queries at once: one round trip to the database instead of three in a row.
+  const [{ data = [] }, { data: playerRows }, { data: matchRows }, { data: inboxRows = [] }, { data: agencyCount }] = await Promise.all([
     applyNeedFilters(query, { ...filters, position: undefined }),
     supabase.from("kw_players").select("*"),
-    supabase.from("need_matches").select("need_id, player_id, status")
+    supabase.from("need_matches").select("need_id, player_id, status"),
+    supabase.from("player_needs").select(`*, clubs!inner(${CLUB_COLUMNS})`).order("updated_at", { ascending: false }).limit(5),
+    supabase.rpc("agency_count")
   ]);
   const allNeeds = data as PlayerNeedWithClub[];
 
@@ -58,13 +61,7 @@ export default async function AdminDashboardPage({
   );
   const queueOnly = params.kw === "offen";
   const needs = queueOnly ? queue : allNeeds;
-  const { data: inboxRows = [] } = await supabase
-    .from("player_needs")
-    .select(`*, clubs!inner(${CLUB_COLUMNS})`)
-    .order("updated_at", { ascending: false })
-    .limit(5);
   const inboxNeeds = inboxRows as PlayerNeedWithClub[];
-  const { data: agencyCount } = await supabase.rpc("agency_count");
   const summaryNeeds = filters.position ? needs.filter((need) => need.attack_positions.includes(filters.position!)) : needs;
 
   return (
@@ -74,6 +71,7 @@ export default async function AdminDashboardPage({
       copy={overviewCopy.de}
       eyebrow="KW Sports Admin · Alle Kaderbedarfe"
       view={view}
+      showAll={params.alle === "1"}
       needs={needs}
       filters={filters}
       agencyCount={agencyCount ?? 0}

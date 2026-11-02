@@ -38,13 +38,11 @@ export default async function AgencyDashboardPage({
     .select(`*, clubs!inner(${CLUB_COLUMNS})`)
     .order("created_at", { ascending: false });
 
-  const { data = [] } = await applyNeedFilters(query, { ...filters, position: undefined });
+  const [{ data = [] }, { data: inboxRows = [] }] = await Promise.all([
+    applyNeedFilters(query, { ...filters, position: undefined }),
+    supabase.from("player_needs").select(`*, clubs!inner(${CLUB_COLUMNS})`).order("updated_at", { ascending: false }).limit(5)
+  ]);
   const needs = data as PlayerNeedWithClub[];
-  const { data: inboxRows = [] } = await supabase
-    .from("player_needs")
-    .select(`*, clubs!inner(${CLUB_COLUMNS})`)
-    .order("updated_at", { ascending: false })
-    .limit(5);
   const inboxNeeds = inboxRows as PlayerNeedWithClub[];
   const summaryNeeds = filters.position ? needs.filter((need) => need.attack_positions.includes(filters.position!)) : needs;
 
@@ -55,6 +53,7 @@ export default async function AgencyDashboardPage({
       copy={overviewCopy[locale]}
       eyebrow={profile.agency_name || agencyCopy[locale].app.tagline}
       view={view}
+      showAll={params.alle === "1"}
       needs={needs}
       filters={filters}
       detailHref={(id) => `/agency/needs/${id}`}

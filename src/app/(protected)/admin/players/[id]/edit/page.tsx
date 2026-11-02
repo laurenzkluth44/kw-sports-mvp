@@ -23,13 +23,12 @@ export default async function EditKwPlayerPage({
   const query = await searchParams;
   const { supabase } = await requireAdmin();
 
-  const { data } = await supabase.from("kw_players").select("*").eq("id", id).maybeSingle();
+  const [{ data }, { count: matchCount }] = await Promise.all([
+    supabase.from("kw_players").select("*").eq("id", id).maybeSingle(),
+    supabase.from("need_matches").select("id", { count: "exact", head: true }).eq("player_id", id)
+  ]);
   if (!data) notFound();
   const player = data as KwPlayer;
-  const { count: matchCount } = await supabase
-    .from("need_matches")
-    .select("id", { count: "exact", head: true })
-    .eq("player_id", id);
   const files = await signedFileUrls(supabase, [player.photo_path, player.cv_path]);
   const name = `${player.first_name} ${player.last_name}`;
   const freshness = playerFreshness(player);
