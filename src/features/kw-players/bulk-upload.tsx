@@ -4,6 +4,7 @@ import { useMemo, useRef, useState, type DragEvent } from "react";
 import Link from "next/link";
 import { AlertTriangle, Check, FileText, ImageIcon, Loader2, RotateCcw, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 import { duplicatesToSkip, matchFile, type BulkKind, type BulkMatch } from "./bulk-match";
 import { uploadPlayerFileAction } from "./actions";
@@ -188,7 +189,7 @@ export function BulkUpload({ players }: { players: BulkUploadPlayer[] }) {
                 <li
                   key={row.key}
                   className={cn(
-                    "grid gap-3 px-4 py-3 sm:grid-cols-[auto_minmax(0,1.2fr)_minmax(0,1fr)_auto] sm:items-center",
+                    "relative grid gap-3 px-4 py-3 pr-14 sm:pr-4 sm:grid-cols-[auto_minmax(0,1.2fr)_minmax(0,1fr)_auto] sm:items-center",
                     !row.include && row.status !== "done" && "bg-slate-50/70"
                   )}
                 >
@@ -222,12 +223,12 @@ export function BulkUpload({ players }: { players: BulkUploadPlayer[] }) {
                   </div>
                   {row.kind ? (
                     <div className="min-w-0">
-                      <select
+                      <Select
                         aria-label={`Spieler für ${row.file.name}`}
                         value={row.playerId}
                         disabled={running || row.status === "done"}
                         onChange={(event) => update(row.key, { playerId: event.target.value, include: event.target.value !== "", problem: null })}
-                        className={cn("w-full", !row.playerId && "border-amber-400")}
+                        className={cn(!row.playerId && "border-amber-400")}
                       >
                         <option value="">Spieler wählen …</option>
                         {sortedPlayers.map((option) => (
@@ -236,7 +237,7 @@ export function BulkUpload({ players }: { players: BulkUploadPlayer[] }) {
                             {option.kind === "trainer" ? " (Trainer)" : ""}
                           </option>
                         ))}
-                      </select>
+                      </Select>
                       {replaces && row.status !== "done" ? (
                         <p className="mt-1 text-xs text-slate-500">Ersetzt {row.kind === "cv" ? "den vorhandenen CV" : "das vorhandene Foto"}.</p>
                       ) : null}
@@ -244,7 +245,7 @@ export function BulkUpload({ players }: { players: BulkUploadPlayer[] }) {
                   ) : (
                     <span className="hidden sm:block" />
                   )}
-                  <div className="flex items-center justify-end gap-2">
+                  <div className="absolute right-2 top-2 flex items-center justify-end gap-2 sm:static">
                     <RowStatus status={row.status} />
                     {row.status !== "done" && !running ? (
                       <button
@@ -262,7 +263,7 @@ export function BulkUpload({ players }: { players: BulkUploadPlayer[] }) {
             })}
           </ul>
 
-          <div className="sticky bottom-0 z-10 -mx-4 flex flex-col gap-3 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:mx-0 sm:flex-row sm:items-center sm:justify-between sm:border sm:px-5">
+          <div className="sticky bottom-0 z-10 -mx-4 mt-2 flex flex-col gap-3 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:mx-0 sm:flex-row sm:items-center sm:justify-between sm:border sm:px-5">
             <p className="text-sm text-slate-600">
               <strong className="text-navy-950">{queue.length}</strong> bereit
               {done ? <> · <strong className="text-navy-950">{done}</strong> hochgeladen</> : null}
