@@ -50,7 +50,7 @@ export function KwPlayerStatsAdmin({ playerId, games, result }: { playerId: stri
             <table className="w-full min-w-[44rem] text-sm">
               <thead>
                 <tr className="table-header text-left">
-                  {["Saison", "Wettbewerb", "Spiele", "Tore", "Würfe", "Wurf %", "Assists", "TF", "2 Min", "HPI ⌀", "Paraden", "Quote"].map((label) => (
+                  {["Saison", "Wettbewerb", "Spiele", "Tore", "Würfe", "Wurf %", "Assists", "TF", "2 Min", "HPI ⌀", "Paraden", "Quote %"].map((label) => (
                     <th key={label} className="px-2 py-2 first:pl-0">{label}</th>
                   ))}
                 </tr>
