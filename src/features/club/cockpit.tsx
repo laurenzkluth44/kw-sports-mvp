@@ -10,6 +10,8 @@ import { CLUB_POSITION_LABELS, type ClubLocale } from "@/lib/club-i18n";
 import { clubCopy } from "@/lib/club-i18n";
 import { cockpitCopy, format } from "@/lib/cockpit-i18n";
 import { cn } from "@/lib/utils";
+import { ClubOnboarding } from "@/features/club/onboarding";
+import type { OnboardingStep } from "@/features/club/onboarding-model";
 import type { AttackPosition, PlayerNeed, RosterPlayer } from "@/types/domain";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -44,6 +46,7 @@ export function ClubCockpit({
   needs,
   openSuggestions,
   planningSeason,
+  onboarding = null,
   now = Date.now()
 }: {
   locale: ClubLocale;
@@ -56,6 +59,8 @@ export function ClubCockpit({
   needs: PlayerNeed[];
   openSuggestions: number;
   planningSeason: string;
+  /** Checklist for new clubs; null once the setup is done or hidden. */
+  onboarding?: OnboardingStep[] | null;
   now?: number;
 }) {
   const t = cockpitCopy[locale];
@@ -175,7 +180,14 @@ export function ClubCockpit({
                 {nameFirst} {nameRest.length > 0 ? <span className="text-brand-500">{nameRest.join(" ")}</span> : null}
               </h1>
               <p className="mt-2 text-sm text-white/70">
-                {personName ? format(t.welcome, { name: personName }) : t.welcomeAnon} {headline}
+                {roster.length === 0 && needs.length === 0
+                  ? personName
+                    ? format(t.welcomeNew, { name: personName })
+                    : t.welcomeNewAnon
+                  : personName
+                    ? format(t.welcome, { name: personName })
+                    : t.welcomeAnon}{" "}
+                {onboarding ? null : headline}
               </p>
             </div>
           </div>
@@ -185,6 +197,8 @@ export function ClubCockpit({
           </LinkButton>
         </div>
       </section>
+
+      {onboarding ? <ClubOnboarding steps={onboarding} locale={locale} /> : null}
 
       {/* KPIs */}
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">

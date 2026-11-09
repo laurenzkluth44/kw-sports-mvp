@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { LEGAL_URLS, legalLabels } from "@/lib/legal";
 import type { ReactNode } from "react";
 import { AuthLanguageSwitcher } from "@/components/layout/auth-language-switcher";
 import { CourtLines } from "@/features/court/court";
@@ -72,9 +73,17 @@ export function AuthArena({
 
       <footer className="relative flex flex-wrap justify-between gap-3 px-5 pb-6 pt-2 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-white/70 sm:px-10 lg:px-12">
         <span>{footer}</span>
-        <a href="https://www.kwsports.de" className="text-white/70 hover:text-white">
-          kwsports.de
-        </a>
+        <span className="flex flex-wrap gap-x-5 gap-y-2">
+          <a href={LEGAL_URLS.imprint} className="text-white/70 hover:text-white">
+            {legalLabels[locale].imprint}
+          </a>
+          <a href={LEGAL_URLS.privacy} className="text-white/70 hover:text-white">
+            {legalLabels[locale].privacy}
+          </a>
+          <a href="https://www.kwsports.de" className="text-white/70 hover:text-white">
+            kwsports.de
+          </a>
+        </span>
       </footer>
     </main>
   );

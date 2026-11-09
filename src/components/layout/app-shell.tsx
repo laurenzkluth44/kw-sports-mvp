@@ -11,6 +11,7 @@ import { agencyCopy } from "@/lib/agency-i18n";
 import { clubCopy, type ClubLocale } from "@/lib/club-i18n";
 import { guideCopy } from "@/lib/guide-i18n";
 import { helpChrome } from "@/features/help/chrome";
+import { LEGAL_URLS, legalLabels } from "@/lib/legal";
 import { matchCopy } from "@/lib/match-i18n";
 import { cockpitCopy } from "@/lib/cockpit-i18n";
 import { getRoleHome } from "@/lib/auth";
@@ -48,7 +49,8 @@ export function AppShell({
         ? profile.agency_name || agencyApp.tagline
         : profile.clubs?.name || t.tagline;
   const menuLabel = guideCopy[profile.role === "admin" ? "de" : locale].menu;
-  const helpLabel = helpChrome[profile.role === "admin" ? "de" : locale].nav;
+  const legalLocale = profile.role === "admin" ? "de" : locale;
+  const helpLabel = helpChrome[legalLocale].nav;
 
   const help = (
     <Link
@@ -148,6 +150,15 @@ export function AppShell({
       </header>
 
       <main className="page-shell">{children}</main>
+
+      <footer className="mx-auto flex w-full max-w-7xl flex-wrap justify-between gap-3 px-4 pb-8 pt-2 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate-500 sm:px-6 lg:px-8">
+        <span>KW Sports GmbH</span>
+        <span className="flex flex-wrap gap-x-5 gap-y-2">
+          <Link href="/help" prefetch={false} className="hover:text-navy-950">{helpLabel}</Link>
+          <a href={LEGAL_URLS.imprint} className="hover:text-navy-950">{legalLabels[legalLocale].imprint}</a>
+          <a href={LEGAL_URLS.privacy} className="hover:text-navy-950">{legalLabels[legalLocale].privacy}</a>
+        </span>
+      </footer>
     </div>
   );
 }
