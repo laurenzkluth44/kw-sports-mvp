@@ -14,6 +14,8 @@ import { NeedForm } from "@/features/player-needs/need-form";
 import { createKwPlayerAction } from "@/features/kw-players/actions";
 import { KwPlayerCard } from "@/features/kw-players/kw-player-card";
 import { BulkUpload } from "@/features/kw-players/bulk-upload";
+import { GoLiveView } from "@/features/system/go-live-view";
+import { appChecks, emailChecks, supabaseAuthUrls } from "@/features/system/go-live";
 import { KwPlayerForm } from "@/features/kw-players/kw-player-form";
 import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
 import { AdminInboxView, type InboxTab } from "@/features/matching/admin-inbox";
@@ -351,6 +353,36 @@ export default async function VisualPreview({
               <KwPlayerCard key={player.id} player={player} />
             ))}
           </section>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (screen === "go-live") {
+    const env = { siteUrl: "https://kw-sports-mvp.vercel.app", resendKey: "set", serviceRoleKey: "set" };
+    return (
+      <AppShell profile={adminProfile} locale="de">
+        <div className="space-y-5">
+          <PageHeader eyebrow="Admin" title="Go-Live-Check" description="Noch 2 offene Punkte bis zum Start. Werte in Vercel ändern sich erst nach dem nächsten Deployment (Vercel › Deployments › Redeploy)." />
+          <GoLiveView
+            data={{
+              app: appChecks(env),
+              email: emailChecks(env, { kind: "domain", domain: "kwsports.de", status: "pending", records: [
+                { record: "SPF", name: "send", type: "MX", value: "feedback-smtp.eu-west-1.amazonses.com", status: "verified", priority: 10 },
+                { record: "SPF", name: "send", type: "TXT", value: "v=spf1 include:amazonses.com ~all", status: "verified" },
+                { record: "DKIM", name: "resend._domainkey", type: "TXT", value: "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC…", status: "not_started" }
+              ] }, ["admin@kwsports.de"]),
+              records: [
+                { record: "SPF", name: "send", type: "MX", value: "feedback-smtp.eu-west-1.amazonses.com", status: "verified", priority: 10 },
+                { record: "SPF", name: "send", type: "TXT", value: "v=spf1 include:amazonses.com ~all", status: "verified" },
+                { record: "DKIM", name: "resend._domainkey", type: "TXT", value: "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC…", status: "not_started" }
+              ],
+              auth: supabaseAuthUrls(env.siteUrl),
+              adminEmail: "admin@kwsports.de",
+              counts: { players: 60, photo: 3, cv: 3, released: 56, clubUsers: 8, openNeeds: 12 },
+              test: { state: "failed", detail: "The kwsports.de domain is not verified. Please, add and verify your domain on https://resend.com/domains" }
+            }}
+          />
         </div>
       </AppShell>
     );

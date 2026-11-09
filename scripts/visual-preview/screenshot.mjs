@@ -30,6 +30,8 @@ const shots = [
   { name: "login-desktop-error", path: "/login?error=invalid", width: 1440 },
   { name: "login-mobile", path: "/login", width: 390 },
   { name: "kw-players-desktop", path: "/visual-preview/players", width: 1280 },
+  { name: "go-live-desktop", path: "/visual-preview/go-live", width: 1280 },
+  { name: "go-live-mobile", path: "/visual-preview/go-live", width: 390 },
   { name: "bulk-upload-empty", path: "/visual-preview/bulk-upload", width: 1280 },
   { name: "bulk-upload-desktop", path: "/visual-preview/bulk-upload", width: 1280, files: ["20261027_KW_CV_Jonas_Brenner_DE.pdf", "20261027_KW_CV_Jonas_Brenner_EN.pdf", "athlete-mats-lindgren.jpg", "Haddad.png", "20260721_KW_CV_Tom_Weber.docx", "scan_0042.pdf"] },
   { name: "bulk-upload-mobile", path: "/visual-preview/bulk-upload", width: 390, files: ["20261027_KW_CV_Jonas_Brenner_DE.pdf", "20261027_KW_CV_Jonas_Brenner_EN.pdf", "athlete-mats-lindgren.jpg", "Haddad.png", "20260721_KW_CV_Tom_Weber.docx", "scan_0042.pdf"] },

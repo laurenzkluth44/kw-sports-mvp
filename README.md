@@ -89,6 +89,8 @@ Wenn `0001_init.sql` frisch aus dieser Version ausgeführt wird, sind die vier 3
 2. Den neuen App-Stand deployen.
 3. Erst danach `0009` ausführen. Sie entfernt `position` und den Sync-Trigger; ältere App-Stände laufen danach nicht mehr.
 
+Unter **Admin › Go-Live** (`/admin/system`) zeigt die App, was für den Start noch fehlt: E-Mail-Versand (Resend-Key, Domain-Status inkl. DNS-Einträge, Empfänger, Cron), die Werte für Supabase Auth zum Kopieren und einen Button für eine Test-E-Mail. Geheime Werte werden dort nie angezeigt, nur „gesetzt“ oder „fehlt“.
+
 Für Einladungen muss Supabase Auth die App-URLs als Redirect URLs erlauben, inklusive `/auth/confirm`. Für Vercel Previews sollte z.B. `https://*.vercel.app/**` erlaubt sein.
 
 ## Tests und CI
