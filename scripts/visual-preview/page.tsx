@@ -15,6 +15,8 @@ import { createKwPlayerAction } from "@/features/kw-players/actions";
 import { KwPlayerCard } from "@/features/kw-players/kw-player-card";
 import { BulkUpload } from "@/features/kw-players/bulk-upload";
 import { GoLiveView } from "@/features/system/go-live-view";
+import { getGuide, helpChrome, quickstartPdf } from "@/features/help";
+import { HelpView } from "@/features/help/help-view";
 import { appChecks, emailChecks, supabaseAuthUrls } from "@/features/system/go-live";
 import { KwPlayerForm } from "@/features/kw-players/kw-player-form";
 import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
@@ -354,6 +356,23 @@ export default async function VisualPreview({
             ))}
           </section>
         </div>
+      </AppShell>
+    );
+  }
+
+  if (screen === "help") {
+    const kind = query.guide === "admin" ? "admin" : query.guide === "agency" ? "agency" : "club";
+    const helpLocale = kind === "admin" ? "de" : locale;
+    const who = kind === "admin" ? adminProfile : kind === "agency" ? agencyProfile : profile;
+    return (
+      <AppShell profile={who} locale={helpLocale}>
+        <HelpView
+          guide={getGuide(kind, helpLocale)}
+          chrome={helpChrome[helpLocale]}
+          kind={kind}
+          switchable={kind === "admin"}
+          pdfHref={kind === "club" ? quickstartPdf(helpLocale) : undefined}
+        />
       </AppShell>
     );
   }
