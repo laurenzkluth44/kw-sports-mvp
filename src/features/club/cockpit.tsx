@@ -70,7 +70,8 @@ export function ClubCockpit({
 
   const activeNeeds = needs.filter((need) => need.status === "offen" || need.status === "in_gespraechen");
   const coverage = attackCoverage(playersForSeason(roster, planningSeason));
-  const gapCount = COURT_ORDER.filter((position) => coverage[position].status === "gap").length;
+  // Without a squad every position would count as a gap, which says nothing yet.
+  const gapCount = roster.length === 0 ? 0 : COURT_ORDER.filter((position) => coverage[position].status === "gap").length;
   const squadNow = playersForSeason(roster, season).length || roster.length;
   const expiring = roster.filter((player) => contractState(player, today) === "expiring");
 
