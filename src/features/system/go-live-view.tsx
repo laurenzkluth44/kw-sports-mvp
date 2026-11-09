@@ -26,7 +26,7 @@ const ICON = {
 
 function Section({ id, step, title, intro, children, aside }: { id: string; step: string; title: string; intro: string; children: ReactNode; aside?: ReactNode }) {
   return (
-    <section id={id} className="panel scroll-mt-28">
+    <section id={id} className="panel min-w-0 scroll-mt-28 overflow-hidden">
       <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow">{step}</p>
@@ -35,7 +35,7 @@ function Section({ id, step, title, intro, children, aside }: { id: string; step
         </div>
         {aside}
       </div>
-      <div className="px-5 py-4">{children}</div>
+      <div className="min-w-0 px-5 py-4">{children}</div>
     </section>
   );
 }
@@ -145,7 +145,7 @@ export function GoLiveView({ data }: { data: GoLiveData }) {
         intro="Einmal in Supabase unter Authentication › URL Configuration eintragen. Hier nicht automatisch prüfbar, deshalb einfach abgleichen."
       >
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <p className="text-sm font-bold text-navy-950">Site URL</p>
             <CopyValue value={data.auth.siteUrl} label="Site URL" />
             <p className="pt-2 text-sm font-bold text-navy-950">Redirect URLs (alle drei hinzufügen)</p>
@@ -164,7 +164,7 @@ export function GoLiveView({ data }: { data: GoLiveData }) {
       </Section>
 
       <Section id="data" step="4 · Inhalte" title="Bereit für Vereine?" intro="Was Vereine zu sehen bekommen. Fehlende Fotos und CVs am schnellsten über den Sammel-Upload.">
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <Count label="KW-Spieler" value={counts.players} href="/admin/players" />
           <Count label="Mit Foto" value={counts.photo} sub={`von ${counts.players}`} href="/admin/players/upload" />
           <Count label="Mit CV" value={counts.cv} sub={`von ${counts.players}`} href="/admin/players/upload" />
