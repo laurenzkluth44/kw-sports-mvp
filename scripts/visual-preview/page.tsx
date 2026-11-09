@@ -209,9 +209,9 @@ function sampleGame(index: number, extra: Partial<KwPlayerGame>): KwPlayerGame {
   };
 }
 const brennerGames: KwPlayerGame[] = [
-  sampleGame(1, { game_date: `${start}-10-04`, games: 6, game: "Saison bis 04.10.", goals: 34, shots: 55, seven_goals: 6, assists: 21, turnovers: 9, two_min: 3, hpi: 6.8, source: "Opel HBL · Saisonstatistik" }),
-  sampleGame(2, { game_date: `${start}-10-11`, game: "TV Beispielstadt – HSG Nord 31:27", goals: 8, shots: 11, assists: 4, turnovers: 1, two_min: 0, hpi: 8.6 }),
-  sampleGame(3, { game_date: `${start}-10-18`, game: "SG Süd – TV Beispielstadt 29:30", goals: 6, shots: 10, assists: 5, turnovers: 2, two_min: 1, hpi: 7.9 }),
+  sampleGame(1, { game_date: `${start}-10-04`, games: 6, game: "Saison bis 04.10.", goals: 34, shots: 55, seven_goals: 6, assists: 21, turnovers: 9, two_min: 3, hpi: 68.4, source: "Opel HBL · Saisonstatistik" }),
+  sampleGame(2, { game_date: `${start}-10-11`, game: "TV Beispielstadt – HSG Nord 31:27", goals: 8, shots: 11, assists: 4, turnovers: 1, two_min: 0, hpi: 86.1 }),
+  sampleGame(3, { game_date: `${start}-10-18`, game: "SG Süd – TV Beispielstadt 29:30", goals: 6, shots: 10, assists: 5, turnovers: 2, two_min: 1, hpi: 79.3 }),
   sampleGame(4, { competition: "DHB-Pokal", game_date: `${start}-09-20`, game: "Pokal 1. Runde", goals: 5, shots: 7 })
 ];
 
