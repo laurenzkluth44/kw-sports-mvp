@@ -24,7 +24,7 @@ const inviteCopy = {
     step2: "Kader eintragen und Lücken sehen",
     step3: "Bedarf melden, passende Spieler mit CV erhalten",
     cta: "Zugang einrichten",
-    outro: "Der Link ist 24 Stunden gültig. Abgelaufen? Melde dich kurz bei KW Sports, wir schicken einen neuen.",
+    outro: "Der Link ist 24 Stunden gültig. Abgelaufen? Melde dich kurz bei KW Sports, wir schicken einen neuen. Nach dem Login findest du oben unter „Hilfe“ eine Schritt-für-Schritt-Anleitung.",
     footer: "KW Sports GmbH · kwsports.de · Du bekommst diese E-Mail, weil KW Sports dich eingeladen hat."
   },
   en: {
@@ -38,7 +38,7 @@ const inviteCopy = {
     step2: "Add your squad and see the gaps",
     step3: "Report a need, get matching players with CV",
     cta: "Set up access",
-    outro: "The link is valid for 24 hours. Expired? Let KW Sports know and we'll send a new one.",
+    outro: "The link is valid for 24 hours. Expired? Let KW Sports know and we'll send a new one. After signing in, you'll find a step-by-step guide under “Help” at the top.",
     footer: "KW Sports GmbH · kwsports.de · You receive this email because KW Sports invited you."
   }
 } as const;

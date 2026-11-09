@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { Eye, FileDown, Inbox, LayoutDashboard, LogOut, Menu, Plus, Rocket, Shield, Shirt, Sparkles, UserRound, Users } from "lucide-react";
+import { CircleHelp, Eye, FileDown, Inbox, LayoutDashboard, LogOut, Menu, Plus, Rocket, Shield, Shirt, Sparkles, UserRound, Users } from "lucide-react";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ClubCrest, clubLogoUrl } from "@/components/ui/club-crest";
 import { NavLinks, type NavItem } from "@/components/layout/nav-links";
@@ -10,6 +10,7 @@ import { ROLE_LABELS } from "@/lib/constants";
 import { agencyCopy } from "@/lib/agency-i18n";
 import { clubCopy, type ClubLocale } from "@/lib/club-i18n";
 import { guideCopy } from "@/lib/guide-i18n";
+import { helpChrome } from "@/features/help/chrome";
 import { matchCopy } from "@/lib/match-i18n";
 import { cockpitCopy } from "@/lib/cockpit-i18n";
 import { getRoleHome } from "@/lib/auth";
@@ -47,6 +48,18 @@ export function AppShell({
         ? profile.agency_name || agencyApp.tagline
         : profile.clubs?.name || t.tagline;
   const menuLabel = guideCopy[profile.role === "admin" ? "de" : locale].menu;
+  const helpLabel = helpChrome[profile.role === "admin" ? "de" : locale].nav;
+
+  const help = (
+    <Link
+      href="/help"
+      prefetch={false}
+      className="inline-flex min-h-10 items-center gap-2 px-3 text-[0.8rem] font-bold uppercase tracking-[0.08em] text-white hover:bg-white/10"
+    >
+      <CircleHelp className="h-4 w-4 text-brand-300" aria-hidden="true" />
+      {helpLabel}
+    </Link>
+  );
 
   const roleBadge = (
     <span className="inline-flex min-h-10 items-center gap-2 rounded-sm border border-white/10 bg-white/5 px-3 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-slate-100">
@@ -101,6 +114,7 @@ export function AppShell({
             {/* Desktop: everything in one row */}
             <div className="hidden flex-wrap items-center gap-2 text-sm md:flex">
               {showLanguageSwitcher ? <LanguageSwitcher locale={locale} label={languageLabel} /> : null}
+              {help}
               {roleBadge}
               {logout}
             </div>
@@ -119,6 +133,7 @@ export function AppShell({
                 <NavLinks items={nav} variant="menu" className="border-b border-white/10 py-2" />
                 <div className="flex flex-col gap-3 px-4 pt-4">
                   {showLanguageSwitcher ? <LanguageSwitcher locale={locale} label={languageLabel} /> : null}
+                  {help}
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     {roleBadge}
                     {logout}
