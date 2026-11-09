@@ -42,6 +42,8 @@ const shots = [
   { name: "bulk-upload-desktop", path: "/visual-preview/bulk-upload", width: 1280, files: ["20261027_KW_CV_Jonas_Brenner_DE.pdf", "20261027_KW_CV_Jonas_Brenner_EN.pdf", "athlete-mats-lindgren.jpg", "Haddad.png", "20260721_KW_CV_Tom_Weber.docx", "scan_0042.pdf"] },
   { name: "bulk-upload-mobile", path: "/visual-preview/bulk-upload", width: 390, files: ["20261027_KW_CV_Jonas_Brenner_DE.pdf", "20261027_KW_CV_Jonas_Brenner_EN.pdf", "athlete-mats-lindgren.jpg", "Haddad.png", "20260721_KW_CV_Tom_Weber.docx", "scan_0042.pdf"] },
   { name: "kw-player-form-desktop", path: "/visual-preview/player-form", width: 1280 },
+  { name: "kw-player-stats-desktop", path: "/visual-preview/player-stats", width: 1280 },
+  { name: "kw-player-stats-mobile", path: "/visual-preview/player-stats", width: 390 },
   { name: "kw-matches-desktop", path: "/visual-preview/matches", width: 1280 },
   { name: "kw-matches-mobile", path: "/visual-preview/matches", width: 390 },
   { name: "club-suggestions-desktop", path: "/visual-preview/suggestions", width: 1280 },

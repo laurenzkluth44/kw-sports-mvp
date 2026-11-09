@@ -80,6 +80,17 @@ export const adminGuideDe: HelpGuide = {
           ]
         },
         {
+          id: "statistik",
+          title: "Saisonstatistik",
+          goal: "Aktuelle Zahlen auf der Spielerkarte, die Vereine sehen.",
+          steps: [
+            "Die Werte kommen jede Woche automatisch aus dem Spieltags-Update (1./2. HBL, 3. Liga, Dänemark, Europapokal).",
+            "Im Spielerprofil unter [[Saisonwerte]] siehst du die Summen je Saison und Wettbewerb und alle erfassten Spiele.",
+            "Fehlende Spiele von früher: eine Sammelzeile anlegen, z. B. Wettbewerb „2. HBL“, Datum des letzten Spiels, Bezeichnung „Saison bis 08.11.“, [[Spiele]] = 8 und die Summen.",
+            "Vereine sehen auf der Karte die aktuelle Saison der Liga mit den meisten Spielen: Spiele, Tore, Wurfquote, Assists und HPI (Torhüter: Paraden und Quote)."
+          ]
+        },
+        {
           id: "pflege",
           title: "Datenbank aktuell halten",
           goal: "Damit das Matching gute Vorschläge macht.",

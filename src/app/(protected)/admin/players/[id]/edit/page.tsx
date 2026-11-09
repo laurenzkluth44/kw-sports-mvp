@@ -9,6 +9,7 @@ import { playerFreshness } from "@/features/kw-players/freshness";
 import { formatDate } from "@/lib/utils";
 import { signedFileUrls } from "@/features/kw-players/files";
 import { KwPlayerForm } from "@/features/kw-players/kw-player-form";
+import { KwPlayerStatsAdmin } from "@/features/kw-players/stats-admin";
 import { requireAdmin } from "@/lib/auth";
 import type { KwPlayer } from "@/types/domain";
 
@@ -17,14 +18,14 @@ export default async function EditKwPlayerPage({
   searchParams
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; done?: string }>;
+  searchParams: Promise<{ error?: string; done?: string; stats?: string }>;
 }) {
   const { id } = await params;
   const query = await searchParams;
   const { supabase } = await requireAdmin();
 
   const [{ data }, { count: matchCount }] = await Promise.all([
-    supabase.from("kw_players").select("*").eq("id", id).maybeSingle(),
+    supabase.from("kw_players").select("*, kw_player_games(*)").eq("id", id).maybeSingle(),
     supabase.from("need_matches").select("id", { count: "exact", head: true }).eq("player_id", id)
   ]);
   if (!data) notFound();
@@ -77,6 +78,10 @@ export default async function EditKwPlayerPage({
         photoUrl={player.photo_path ? files.get(player.photo_path) : null}
         cvUrl={player.cv_path ? files.get(player.cv_path) : null}
       />
+
+      {player.kind === "spieler" ? (
+        <KwPlayerStatsAdmin playerId={player.id} games={player.kw_player_games ?? []} result={query.stats} />
+      ) : null}
 
       <details className="panel overflow-hidden border-red-200">
         <summary className="cursor-pointer list-none px-5 py-4 text-sm font-extrabold uppercase tracking-[0.06em] text-red-700 hover:bg-red-50">

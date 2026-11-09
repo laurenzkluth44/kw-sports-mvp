@@ -17,7 +17,7 @@ export default async function ClubSuggestionsPage({
   const [{ data: needRows }, { data: matchRows }, { data: playerRows }] = await Promise.all([
     supabase.from("player_needs").select("*").eq("club_id", profile.club_id!),
     supabase.from("need_matches").select("*").order("released_at", { ascending: false }),
-    supabase.from("kw_players").select("*")
+    supabase.from("kw_players").select("*, kw_player_games(*)")
   ]);
 
   const players = (playerRows ?? []) as KwPlayer[];

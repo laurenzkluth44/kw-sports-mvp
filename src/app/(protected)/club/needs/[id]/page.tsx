@@ -38,7 +38,7 @@ export default async function ClubNeedPage({
   const matches = (matchRows ?? []) as unknown as NeedMatch[];
   const playerIds = matches.map((match) => match.player_id);
   const { data: playerRows } = playerIds.length
-    ? await supabase.from("kw_players").select("*").in("id", playerIds)
+    ? await supabase.from("kw_players").select("*, kw_player_games(*)").in("id", playerIds)
     : { data: [] as KwPlayer[] };
   const players = new Map(((playerRows ?? []) as KwPlayer[]).map((player) => [player.id, player]));
   const files = await signedFileUrls(

@@ -29,7 +29,7 @@ export default async function AdminPlayersPage({
   const position = ATTACK_POSITIONS.find((value) => value === params.position);
   const kind = params.kind === "trainer" ? "trainer" : params.kind === "spieler" ? "spieler" : undefined;
 
-  const { data } = await supabase.from("kw_players").select("*").order("last_name", { ascending: true });
+  const { data } = await supabase.from("kw_players").select("*, kw_player_games(*)").order("last_name", { ascending: true });
   const all = (data ?? []) as KwPlayer[];
   const now = new Date();
   const freshness = new Map(all.map((player) => [player.id, playerFreshness(player, now)]));

@@ -30,7 +30,7 @@ export async function AdminNeedMatches({
   error?: string;
 }) {
   const [{ data: playerRows }, { data: matchRows }] = await Promise.all([
-    supabase.from("kw_players").select("*"),
+    supabase.from("kw_players").select("*, kw_player_games(*)"),
     supabase.from("need_matches").select("*").eq("need_id", need.id).order("released_at", { ascending: false })
   ]);
   const players = (playerRows ?? []) as KwPlayer[];

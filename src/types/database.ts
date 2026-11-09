@@ -201,6 +201,83 @@ export type Database = {
           }
         ];
       };
+      kw_player_games: {
+        Row: {
+          id: string;
+          player_id: string;
+          competition: string;
+          game_date: string;
+          game: string | null;
+          games: number;
+          goals: number | null;
+          shots: number | null;
+          seven_goals: number | null;
+          assists: number | null;
+          steals: number | null;
+          blocks: number | null;
+          turnovers: number | null;
+          two_min: number | null;
+          hpi: number | null;
+          saves: number | null;
+          goals_against: number | null;
+          source: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          player_id: string;
+          competition: string;
+          game_date: string;
+          game?: string | null;
+          games?: number;
+          goals?: number | null;
+          shots?: number | null;
+          seven_goals?: number | null;
+          assists?: number | null;
+          steals?: number | null;
+          blocks?: number | null;
+          turnovers?: number | null;
+          two_min?: number | null;
+          hpi?: number | null;
+          saves?: number | null;
+          goals_against?: number | null;
+          source?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          player_id?: string;
+          competition?: string;
+          game_date?: string;
+          game?: string | null;
+          games?: number;
+          goals?: number | null;
+          shots?: number | null;
+          seven_goals?: number | null;
+          assists?: number | null;
+          steals?: number | null;
+          blocks?: number | null;
+          turnovers?: number | null;
+          two_min?: number | null;
+          hpi?: number | null;
+          saves?: number | null;
+          goals_against?: number | null;
+          source?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "kw_player_games_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "kw_players";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       kw_players: {
         Row: {
           id: string;
