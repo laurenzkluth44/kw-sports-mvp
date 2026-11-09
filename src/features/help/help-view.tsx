@@ -127,7 +127,7 @@ export function HelpView({
                   <a href={`#${section.id}`} className="text-sm font-bold text-navy-950 hover:text-brand-600">
                     {sectionIndex + 1}. {section.title}
                   </a>
-                  <ul className="mt-1 space-y-1 border-l border-slate-200 pl-3">
+                  <ul className="mt-1 hidden space-y-1 border-l border-slate-200 pl-3 lg:block">
                     {section.topics.map((topic) => (
                       <li key={topic.id}>
                         <a href={`#${section.id}-${topic.id}`} className="block text-[0.82rem] leading-5 text-slate-600 hover:text-brand-600">
