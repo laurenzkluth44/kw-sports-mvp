@@ -46,7 +46,6 @@ export function renderEmail(content: EmailContent, siteUrl: string) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light only">
 <title>${e(content.title)}</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body style="margin:0;padding:0;background:#F3F4F6">
 <span style="display:none!important;visibility:hidden;opacity:0;height:0;width:0;overflow:hidden">${e(content.preheader)}</span>

@@ -51,6 +51,8 @@ const shots = [
   { name: "club-cockpit-desktop", path: "/visual-preview/cockpit", width: 1280 },
   { name: "club-cockpit-mobile", path: "/visual-preview/cockpit?lang=en", width: 390 },
   { name: "club-cockpit-empty", path: "/visual-preview/cockpit-empty", width: 1280 },
+  { name: "club-cockpit-empty-mobile", path: "/visual-preview/cockpit-empty?lang=fr", width: 390 },
+  { name: "club-cockpit-onboarding-answer", path: "/visual-preview/cockpit?onboarding=1", width: 1280 },
   { name: "crests-desktop", path: "/visual-preview/crests", width: 1280 },
   { name: "crests-mobile", path: "/visual-preview/crests", width: 390 },
   { name: "club-need-desktop", path: "/visual-preview/club-need", width: 1280 },

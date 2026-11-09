@@ -23,6 +23,7 @@ import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
 import { AdminInboxView, type InboxTab } from "@/features/matching/admin-inbox";
 import { ClubSuggestionsView } from "@/features/matching/club-suggestions";
 import { ClubCockpit } from "@/features/club/cockpit";
+import { onboardingSteps } from "@/features/club/onboarding-model";
 import { ClubCrest } from "@/components/ui/club-crest";
 import { ClubNeedCard, NewNeedTile } from "@/features/club/club-need-card";
 import { ClubNeedView } from "@/features/club/club-need-view";
@@ -542,6 +543,13 @@ export default async function VisualPreview({
           needs={empty ? [] : [needs[0], needs[4], needs[5]]}
           openSuggestions={empty ? 0 : 2}
           planningSeason={planningSeasons(1)[1]}
+          onboarding={
+            empty
+              ? onboardingSteps({ rosterCount: 0, needCount: 0, openSuggestions: 0, answeredSuggestions: 0 })
+              : query.onboarding
+                ? onboardingSteps({ rosterCount: 14, needCount: 3, openSuggestions: 2, answeredSuggestions: 0 })
+                : null
+          }
         />
         {empty ? null : (
           <section className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">

@@ -9,7 +9,9 @@ import { clubCopy } from "@/lib/club-i18n";
 import { getClubLocale } from "@/lib/club-locale";
 import { requireClubUser } from "@/lib/auth";
 import { cockpitCopy, format } from "@/lib/cockpit-i18n";
+import { cookies } from "next/headers";
 import { ClubCockpit } from "@/features/club/cockpit";
+import { ONBOARDING_COOKIE, onboardingSteps, showOnboarding } from "@/features/club/onboarding-model";
 import { ClubNeedCard, NewNeedTile } from "@/features/club/club-need-card";
 import { clubNeedCopy } from "@/lib/club-need-i18n";
 import type { PlayerNeed, RosterPlayer } from "@/types/domain";
@@ -55,6 +57,14 @@ export default async function ClubDashboardPage({
   });
   const openSuggestions = [...suggestionsByNeed.values()].reduce((sum, entry) => sum + entry.open, 0);
   const cockpit = cockpitCopy[locale];
+
+  const steps = onboardingSteps({
+    rosterCount: roster.length,
+    needCount: typedNeeds.length,
+    openSuggestions,
+    answeredSuggestions: (matchRows ?? []).filter((row) => row.status === "interessiert" || row.status === "kein_interesse").length
+  });
+  const onboardingHidden = (await cookies()).get(ONBOARDING_COOKIE)?.value === "1";
 
   const closedNeeds = typedNeeds.filter((need) => need.status === "besetzt");
   const staleCount = typedNeeds.filter(
@@ -118,6 +128,7 @@ export default async function ClubDashboardPage({
         needs={typedNeeds}
         openSuggestions={openSuggestions}
         planningSeason={planningSeason}
+        onboarding={showOnboarding(steps, onboardingHidden) ? steps : null}
       />
 
       <div id="bedarfe" className="flex scroll-mt-32 flex-wrap items-end justify-between gap-2 border-b-2 border-navy-950 pb-2 pt-2">
