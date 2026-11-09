@@ -4,6 +4,11 @@ import type { NeedFillSource, PlayerNeedStatus } from "@/types/domain";
 /** The club's own need page and need cards. Plain strings with {n}, safe for client components. */
 type ClubNeedCopy = {
   edit: string;
+  remove: string;
+  removeQuestion: string;
+  removeHint: string;
+  removeYes: string;
+  open: string;
   duplicate: string;
   confirm: string;
   confirmHint: string;
@@ -33,6 +38,11 @@ type ClubNeedCopy = {
 export const clubNeedCopy: Record<ClubLocale, ClubNeedCopy> = {
   de: {
     edit: "Bearbeiten",
+    remove: "Löschen",
+    removeQuestion: "Bedarf löschen?",
+    removeHint: "Er verschwindet aus eurer Übersicht, für die Agenturen und für KW Sports. Schon besetzt? Dann besser den Status auf „Besetzt“ setzen.",
+    removeYes: "Ja, löschen",
+    open: "Öffnen",
     duplicate: "Als Vorlage kopieren",
     confirm: "Noch aktuell",
     confirmHint: "Seit über 30 Tagen nicht bestätigt. Ein Klick zeigt KW Sports und den Agenturen, dass ihr noch sucht.",
@@ -70,6 +80,11 @@ export const clubNeedCopy: Record<ClubLocale, ClubNeedCopy> = {
   },
   en: {
     edit: "Edit",
+    remove: "Delete",
+    removeQuestion: "Delete this need?",
+    removeHint: "It disappears from your overview, for agencies and for KW Sports. Already filled? Better set the status to “Filled”.",
+    removeYes: "Yes, delete",
+    open: "Open",
     duplicate: "Copy as template",
     confirm: "Still current",
     confirmHint: "Not confirmed for over 30 days. One click tells KW Sports and the agencies you're still looking.",
@@ -107,6 +122,11 @@ export const clubNeedCopy: Record<ClubLocale, ClubNeedCopy> = {
   },
   fr: {
     edit: "Modifier",
+    remove: "Supprimer",
+    removeQuestion: "Supprimer ce besoin ?",
+    removeHint: "Il disparaît de votre aperçu, pour les agences et pour KW Sports. Déjà pourvu ? Mieux vaut choisir le statut « Pourvu ».",
+    removeYes: "Oui, supprimer",
+    open: "Ouvrir",
     duplicate: "Copier comme modèle",
     confirm: "Toujours d’actualité",
     confirmHint: "Non confirmé depuis plus de 30 jours. Un clic indique à KW Sports et aux agences que vous cherchez toujours.",
@@ -144,6 +164,11 @@ export const clubNeedCopy: Record<ClubLocale, ClubNeedCopy> = {
   },
   es: {
     edit: "Editar",
+    remove: "Eliminar",
+    removeQuestion: "¿Eliminar esta necesidad?",
+    removeHint: "Desaparece de vuestro resumen, para las agencias y para KW Sports. ¿Ya está cubierta? Mejor cambiad el estado a «Cubierto».",
+    removeYes: "Sí, eliminar",
+    open: "Abrir",
     duplicate: "Copiar como plantilla",
     confirm: "Sigue vigente",
     confirmHint: "Sin confirmar desde hace más de 30 días. Un clic indica a KW Sports y a las agencias que seguís buscando.",

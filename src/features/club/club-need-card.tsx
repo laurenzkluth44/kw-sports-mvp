@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Plus, Sparkles } from "lucide-react";
+import { Pencil, Plus, Sparkles } from "lucide-react";
+import { NeedRemoveButton } from "@/features/club/need-remove";
 import { NeedCourt, PRIORITY_TAG, isStale } from "@/features/needs-overview/need-card";
 import { attackPositionsText, defensePositionsText, needHeadline } from "@/features/player-needs/need-summary";
 import { CLUB_PRIORITY_LABELS, CLUB_STATUS_LABELS, type ClubLocale } from "@/lib/club-i18n";
@@ -26,13 +27,13 @@ export function ClubNeedCard({
   const closed = need.status === "besetzt" || need.status === "archiviert";
 
   return (
-    <Link
-      href={`/club/needs/${need.id}`}
+    <div
       className={cn(
-        "group flex flex-col border border-slate-200 bg-white text-navy-950 transition duration-300 ease-out-expo hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-cardHover focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
+        "group/card flex flex-col border border-slate-200 bg-white text-navy-950 transition duration-300 ease-out-expo hover:border-brand-300 hover:shadow-cardHover",
         closed && "opacity-75"
       )}
     >
+    <Link href={`/club/needs/${need.id}`} className="group flex flex-1 flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-500">
       <div className="relative bg-navy-950 py-2">
         <NeedCourt need={need} locale={locale} className="mx-auto w-[72%] max-w-[240px]" />
         {suggestions && suggestions.open > 0 ? (
@@ -84,6 +85,19 @@ export function ClubNeedCard({
         </div>
       </div>
     </Link>
+      {/* Edit and delete right on the card, so nobody has to open the need first. */}
+      <div className="flex items-center justify-between gap-2 border-t border-slate-100 px-2 py-1">
+        <Link
+          href={`/club/needs/${need.id}/edit`}
+          prefetch={false}
+          className="inline-flex min-h-10 items-center gap-1.5 px-2 text-[0.7rem] font-extrabold uppercase tracking-[0.1em] text-navy-950 transition-colors hover:text-brand-600"
+        >
+          <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+          {t.edit}
+        </Link>
+        <NeedRemoveButton needId={need.id} locale={locale} />
+      </div>
+    </div>
   );
 }
 

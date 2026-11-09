@@ -3,6 +3,7 @@ import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Button, LinkButton } from "@/components/ui/button";
 import { Flash, flashKind } from "@/components/ui/flash";
 import { ClubNeedStatus } from "@/features/club/club-need-status";
+import { NeedRemoveButton } from "@/features/club/need-remove";
 import { ClubSuggestionCard } from "@/features/matching/club-suggestion-card";
 import { isStale } from "@/features/needs-overview/need-card";
 import { confirmClubNeedsAction, duplicateClubNeedAction } from "@/features/player-needs/actions";
@@ -99,6 +100,7 @@ export function ClubNeedView({
                 {t.duplicate}
               </Button>
             </form>
+            <NeedRemoveButton needId={need.id} locale={locale} tone="dark" className="[&>div]:bottom-auto [&>div]:top-full [&>div]:mb-0 [&>div]:mt-2" />
           </>
         }
       />

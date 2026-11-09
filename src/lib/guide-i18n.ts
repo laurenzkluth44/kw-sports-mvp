@@ -10,6 +10,7 @@ export type GuideCopy = {
     needUpdated: string;
     statusUpdated: string;
     needsConfirmed: string;
+    needRemoved: string;
     staleTitle: string;
     staleBody: string;
     staleConfirmAll: string;
@@ -30,6 +31,7 @@ export const guideCopy: Record<ClubLocale, GuideCopy> = {
       needUpdated: "Änderungen gespeichert.",
       statusUpdated: "Status aktualisiert.",
       needsConfirmed: "Danke! Als aktuell bestätigt.",
+      needRemoved: "Bedarf gelöscht. Er ist für Agenturen und KW Sports nicht mehr sichtbar.",
       staleTitle: "{n} Bedarf(e) seit über 30 Tagen nicht bestätigt",
       staleBody: "Noch aktuell? Ein Klick, damit Agenturen und KW Sports wissen, dass ihr weiter sucht. Schon besetzt? Status auf „Besetzt“ setzen.",
       staleConfirmAll: "Alle als aktuell bestätigen",
@@ -59,6 +61,7 @@ export const guideCopy: Record<ClubLocale, GuideCopy> = {
       needUpdated: "Changes saved.",
       statusUpdated: "Status updated.",
       needsConfirmed: "Thanks! Confirmed as current.",
+      needRemoved: "Need deleted. Agencies and KW Sports no longer see it.",
       staleTitle: "{n} need(s) not confirmed for over 30 days",
       staleBody: "Still current? One click tells agencies and KW Sports you are still searching. Already filled? Set the status to “Filled”.",
       staleConfirmAll: "Confirm all as current",
@@ -88,6 +91,7 @@ export const guideCopy: Record<ClubLocale, GuideCopy> = {
       needUpdated: "Modifications enregistrées.",
       statusUpdated: "Statut mis à jour.",
       needsConfirmed: "Merci ! Confirmé comme actuel.",
+      needRemoved: "Besoin supprimé. Les agences et KW Sports ne le voient plus.",
       staleTitle: "{n} besoin(s) non confirmé(s) depuis plus de 30 jours",
       staleBody: "Toujours d’actualité ? Un clic pour indiquer aux agences et à KW Sports que vous cherchez toujours. Déjà pourvu ? Passez le statut à « Pourvu ».",
       staleConfirmAll: "Tout confirmer",
@@ -117,6 +121,7 @@ export const guideCopy: Record<ClubLocale, GuideCopy> = {
       needUpdated: "Cambios guardados.",
       statusUpdated: "Estado actualizado.",
       needsConfirmed: "¡Gracias! Confirmado como vigente.",
+      needRemoved: "Necesidad eliminada. Las agencias y KW Sports ya no la ven.",
       staleTitle: "{n} necesidad(es) sin confirmar desde hace más de 30 días",
       staleBody: "¿Sigue vigente? Un clic para que agencias y KW Sports sepan que seguís buscando. ¿Ya cubierta? Cambiad el estado a «Cubierta».",
       staleConfirmAll: "Confirmar todas",
