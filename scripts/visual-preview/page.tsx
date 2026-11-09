@@ -19,6 +19,7 @@ import { getGuide, helpChrome, quickstartPdf } from "@/features/help";
 import { HelpView } from "@/features/help/help-view";
 import { appChecks, emailChecks, supabaseAuthUrls } from "@/features/system/go-live";
 import { KwPlayerForm } from "@/features/kw-players/kw-player-form";
+import { KwPlayerStatsAdmin } from "@/features/kw-players/stats-admin";
 import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
 import { AdminInboxView, type InboxTab } from "@/features/matching/admin-inbox";
 import { ClubSuggestionsView } from "@/features/matching/club-suggestions";
@@ -46,7 +47,7 @@ import { seasonEndDate, seasonForDate, seasonLabel, seasonStartYear } from "@/li
 import { clubCopy } from "@/lib/club-i18n";
 import { overviewCopy } from "@/lib/overview-i18n";
 import { squadCopy } from "@/lib/squad-i18n";
-import type { AttackPosition, Club, DefensePosition, KwPlayer, NeedMatch, PlayerNeedWithClub, Priority, Profile, RosterPlayer } from "@/types/domain";
+import type { KwPlayerGame, AttackPosition, Club, DefensePosition, KwPlayer, NeedMatch, PlayerNeedWithClub, Priority, Profile, RosterPlayer } from "@/types/domain";
 
 const profile: Profile = {
   id: "00000000-0000-0000-0000-000000000001",
@@ -191,6 +192,29 @@ const needs: PlayerNeedWithClub[] = [
 ];
 
 // ---- KW player fixtures (fictional) ----
+// Sample match-report numbers for Brenner: a "season so far" row plus two single games.
+function sampleGame(index: number, extra: Partial<KwPlayerGame>): KwPlayerGame {
+  return {
+    id: `00000000-0000-0000-0000-0000000009${String(index).padStart(2, "0")}`,
+    player_id: "00000000-0000-0000-0000-000000000301",
+    competition: "2. HBL",
+    game_date: `${start}-10-01`,
+    game: null,
+    games: 1,
+    goals: null, shots: null, seven_goals: null, assists: null, steals: null, blocks: null,
+    turnovers: null, two_min: null, hpi: null, saves: null, goals_against: null,
+    source: "Opel HBL · Spielbericht",
+    created_at: "", updated_at: "",
+    ...extra
+  };
+}
+const brennerGames: KwPlayerGame[] = [
+  sampleGame(1, { game_date: `${start}-10-04`, games: 6, game: "Saison bis 04.10.", goals: 34, shots: 55, seven_goals: 6, assists: 21, turnovers: 9, two_min: 3, hpi: 6.8, source: "Opel HBL · Saisonstatistik" }),
+  sampleGame(2, { game_date: `${start}-10-11`, game: "TV Beispielstadt – HSG Nord 31:27", goals: 8, shots: 11, assists: 4, turnovers: 1, two_min: 0, hpi: 8.6 }),
+  sampleGame(3, { game_date: `${start}-10-18`, game: "SG Süd – TV Beispielstadt 29:30", goals: 6, shots: 10, assists: 5, turnovers: 2, two_min: 1, hpi: 7.9 }),
+  sampleGame(4, { competition: "DHB-Pokal", game_date: `${start}-09-20`, game: "Pokal 1. Runde", goals: 5, shots: 7 })
+];
+
 function kwPlayer(index: number, extra: Partial<KwPlayer>): KwPlayer {
   return {
     id: `00000000-0000-0000-0000-0000000003${String(index).padStart(2, "0")}`,
@@ -224,7 +248,7 @@ function kwPlayer(index: number, extra: Partial<KwPlayer>): KwPlayer {
 }
 
 const kwPlayers: KwPlayer[] = [
-  kwPlayer(1, { first_name: "Jonas", last_name: "Brenner", birth_date: "2001-05-12", attack_positions: ["RR"], defense_positions: [5, 6], handedness: "links", height_cm: 192, current_club: "TV Beispielstadt", current_league: "2. Bundesliga", contract_until: `${start + 1}-06-30`, languages: ["de", "en"], player_types: ["wurfstark", "eins_gegen_eins"], cv_path: "x/cv.pdf" }),
+  kwPlayer(1, { first_name: "Jonas", last_name: "Brenner", birth_date: "2001-05-12", attack_positions: ["RR"], defense_positions: [5, 6], handedness: "links", height_cm: 192, current_club: "TV Beispielstadt", current_league: "2. Bundesliga", contract_until: `${start + 1}-06-30`, languages: ["de", "en"], player_types: ["wurfstark", "eins_gegen_eins"], cv_path: "x/cv.pdf" , kw_player_games: brennerGames }),
   kwPlayer(2, { first_name: "Mats", last_name: "Lindgren", birth_date: "2002-02-02", attack_positions: ["RR", "RA"], handedness: "links", height_cm: 188, current_club: "IK Exempel", current_league: "Håndboldligaen", available_from: `${start + 1}-07-01`, languages: ["en", "sv"], player_types: ["eins_gegen_eins"], cv_path: "x/cv.pdf" }),
   kwPlayer(3, { first_name: "Karim", last_name: "Haddad", birth_date: "1993-08-20", attack_positions: ["RR"], height_cm: 196, current_club: "HC Muster", current_league: "1. Bundesliga", contract_until: `${start + 2}-06-30`, languages: ["de", "fr"], player_types: ["wurfstark"], visible_to_clubs: false, consent_at: null }),
   kwPlayer(4, { first_name: "Tom", last_name: "Weber", birth_date: "2003-03-03", attack_positions: ["RL", "RM"], height_cm: 190, current_club: "SG Probe", current_league: "3. Liga Süd", contract_until: `${start}-06-30`, languages: ["de"], player_types: ["spielstark"], updated_at: daysAgo(120) }),
@@ -404,6 +428,14 @@ export default async function VisualPreview({
             }}
           />
         </div>
+      </AppShell>
+    );
+  }
+
+  if (screen === "player-stats") {
+    return (
+      <AppShell profile={adminProfile} locale="de">
+        <KwPlayerStatsAdmin playerId="00000000-0000-0000-0000-000000000301" games={brennerGames} result={query.stats} />
       </AppShell>
     );
   }

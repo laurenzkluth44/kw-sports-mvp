@@ -175,6 +175,32 @@ export type KwPlayer = {
   visible_to_clubs: boolean;
   created_at: string;
   updated_at: string;
+  /** Embedded via select("*, kw_player_games(*)") where the statistics are shown. */
+  kw_player_games?: KwPlayerGame[];
+};
+
+/** One game (or a summary row covering several games) of a KW player. */
+export type KwPlayerGame = {
+  id: string;
+  player_id: string;
+  competition: string;
+  game_date: string;
+  game: string | null;
+  games: number;
+  goals: number | null;
+  shots: number | null;
+  seven_goals: number | null;
+  assists: number | null;
+  steals: number | null;
+  blocks: number | null;
+  turnovers: number | null;
+  two_min: number | null;
+  hpi: number | null;
+  saves: number | null;
+  goals_against: number | null;
+  source: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type MatchReasonKey = "position" | "coach_role" | "availability" | "age" | "height" | "languages" | "player_types" | "league";

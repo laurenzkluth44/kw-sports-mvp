@@ -37,6 +37,7 @@ jobs:
           node --experimental-strip-types scripts/tests/go-live.test.ts
           node --experimental-strip-types scripts/tests/help.test.ts
           node --experimental-strip-types scripts/tests/onboarding.test.ts
+          node --experimental-strip-types scripts/tests/stats.test.ts
       - run: npm run lint
       - name: Build
         run: |

@@ -43,7 +43,7 @@ export default async function AdminNeedDetailPage({
       .order("created_at", { ascending: false })
       .limit(12),
     supabase.from("need_outcomes").select("*").eq("need_id", id).maybeSingle(),
-    supabase.from("kw_players").select("*").order("last_name"),
+    supabase.from("kw_players").select("*, kw_player_games(*)").order("last_name"),
     supabase.from("need_matches").select("player_id").eq("need_id", id)
   ]);
 
