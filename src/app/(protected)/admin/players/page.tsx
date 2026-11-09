@@ -8,6 +8,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { signedFileUrls } from "@/features/kw-players/files";
 import { playerFreshness, type Freshness } from "@/features/kw-players/freshness";
 import { KwPlayerCard } from "@/features/kw-players/kw-player-card";
+import { PlayerSearch } from "@/features/kw-players/player-search";
+import { matchesPlayerSearch } from "@/features/kw-players/search-text";
 import { requireAdmin } from "@/lib/auth";
 import { ATTACK_POSITIONS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -22,7 +24,7 @@ const FLASH: Record<string, string> = {
 export default async function AdminPlayersPage({
   searchParams
 }: {
-  searchParams: Promise<{ done?: string; position?: string; kind?: string; check?: string; incomplete?: string }>;
+  searchParams: Promise<{ done?: string; position?: string; kind?: string; check?: string; incomplete?: string; q?: string }>;
 }) {
   const { supabase } = await requireAdmin();
   const params = await searchParams;
@@ -39,12 +41,14 @@ export default async function AdminPlayersPage({
   const isIncomplete = (player: KwPlayer) => !player.photo_path || !player.cv_path;
   const incompleteCount = all.filter(isIncomplete).length;
   const incompleteOnly = params.incomplete === "1";
+  const search = (params.q ?? "").slice(0, 80);
   const players = all.filter(
     (player) =>
       (!position || player.attack_positions.includes(position)) &&
       (!kind || player.kind === kind) &&
       (!checkOnly || freshness.get(player.id)!.stale) &&
-      (!incompleteOnly || isIncomplete(player))
+      (!incompleteOnly || isIncomplete(player)) &&
+      matchesPlayerSearch(player, search)
   );
   const photos = await signedFileUrls(supabase, players.map((player) => player.photo_path));
   const released = all.filter((player) => player.visible_to_clubs).length;
@@ -55,6 +59,8 @@ export default async function AdminPlayersPage({
     if (next.kind) query.set("kind", next.kind);
     if (next.check) query.set("check", "1");
     if (next.incomplete) query.set("incomplete", "1");
+    // Keep the name search when switching filters.
+    if (params.q) query.set("q", params.q);
     const text = query.toString();
     return text ? `/admin/players?${text}` : "/admin/players";
   };
@@ -80,6 +86,8 @@ export default async function AdminPlayersPage({
       />
 
       <Flash message={params.done ? FLASH[params.done] : null} />
+
+      <PlayerSearch count={players.length} />
 
       <nav aria-label="Filter" className="flex flex-wrap gap-2">
         <FilterChip href={filterHref({})} active={!position && !kind && !checkOnly && !incompleteOnly}>
@@ -111,7 +119,9 @@ export default async function AdminPlayersPage({
           body={
             all.length === 0
               ? "Lege deine Spieler mit Positionen, Vertragsende und CV an. Danach schlägt das System sie automatisch für passende Vereinsbedarfe vor."
-              : "Für diesen Filter gibt es keine Spieler."
+              : search
+                ? `Kein Spieler passt zu „${search}“. Prüfe die Schreibweise oder setze die Filter zurück.`
+                : "Für diesen Filter gibt es keine Spieler."
           }
           action={
             <LinkButton href="/admin/players/new" variant="accent">

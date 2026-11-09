@@ -169,6 +169,26 @@ export async function updateClubNeedStatusAction(formData: FormData) {
   redirect(`${back}?done=status`);
 }
 
+/**
+ * "Löschen" for clubs: the need disappears from the club overview, for agencies and from matching.
+ * Kept as archived (not hard-deleted) so KW suggestions and the history stay intact for KW Sports.
+ */
+export async function removeClubNeedAction(formData: FormData) {
+  const { supabase, profile } = await requireClubUser();
+  const id = readId(formData);
+
+  const { error } = await supabase
+    .from("player_needs")
+    .update({ status: "archiviert", ...statusTimestamps("archiviert") })
+    .eq("id", id)
+    .eq("club_id", profile.club_id!);
+
+  if (error) redirect(`${clubReturnPath(formData)}?error=status`);
+  revalidatePath("/club", "layout");
+  revalidatePath("/admin", "layout");
+  redirect("/club?done=removed#bedarfe");
+}
+
 export async function duplicateClubNeedAction(formData: FormData) {
   const { supabase, profile } = await requireClubUser();
   const id = readId(formData);

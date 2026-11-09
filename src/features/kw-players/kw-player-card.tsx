@@ -8,7 +8,7 @@ import { headlineLine } from "@/features/kw-players/stats-model";
 
 const copy = {
   de: { age: "Alter", height: "Größe", free: "Frei ab", contract: "Vertrag bis", open: "offen", coach: "Trainer", years: "J.",
-    season: "Saison", asOf: "Stand", games: "Spiele", goals: "Tore", shotPct: "Wurf %", assists: "Assists", hpi: "HPI ⌀", saves: "Paraden", savePct: "Quote" },
+    season: "Saison", asOf: "Stand", games: "Spiele", goals: "Tore", shotPct: "Wurf %", assists: "Assists", hpi: "HPI ⌀", saves: "Paraden", savePct: "Quote %" },
   en: { age: "Age", height: "Height", free: "Free from", contract: "Contract until", open: "open", coach: "Coach", years: "y",
     season: "Season", asOf: "as of", games: "Games", goals: "Goals", shotPct: "Shot %", assists: "Assists", hpi: "HPI avg", saves: "Saves", savePct: "Save %" },
   fr: { age: "Âge", height: "Taille", free: "Libre dès", contract: "Contrat jusqu’à", open: "ouvert", coach: "Entraîneur", years: "ans",

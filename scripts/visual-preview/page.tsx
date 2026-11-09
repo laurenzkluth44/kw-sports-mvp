@@ -20,6 +20,8 @@ import { HelpView } from "@/features/help/help-view";
 import { appChecks, emailChecks, supabaseAuthUrls } from "@/features/system/go-live";
 import { KwPlayerForm } from "@/features/kw-players/kw-player-form";
 import { KwPlayerStatsAdmin } from "@/features/kw-players/stats-admin";
+import { PlayerSearch } from "@/features/kw-players/player-search";
+import { matchesPlayerSearch } from "@/features/kw-players/search-text";
 import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
 import { AdminInboxView, type InboxTab } from "@/features/matching/admin-inbox";
 import { ClubSuggestionsView } from "@/features/matching/club-suggestions";
@@ -375,8 +377,9 @@ export default async function VisualPreview({
       <AppShell profile={adminProfile} locale="de">
         <div className="space-y-6">
           <PageHeader eyebrow="KW Sports Admin" title="Spielerdatenbank" description="Beispieldaten" />
+          <PlayerSearch count={kwPlayers.filter((player) => matchesPlayerSearch(player, query.q ?? "")).length} />
           <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {kwPlayers.map((player) => (
+            {kwPlayers.filter((player) => matchesPlayerSearch(player, query.q ?? "")).map((player) => (
               <KwPlayerCard key={player.id} player={player} />
             ))}
           </section>

@@ -89,7 +89,9 @@ export default async function ClubDashboardPage({
                 ? flash.needUpdated
                 : doneKind === "confirmed"
                   ? flash.needsConfirmed
-                  : flash.statusUpdated
+                  : doneKind === "removed"
+                    ? flash.needRemoved
+                    : flash.statusUpdated
             : null
         }
       />
