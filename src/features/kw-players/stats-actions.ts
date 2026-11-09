@@ -19,7 +19,8 @@ function decimal(formData: FormData, key: string) {
   const raw = String(formData.get(key) ?? "").trim().replace(",", ".");
   if (!raw) return null;
   const value = Number(raw);
-  if (!Number.isFinite(value) || value < -99 || value > 99) throw new Error("invalid");
+  // HBL reports the HPI on a 0–100 scale.
+  if (!Number.isFinite(value) || value < 0 || value > 150) throw new Error("invalid");
   return Math.round(value * 10) / 10;
 }
 
