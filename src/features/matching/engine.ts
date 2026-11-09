@@ -4,7 +4,9 @@ import type { KwPlayer, MatchReason, PlayerNeed } from "@/types/domain";
  * Matching engine: how well does a KW player fit a club need?
  *
  * Must fit (otherwise the player is not suggested at all):
- *   - player need: at least one wanted attack or defence position
+ *   - player need: one of the wanted attack positions AND one of the wanted defence positions
+ *     (each only when the club asked for it; a player without recorded defence positions stays
+ *     in with the defence marked unknown)
  *   - coach need:  the wanted coach role
  * Scored (each with a weight; criteria the club left empty are skipped, so the
  * score is "share of the club's criteria the player meets"):
@@ -83,10 +85,18 @@ export function scorePlayerForNeed(
     if (!need.coach_role || !player.coach_roles.includes(need.coach_role)) return { eligible: false, score: 0, reasons: [] };
     add("coach_role", true, need.coach_role);
   } else {
+    // Attack AND defence must fit: a left back defending on 2 is no match for "RL + A2" if he
+    // plays another attack position. Each side only counts when the club asked for it.
+    const wantsAttack = need.attack_positions.length > 0;
+    const wantsDefense = need.defense_positions.length > 0;
+    if (!wantsAttack && !wantsDefense) return { eligible: false, score: 0, reasons: [] };
     const attack = need.attack_positions.filter((position) => player.attack_positions.includes(position));
     const defense = need.defense_positions.filter((position) => player.defense_positions.includes(position));
-    if (attack.length === 0 && defense.length === 0) return { eligible: false, score: 0, reasons: [] };
-    add("position", true, [...attack, ...defense.map((position) => `A${position}`)].join(" · "));
+    if (wantsAttack && attack.length === 0) return { eligible: false, score: 0, reasons: [] };
+    // No defence positions recorded for the player: not ruled out, but marked unknown ("?") and scored half.
+    const defenseUnknown = wantsDefense && player.defense_positions.length === 0;
+    if (wantsDefense && !defenseUnknown && defense.length === 0) return { eligible: false, score: 0, reasons: [] };
+    add("position", defenseUnknown ? null : true, [...attack, ...(defenseUnknown ? ["A?"] : defense.map((position) => `A${position}`))].join(" · "));
   }
 
   // Availability: free by the date the club needs the player

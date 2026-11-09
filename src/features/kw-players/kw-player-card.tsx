@@ -32,6 +32,8 @@ export function KwPlayerCard({
   locale = "de",
   topRight,
   footer,
+  details,
+  size = "md",
   className
 }: {
   player: KwPlayer;
@@ -39,6 +41,10 @@ export function KwPlayerCard({
   locale?: ClubLocale;
   topRight?: ReactNode;
   footer?: ReactNode;
+  /** Extra dark section between the facts and the footer (e.g. positions on the court). */
+  details?: ReactNode;
+  /** "lg": bigger photo and name, for the detailed suggestion view. */
+  size?: "md" | "lg";
   className?: string;
 }) {
   const t = copy[locale];
@@ -54,7 +60,7 @@ export function KwPlayerCard({
         {player.kind === "trainer" ? "CO" : player.attack_positions[0] ?? "KW"}
       </span>
       <div className="relative flex gap-4 p-5">
-        <div className="relative h-24 w-[4.5rem] shrink-0">
+        <div className={cn("relative shrink-0", size === "lg" ? "h-36 w-[6.75rem]" : "h-24 w-[4.5rem]")}>
           <span aria-hidden="true" className="absolute -left-1.5 -top-1.5 h-4 w-4 border-l-2 border-t-2 border-brand-500" />
           {photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -73,7 +79,7 @@ export function KwPlayerCard({
             </span>
             {topRight}
           </div>
-          <p className="mt-2 font-display text-[1.9rem] leading-[0.88]">
+          <p className={cn("mt-2 font-display leading-[0.88]", size === "lg" ? "text-[2.4rem]" : "text-[1.9rem]")}>
             {player.first_name} <span className="block text-brand-500">{player.last_name}</span>
           </p>
           <p className="mt-1 truncate text-xs text-white/65">
@@ -89,6 +95,7 @@ export function KwPlayerCard({
           value={freeFrom ? formatDate(freeFrom, locale) : player.contract_until ? formatDate(player.contract_until, locale) : t.open}
         />
       </dl>
+      {details}
       {footer ? <div className="relative mt-auto border-t border-white/10 p-4">{footer}</div> : null}
     </article>
   );
