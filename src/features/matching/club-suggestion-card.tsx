@@ -1,5 +1,6 @@
 import { Check, FileText, PlayCircle, ThumbsDown, ThumbsUp } from "lucide-react";
 import { KwPlayerCard } from "@/features/kw-players/kw-player-card";
+import { KwPlayerPositions, matchedPositions } from "@/features/kw-players/kw-player-positions";
 import { respondToMatchAction } from "@/features/matching/club-actions";
 import { MatchReasons } from "@/features/matching/match-reasons";
 import { languageLabel, type ClubLocale } from "@/lib/club-i18n";
@@ -50,6 +51,8 @@ export function ClubSuggestionCard({
         photoUrl={photoUrl}
         locale={locale}
         className="h-full"
+        size="lg"
+        details={<KwPlayerPositions player={player} locale={locale} matched={matchedPositions(match.reasons)} />}
         topRight={
           isNew ? (
             <span className="shrink-0 bg-white px-2 py-0.5 text-[0.7rem] font-extrabold uppercase tracking-[0.14em] text-navy-950">

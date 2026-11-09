@@ -33,3 +33,13 @@ assert(!isAcceptablePassword("1234567890", "1234567890"), "password: needs a let
 assert(!isAcceptablePassword("Handball2027", "Handball2028"), "password: entries must match");
 assert(isAcceptablePassword("Handball2027", "Handball2027"), "password: good password accepted");
 assert(passwordChecks("Äöü1234567", "").letter, "password: umlauts count as letters");
+
+// Attack AND defence must both fit (RL + A2 need)
+const rlA2 = { ...need, attack_positions:["RL"], defense_positions:[2], age_min:null, age_max:null, height_min:null, languages:[], player_types:[], league_experience:null };
+assert(scorePlayerForNeed(rlA2, { ...base, attack_positions:["RL"], defense_positions:[2,3] }).eligible, "RL defending on 2 fits RL + A2");
+assert(!scorePlayerForNeed(rlA2, { ...base, attack_positions:["RM"], defense_positions:[2] }).eligible, "RM defending on 2 does NOT fit RL + A2");
+assert(!scorePlayerForNeed(rlA2, { ...base, attack_positions:["RL"], defense_positions:[4] }).eligible, "RL defending on 4 does NOT fit RL + A2");
+const noDef = scorePlayerForNeed(rlA2, { ...base, attack_positions:["RL"], defense_positions:[] });
+assert(noDef.eligible && noDef.reasons[0].ok === null && noDef.reasons[0].value === "RL · A?", "RL without recorded defence stays in, marked unknown");
+assert(!scorePlayerForNeed(rlA2, { ...base, attack_positions:["LA"], defense_positions:[] }).eligible, "unknown defence never rescues a wrong attack position");
+assert(scorePlayerForNeed(defNeed, { ...base, attack_positions:["LA"], defense_positions:[3] }).eligible, "defence-only need: any attack position");
