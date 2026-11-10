@@ -91,12 +91,12 @@ export function defenseGroupOf(position: DefensePosition): DefenseGroup {
 
 export const COACH_ROLES = ["cheftrainer", "co_trainer", "torwarttrainer", "athletiktrainer", "jugendtrainer"] as const;
 
-export const PLAYER_TYPES = ["eins_gegen_eins", "spielstark", "wurfstark", "abwehrstark"] as const;
+export const PLAYER_TYPES = ["eins_gegen_eins", "spielstark", "wurfstark", "abwehrstark", "sperrstark", "laufstark"] as const;
 
 export const TARGET_ROLES = ["fuehrungsrolle", "stammspieler", "rotationsspieler", "perspektivspieler"] as const;
 
 // ISO 639-1; Anzeigenamen kommen lokalisiert aus Intl.DisplayNames.
-export const LANGUAGES = ["de", "en", "fr", "es", "da", "sv", "no", "nl", "pl", "hr", "sr", "sl", "hu", "pt", "is"] as const;
+export const LANGUAGES = ["de", "en", "fr", "es", "da", "sv", "no", "nl", "pl", "hr", "sr", "sl", "hu", "pt", "is", "ar", "lt", "ro", "it"] as const;
 
 export const LEAGUE_EXPERIENCE_SUGGESTIONS = [
   ...LEAGUES.filter((league) => league !== "Andere"),
