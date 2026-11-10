@@ -518,10 +518,10 @@ export const CLUB_COACH_ROLE_LABELS: Record<ClubLocale, Record<CoachRole, string
 };
 
 export const CLUB_PLAYER_TYPE_LABELS: Record<ClubLocale, Record<PlayerType, string>> = {
-  de: { eins_gegen_eins: "1-gegen-1-stark (Iso)", spielstark: "Spielstark", wurfstark: "Wurfstark", abwehrstark: "Abwehrstark" },
-  en: { eins_gegen_eins: "Strong 1-on-1 (iso)", spielstark: "Playmaker", wurfstark: "Strong shooter", abwehrstark: "Strong defender" },
-  fr: { eins_gegen_eins: "Fort en 1 contre 1", spielstark: "Créateur de jeu", wurfstark: "Bon tireur", abwehrstark: "Bon défenseur" },
-  es: { eins_gegen_eins: "Fuerte en 1x1", spielstark: "Creador de juego", wurfstark: "Buen lanzador", abwehrstark: "Buen defensor" }
+  de: { eins_gegen_eins: "1-gegen-1-stark (Iso)", spielstark: "Spielstark", wurfstark: "Wurfstark", abwehrstark: "Abwehrstark", sperrstark: "Sperrstark", laufstark: "Laufstark" },
+  en: { eins_gegen_eins: "Strong 1-on-1 (iso)", spielstark: "Playmaker", wurfstark: "Strong shooter", abwehrstark: "Strong defender", sperrstark: "Strong screener", laufstark: "Strong runner" },
+  fr: { eins_gegen_eins: "Fort en 1 contre 1", spielstark: "Créateur de jeu", wurfstark: "Bon tireur", abwehrstark: "Bon défenseur", sperrstark: "Bon bloqueur", laufstark: "Grande mobilité" },
+  es: { eins_gegen_eins: "Fuerte en 1x1", spielstark: "Creador de juego", wurfstark: "Buen lanzador", abwehrstark: "Buen defensor", sperrstark: "Buen bloqueador", laufstark: "Gran movilidad" }
 };
 
 export const CLUB_TARGET_ROLE_LABELS: Record<ClubLocale, Record<TargetRole, string>> = {
