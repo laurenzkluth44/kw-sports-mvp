@@ -73,6 +73,7 @@ const shots = [
   { name: "email-new-need", path: "/visual-preview/email?kind=need", width: 680 },
   { name: "email-answer", path: "/visual-preview/email?kind=answer", width: 680 },
   { name: "email-reminder", path: "/visual-preview/email?kind=reminder", width: 680 },
+  { name: "email-agency-digest", path: "/visual-preview/email?kind=digest", width: 680 },
   { name: "email-invite", path: "/visual-preview/email?kind=invite", width: 680 },
   { name: "email-reset", path: "/visual-preview/email?kind=reset", width: 680 },
   { name: "auth-set-password", path: "/set-password", width: 1280 },

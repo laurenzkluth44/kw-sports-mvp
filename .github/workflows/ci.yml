@@ -41,6 +41,7 @@ jobs:
           node --experimental-strip-types scripts/tests/search.test.ts
           node --experimental-strip-types scripts/tests/global-search.test.ts
           node --experimental-strip-types scripts/tests/completeness.test.ts
+          node --experimental-strip-types scripts/tests/digest.test.ts
       - run: npm run lint
       - name: Build
         run: |

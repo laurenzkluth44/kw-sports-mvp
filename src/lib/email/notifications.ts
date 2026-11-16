@@ -1,5 +1,6 @@
 import { needHeadline } from "@/features/player-needs/need-summary";
 import type { ClubLocale } from "@/lib/club-i18n";
+import { digestLocale, digestNeeds } from "@/lib/email/digest";
 import { renderEmail } from "@/lib/email/template";
 import { sendEmail } from "@/lib/email/send";
 import { getSiteUrl } from "@/lib/site-url";
@@ -396,4 +397,81 @@ export function buildReminderEmail(clubNeeds: (PlayerNeed & { clubs: Club })[], 
       site
     );
     return { subject: t.subject, html, text };
+}
+
+// ---------------------------------------------------------------- Agencies: weekly digest of new needs
+
+const digestCopy = {
+  de: {
+    subject: (n: number) => (n === 1 ? "1 neuer Kaderbedarf diese Woche" : `${n} neue Kaderbedarfe diese Woche`),
+    eyebrow: "Wochenübersicht",
+    title: "Neue Bedarfe",
+    intro: (n: number) =>
+      n === 1
+        ? "Diese Woche ist 1 neuer Bedarf auf KW Club Hub dazugekommen, nach Position sortiert."
+        : `Diese Woche sind ${n} neue Bedarfe auf KW Club Hub dazugekommen, nach Position sortiert.`,
+    from: "ab",
+    priority: { hoch: "Priorität hoch", mittel: "Priorität mittel", niedrig: "Priorität niedrig" } as Record<string, string>,
+    cta: "Alle Bedarfe ansehen",
+    outro: "Passenden Spieler gefunden? Meldet euch direkt bei KW Sports.",
+    footer: "Ihr bekommt diese E-Mail montags, wenn es neue Bedarfe gibt."
+  },
+  en: {
+    subject: (n: number) => (n === 1 ? "1 new squad need this week" : `${n} new squad needs this week`),
+    eyebrow: "Weekly overview",
+    title: "New needs",
+    intro: (n: number) =>
+      n === 1 ? "1 new need was added on KW Club Hub this week, sorted by position." : `${n} new needs were added on KW Club Hub this week, sorted by position.`,
+    from: "from",
+    priority: { hoch: "high priority", mittel: "medium priority", niedrig: "low priority" } as Record<string, string>,
+    cta: "View all needs",
+    outro: "Found a matching player? Contact KW Sports directly.",
+    footer: "You get this email on Mondays when there are new needs."
+  }
+};
+
+export function buildAgencyDigestEmail(needs: (PlayerNeed & { clubs: Club })[], locale: "de" | "en", site = getSiteUrl()) {
+  const t = digestCopy[locale];
+  const { html, text } = renderEmail(
+    {
+      preheader: t.intro(needs.length),
+      eyebrow: t.eyebrow,
+      title: t.title,
+      intro: t.intro(needs.length),
+      rows: needs.map((need) => ({
+        label: `${needHeadline(need, locale)} · ${need.clubs.name}`,
+        value: [need.clubs.league, need.season, `${t.from} ${formatDate(need.needed_from_date, locale)}`, t.priority[need.priority] ?? null]
+          .filter(Boolean)
+          .join(" · ")
+      })),
+      cta: { label: t.cta, href: `${site}/agency` },
+      outro: t.outro,
+      footer: t.footer
+    },
+    site
+  );
+  return { subject: t.subject(needs.length), html, text };
+}
+
+/** Weekly job: every agency user gets the needs added in the last 7 days. Nothing new, no email. Returns emails sent. */
+export async function sendAgencyDigest(now = new Date()) {
+  const admin = adminClientOrNull();
+  if (!admin) return 0;
+  const since = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const [{ data: needRows }, { data: agencyUsers }] = await Promise.all([
+    admin.from("player_needs").select("*, clubs(*)").in("status", ["offen", "in_gespraechen"]).gte("created_at", since),
+    admin.from("users").select("email").eq("role", "agency")
+  ]);
+  const needs = digestNeeds((needRows ?? []) as (PlayerNeed & { clubs: Club })[], now);
+  if (needs.length === 0) return 0;
+
+  const site = getSiteUrl();
+  let sent = 0;
+  for (const user of agencyUsers ?? []) {
+    await safely("agency digest", async () => {
+      const email = buildAgencyDigestEmail(needs, digestLocale(user.email as string), site);
+      if (await sendEmail({ to: [user.email as string], ...email })) sent += 1;
+    });
+  }
+  return sent;
 }

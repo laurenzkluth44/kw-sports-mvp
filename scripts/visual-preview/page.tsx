@@ -38,7 +38,7 @@ import { NeedFacts, NeedHero, chips } from "@/features/player-needs/need-hero";
 import { needProfileLabels } from "@/features/player-needs/need-summary";
 import { planningSeasons } from "@/features/squad/squad-model";
 import { scorePlayerForNeed } from "@/features/matching/engine";
-import { buildAnswerEmail, buildNewNeedEmail, buildReminderEmail, buildSuggestionEmail } from "@/lib/email/notifications";
+import { buildAgencyDigestEmail, buildAnswerEmail, buildNewNeedEmail, buildReminderEmail, buildSuggestionEmail } from "@/lib/email/notifications";
 import { buildInviteEmail, buildResetEmail } from "@/lib/email/auth-emails";
 import { createRosterPlayerAction } from "@/features/squad/actions";
 import { PlayerForm } from "@/features/squad/player-form";
@@ -656,6 +656,8 @@ export default async function VisualPreview({
         ? buildNewNeedEmail(needs[0], site)
         : kind === "answer"
           ? buildAnswerEmail(needs[2], suggestionPlayers[0], inboxMatches[1], ["lars@example.com"], site)
+          : kind === "digest"
+            ? buildAgencyDigestEmail([needs[0], needs[2], needs[4]], "de", site)
           : kind === "reminder"
             ? buildReminderEmail([needs[4], { ...needs[4], id: "x", attack_positions: ["RL"], season: "2027/28" }], site)
             : kind === "suggestion-fr"
