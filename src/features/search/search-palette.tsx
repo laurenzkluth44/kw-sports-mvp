@@ -3,6 +3,7 @@
 import { ArrowRight, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { globalSearchAction } from "./actions";
 import type { SearchGroup, SearchItem, SearchResult } from "./model";
@@ -28,10 +29,14 @@ export function SearchPalette({ copy, variant = "desktop" }: { copy: Copy; varia
   const [results, setResults] = useState<SearchResult[]>([]);
   const [active, setActive] = useState(0);
   const [pending, startTransition] = useTransition();
+  const [mounted, setMounted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const request = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // The dialog is rendered into <body>: inside the sticky header, "fixed" would only cover the header.
+  useEffect(() => setMounted(true), []);
 
   const flat = useMemo(() => results.flatMap((group) => group.items), [results]);
 
@@ -125,11 +130,11 @@ export function SearchPalette({ copy, variant = "desktop" }: { copy: Copy; varia
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="group inline-flex min-h-10 w-56 items-center gap-2 border border-white/20 bg-white/[0.06] px-3 text-left text-sm text-white/70 transition-colors hover:border-white/40 hover:text-white xl:w-72"
+          className="group inline-flex min-h-10 w-48 items-center gap-2 border border-white/20 bg-white/[0.06] px-3 text-left text-sm text-white/70 transition-colors hover:border-white/40 hover:text-white 2xl:w-64"
         >
           <Search className="h-4 w-4 shrink-0 text-brand-300" aria-hidden="true" />
           <span className="flex-1 truncate">{copy.button} …</span>
-          <kbd className="hidden border border-white/20 px-1.5 font-sans text-[0.65rem] font-bold tracking-wider text-white/60 lg:inline">⌘K</kbd>
+          <kbd className="border border-white/20 px-1.5 font-sans text-[0.65rem] font-bold tracking-wider text-white/60">⌘K</kbd>
         </button>
       ) : (
         <button
@@ -142,7 +147,7 @@ export function SearchPalette({ copy, variant = "desktop" }: { copy: Copy; varia
         </button>
       )}
 
-      {open ? (
+      {open && mounted ? createPortal(
         <div className="fixed inset-0 z-[100] flex items-start justify-center bg-navy-950/60 px-3 pt-[10vh] backdrop-blur-[2px] sm:px-6" onMouseDown={close}>
           <div
             role="dialog"
@@ -214,7 +219,8 @@ export function SearchPalette({ copy, variant = "desktop" }: { copy: Copy; varia
 
             <p className="hidden border-t border-slate-100 bg-slate-50 px-5 py-2 text-[0.7rem] font-semibold text-slate-500 sm:block">{copy.hint}</p>
           </div>
-        </div>
+        </div>,
+        document.body
       ) : null}
     </>
   );

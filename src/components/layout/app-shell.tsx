@@ -118,10 +118,10 @@ export function AppShell({
 
             {/* Desktop: everything in one row */}
             <div className="hidden flex-wrap items-center gap-2 text-sm md:flex">
-              <div className="hidden lg:block">
+              <div className="hidden xl:block">
                 <SearchPalette copy={search} variant="desktop" />
               </div>
-              <div className="lg:hidden">
+              <div className="xl:hidden">
                 <SearchPalette copy={search} variant="mobile" />
               </div>
               {showLanguageSwitcher ? <LanguageSwitcher locale={locale} label={languageLabel} /> : null}
