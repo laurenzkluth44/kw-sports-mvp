@@ -40,6 +40,7 @@ jobs:
           node --experimental-strip-types scripts/tests/stats.test.ts
           node --experimental-strip-types scripts/tests/search.test.ts
           node --experimental-strip-types scripts/tests/global-search.test.ts
+          node --experimental-strip-types scripts/tests/completeness.test.ts
       - run: npm run lint
       - name: Build
         run: |

@@ -21,6 +21,8 @@ import { appChecks, emailChecks, supabaseAuthUrls } from "@/features/system/go-l
 import { KwPlayerForm } from "@/features/kw-players/kw-player-form";
 import { KwPlayerStatsAdmin } from "@/features/kw-players/stats-admin";
 import { PlayerSearch } from "@/features/kw-players/player-search";
+import { CompletenessMeter } from "@/features/kw-players/completeness-meter";
+import { profileCompleteness } from "@/features/kw-players/completeness";
 import { matchesPlayerSearch } from "@/features/kw-players/search-text";
 import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
 import { AdminInboxView, type InboxTab } from "@/features/matching/admin-inbox";
@@ -380,7 +382,7 @@ export default async function VisualPreview({
           <PlayerSearch count={kwPlayers.filter((player) => matchesPlayerSearch(player, query.q ?? "")).length} />
           <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {kwPlayers.filter((player) => matchesPlayerSearch(player, query.q ?? "")).map((player) => (
-              <KwPlayerCard key={player.id} player={player} />
+              <KwPlayerCard key={player.id} player={player} footer={<CompletenessMeter completeness={profileCompleteness(player)} />} />
             ))}
           </section>
         </div>
