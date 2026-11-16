@@ -54,6 +54,8 @@ const shots = [
   { name: "club-cockpit-desktop", path: "/visual-preview/cockpit", width: 1280 },
   { name: "club-cockpit-mobile", path: "/visual-preview/cockpit?lang=en", width: 390 },
   { name: "club-cockpit-empty", path: "/visual-preview/cockpit-empty", width: 1280 },
+  { name: "search-open-desktop", path: "/visual-preview/cockpit", width: 1280, click: "header button:has-text('Suchen')", fullPage: false },
+  { name: "search-open-mobile", path: "/visual-preview/cockpit", width: 390, click: "header button[aria-label='Suchen']:visible", fullPage: false },
   { name: "club-need-remove", path: "/visual-preview/cockpit", width: 1280, click: "section.mt-6 details summary" },
   { name: "club-need-cards-mobile", path: "/visual-preview/cockpit?lang=fr", width: 390 },
   { name: "club-cockpit-empty-mobile", path: "/visual-preview/cockpit-empty?lang=fr", width: 390 },
