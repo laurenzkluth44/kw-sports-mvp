@@ -11,6 +11,8 @@ import { agencyCopy } from "@/lib/agency-i18n";
 import { clubCopy, type ClubLocale } from "@/lib/club-i18n";
 import { guideCopy } from "@/lib/guide-i18n";
 import { helpChrome } from "@/features/help/chrome";
+import { searchCopy } from "@/features/search/copy";
+import { SearchPalette } from "@/features/search/search-palette";
 import { LEGAL_URLS, legalLabels } from "@/lib/legal";
 import { matchCopy } from "@/lib/match-i18n";
 import { cockpitCopy } from "@/lib/cockpit-i18n";
@@ -51,6 +53,7 @@ export function AppShell({
   const menuLabel = guideCopy[profile.role === "admin" ? "de" : locale].menu;
   const legalLocale = profile.role === "admin" ? "de" : locale;
   const helpLabel = helpChrome[legalLocale].nav;
+  const search = searchCopy[legalLocale];
 
   const help = (
     <Link
@@ -115,6 +118,12 @@ export function AppShell({
 
             {/* Desktop: everything in one row */}
             <div className="hidden flex-wrap items-center gap-2 text-sm md:flex">
+              <div className="hidden xl:block">
+                <SearchPalette copy={search} variant="desktop" />
+              </div>
+              <div className="xl:hidden">
+                <SearchPalette copy={search} variant="mobile" />
+              </div>
               {showLanguageSwitcher ? <LanguageSwitcher locale={locale} label={languageLabel} /> : null}
               {help}
               {roleBadge}
@@ -122,7 +131,9 @@ export function AppShell({
             </div>
 
             {/* Mobile: one menu button instead of the stacked controls */}
-            <details className="group md:hidden">
+            <div className="flex items-center gap-2 md:hidden">
+            <SearchPalette copy={search} variant="mobile" />
+            <details className="group">
               <summary
                 aria-label={menuLabel}
                 className="flex min-h-11 min-w-11 shrink-0 cursor-pointer list-none items-center justify-center gap-2 border border-white/15 px-3 text-[0.72rem] font-extrabold uppercase tracking-[0.12em] [&::-webkit-details-marker]:hidden"
@@ -143,6 +154,7 @@ export function AppShell({
                 </div>
               </div>
             </details>
+            </div>
           </div>
 
           <NavLinks items={nav} className="hidden md:block" />
