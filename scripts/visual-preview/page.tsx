@@ -273,6 +273,7 @@ const sampleMatches: NeedMatch[] = [
     responded_at: daysAgo(2),
     responded_by: null,
     handled_at: null,
+    seen_at: null,
     created_at: daysAgo(6),
     updated_at: daysAgo(2)
   }
@@ -294,6 +295,7 @@ function released(index: number, needIndex: number, playerIndex: number, extra: 
     responded_at: null,
     responded_by: null,
     handled_at: null,
+    seen_at: null,
     created_at: daysAgo(3),
     updated_at: daysAgo(3),
     ...extra
@@ -324,7 +326,7 @@ const inboxMatches: NeedMatch[] = [
   released(3, 0, 1, { status: "interessiert", club_note: "Gerne Videos und Gehaltsvorstellung schicken.", responded_at: daysAgo(1) }),
   released(4, 2, 0, { status: "interessiert", club_note: "Können wir nächste Woche telefonieren?", responded_at: daysAgo(0) }),
   released(5, 3, 3, { status: "interessiert", responded_at: daysAgo(2), handled_at: daysAgo(1) }),
-  released(6, 2, 1, { released_at: daysAgo(9) }),
+  released(6, 2, 1, { released_at: daysAgo(9), seen_at: daysAgo(7) }),
   released(7, 0, 2, { status: "kein_interesse", club_note: "Zu teuer für unser Budget.", responded_at: daysAgo(4) })
 ];
 

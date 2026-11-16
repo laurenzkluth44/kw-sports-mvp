@@ -99,6 +99,7 @@ export function AdminNeedMatchesView({
                     </p>
                     <p className="mt-0.5 text-xs text-slate-500">
                       Freigegeben am {formatDate(match.released_at)}
+                      {match.seen_at ? ` · Gesehen am ${formatDate(match.seen_at)}` : match.status === "freigegeben" ? " · Noch nicht geöffnet" : ""}
                       {match.responded_at ? ` · Antwort am ${formatDate(match.responded_at)}` : ""}
                     </p>
                     {match.club_note ? <p className="mt-1 text-sm italic text-slate-700">„{match.club_note}“</p> : null}

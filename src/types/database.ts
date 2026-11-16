@@ -379,6 +379,7 @@ export type Database = {
           responded_at: string | null;
           responded_by: string | null;
           handled_at: string | null;
+          seen_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -397,6 +398,7 @@ export type Database = {
           handled_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          seen_at?: string | null;
         };
         Update: {
           id?: string;
@@ -413,6 +415,7 @@ export type Database = {
           handled_at?: string | null;
           created_at?: string;
           updated_at?: string;
+          seen_at?: string | null;
         };
         Relationships: [
           {
@@ -655,6 +658,10 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      mark_need_matches_seen: {
+        Args: { match_ids: string[] };
+        Returns: undefined;
+      };
       respond_to_need_match: {
         Args: { match_id: string; answer: NeedMatchStatus; note?: string | null };
         Returns: undefined;

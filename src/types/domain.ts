@@ -221,6 +221,8 @@ export type NeedMatch = {
   responded_at: string | null;
   responded_by: string | null;
   handled_at: string | null;
+  /** When the club first opened the suggestion. */
+  seen_at: string | null;
   created_at: string;
   updated_at: string;
 };

@@ -36,6 +36,9 @@ export default async function ClubNeedPage({
 
   const need = data as PlayerNeedWithClub & { player_need_confidential?: { note: string | null } | null };
   const matches = (matchRows ?? []) as unknown as NeedMatch[];
+  // The suggestions are shown on this page too: counts as "seen" for KW Sports.
+  const unseen = matches.filter((match) => !match.seen_at).map((match) => match.id);
+  if (unseen.length > 0) await supabase.rpc("mark_need_matches_seen", { match_ids: unseen });
   const playerIds = matches.map((match) => match.player_id);
   const { data: playerRows } = playerIds.length
     ? await supabase.from("kw_players").select("*, kw_player_games(*)").in("id", playerIds)
