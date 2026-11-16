@@ -21,6 +21,8 @@ import { appChecks, emailChecks, supabaseAuthUrls } from "@/features/system/go-l
 import { KwPlayerForm } from "@/features/kw-players/kw-player-form";
 import { KwPlayerStatsAdmin } from "@/features/kw-players/stats-admin";
 import { PlayerSearch } from "@/features/kw-players/player-search";
+import { CompletenessMeter } from "@/features/kw-players/completeness-meter";
+import { profileCompleteness } from "@/features/kw-players/completeness";
 import { matchesPlayerSearch } from "@/features/kw-players/search-text";
 import { AdminNeedMatchesView } from "@/features/matching/admin-need-matches";
 import { AdminInboxView, type InboxTab } from "@/features/matching/admin-inbox";
@@ -36,7 +38,7 @@ import { NeedFacts, NeedHero, chips } from "@/features/player-needs/need-hero";
 import { needProfileLabels } from "@/features/player-needs/need-summary";
 import { planningSeasons } from "@/features/squad/squad-model";
 import { scorePlayerForNeed } from "@/features/matching/engine";
-import { buildAnswerEmail, buildNewNeedEmail, buildReminderEmail, buildSuggestionEmail } from "@/lib/email/notifications";
+import { buildAgencyDigestEmail, buildAnswerEmail, buildNewNeedEmail, buildReminderEmail, buildSuggestionEmail } from "@/lib/email/notifications";
 import { buildInviteEmail, buildResetEmail } from "@/lib/email/auth-emails";
 import { createRosterPlayerAction } from "@/features/squad/actions";
 import { PlayerForm } from "@/features/squad/player-form";
@@ -271,6 +273,7 @@ const sampleMatches: NeedMatch[] = [
     responded_at: daysAgo(2),
     responded_by: null,
     handled_at: null,
+    seen_at: null,
     created_at: daysAgo(6),
     updated_at: daysAgo(2)
   }
@@ -292,6 +295,7 @@ function released(index: number, needIndex: number, playerIndex: number, extra: 
     responded_at: null,
     responded_by: null,
     handled_at: null,
+    seen_at: null,
     created_at: daysAgo(3),
     updated_at: daysAgo(3),
     ...extra
@@ -322,7 +326,7 @@ const inboxMatches: NeedMatch[] = [
   released(3, 0, 1, { status: "interessiert", club_note: "Gerne Videos und Gehaltsvorstellung schicken.", responded_at: daysAgo(1) }),
   released(4, 2, 0, { status: "interessiert", club_note: "Können wir nächste Woche telefonieren?", responded_at: daysAgo(0) }),
   released(5, 3, 3, { status: "interessiert", responded_at: daysAgo(2), handled_at: daysAgo(1) }),
-  released(6, 2, 1, { released_at: daysAgo(9) }),
+  released(6, 2, 1, { released_at: daysAgo(9), seen_at: daysAgo(7) }),
   released(7, 0, 2, { status: "kein_interesse", club_note: "Zu teuer für unser Budget.", responded_at: daysAgo(4) })
 ];
 
@@ -380,7 +384,7 @@ export default async function VisualPreview({
           <PlayerSearch count={kwPlayers.filter((player) => matchesPlayerSearch(player, query.q ?? "")).length} />
           <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {kwPlayers.filter((player) => matchesPlayerSearch(player, query.q ?? "")).map((player) => (
-              <KwPlayerCard key={player.id} player={player} />
+              <KwPlayerCard key={player.id} player={player} footer={<CompletenessMeter completeness={profileCompleteness(player)} />} />
             ))}
           </section>
         </div>
@@ -652,6 +656,8 @@ export default async function VisualPreview({
         ? buildNewNeedEmail(needs[0], site)
         : kind === "answer"
           ? buildAnswerEmail(needs[2], suggestionPlayers[0], inboxMatches[1], ["lars@example.com"], site)
+          : kind === "digest"
+            ? buildAgencyDigestEmail([needs[0], needs[2], needs[4]], "de", site)
           : kind === "reminder"
             ? buildReminderEmail([needs[4], { ...needs[4], id: "x", attack_positions: ["RL"], season: "2027/28" }], site)
             : kind === "suggestion-fr"

@@ -154,6 +154,7 @@ export function AdminInboxView({
                   </p>
                   <p className="mt-0.5 text-xs text-slate-500">
                     Freigegeben am {formatDate(match.released_at)}
+                    {match.seen_at ? ` · Gesehen am ${formatDate(match.seen_at)}` : ""}
                     {match.responded_at ? ` · Antwort am ${formatDate(match.responded_at)}` : ""}
                     {match.handled_at ? ` · erledigt am ${formatDate(match.handled_at)}` : ""}
                   </p>
@@ -167,6 +168,9 @@ export function AdminInboxView({
                   ) : tab === "wartet" ? (
                     <p className={cn("text-sm font-semibold", waitingDays >= 7 ? "text-amber-700" : "text-slate-500")}>
                       {waitingDays <= 0 ? "Heute freigegeben" : waitingDays === 1 ? "Seit 1 Tag offen" : `Seit ${waitingDays} Tagen offen`}
+                      {" · "}
+                      {/* Opened but no answer: worth a call. Never opened: maybe the e-mail got lost. */}
+                      {match.seen_at ? "vom Verein angesehen, noch keine Antwort" : "noch nicht geöffnet"}
                     </p>
                   ) : (
                     <p className="text-sm text-slate-500">Keine Notiz</p>

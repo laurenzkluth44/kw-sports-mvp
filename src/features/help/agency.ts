@@ -65,7 +65,8 @@ export const agencyGuideDe: HelpGuide = {
           steps: [
             "Ihr seht alle aktuellen Bedarfe der Vereine. Kader der Vereine, Spieler von KW Sports und vertrauliche Notizen seht ihr nicht.",
             "Ändern, Notizen, Exporte und Nutzerverwaltung bleiben bei KW Sports.",
-            "Passenden Spieler gefunden? Meldet euch direkt bei KW Sports."
+            "Passenden Spieler gefunden? Meldet euch direkt bei KW Sports.",
+            "Jeden Montag kommt eine E-Mail mit den neuen Bedarfen der Woche, nach Position sortiert (nur wenn es neue gibt)."
           ]
         }
       ]
@@ -138,7 +139,8 @@ export const agencyGuideEn: HelpGuide = {
           steps: [
             "You see all current needs of the clubs. You don’t see club squads, KW Sports players or confidential notes.",
             "Changes, notes, exports and user management stay with KW Sports.",
-            "Found a matching player? Contact KW Sports directly."
+            "Found a matching player? Contact KW Sports directly.",
+            "Every Monday you get an email with the new needs of the week, sorted by position (only when there are new ones)."
           ]
         }
       ]

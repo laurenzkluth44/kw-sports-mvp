@@ -20,6 +20,10 @@ export default async function ClubSuggestionsPage({
     supabase.from("kw_players").select("*, kw_player_games(*)")
   ]);
 
+  // Opening this page counts as "seen" for KW Sports (only the first time is kept).
+  const unseen = ((matchRows ?? []) as unknown as NeedMatch[]).filter((match) => !match.seen_at).map((match) => match.id);
+  if (unseen.length > 0) await supabase.rpc("mark_need_matches_seen", { match_ids: unseen });
+
   const players = (playerRows ?? []) as KwPlayer[];
   const files = await signedFileUrls(
     supabase,

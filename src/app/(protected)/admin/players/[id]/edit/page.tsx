@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { CheckCircle2, Clock3, Trash2 } from "lucide-react";
 import { Flash } from "@/components/ui/flash";
+import { profileCompleteness } from "@/features/kw-players/completeness";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -43,6 +44,16 @@ export default async function EditKwPlayerPage({
         description={`${matchCount ?? 0} Vorschläge an Vereine. Änderungen an Positionen oder Vertrag wirken sich sofort auf neue Vorschläge aus.`}
       />
       <Flash message={query.done === "confirmed" ? "Danke, Profil als aktuell bestätigt." : null} />
+
+      {(() => {
+        const { percent, missing } = profileCompleteness(player);
+        if (missing.length === 0) return null;
+        return (
+          <p className="border-l-2 border-amber-400 bg-amber-50 px-4 py-3 text-sm text-navy-950">
+            <span className="font-bold">Profil {percent} % vollständig.</span> Es fehlt noch: {missing.join(", ")}.
+          </p>
+        );
+      })()}
       {freshness.stale ? (
         <section className="flex flex-col gap-3 border-l-4 border-amber-400 bg-amber-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">

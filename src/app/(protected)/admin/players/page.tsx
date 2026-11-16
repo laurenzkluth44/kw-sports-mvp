@@ -7,6 +7,8 @@ import { Flash } from "@/components/ui/flash";
 import { PageHeader } from "@/components/ui/page-header";
 import { signedFileUrls } from "@/features/kw-players/files";
 import { playerFreshness, type Freshness } from "@/features/kw-players/freshness";
+import { profileCompleteness } from "@/features/kw-players/completeness";
+import { CompletenessMeter } from "@/features/kw-players/completeness-meter";
 import { KwPlayerCard } from "@/features/kw-players/kw-player-card";
 import { PlayerSearch } from "@/features/kw-players/player-search";
 import { matchesPlayerSearch } from "@/features/kw-players/search-text";
@@ -24,7 +26,7 @@ const FLASH: Record<string, string> = {
 export default async function AdminPlayersPage({
   searchParams
 }: {
-  searchParams: Promise<{ done?: string; position?: string; kind?: string; check?: string; incomplete?: string; q?: string }>;
+  searchParams: Promise<{ done?: string; position?: string; kind?: string; check?: string; incomplete?: string; gaps?: string; q?: string }>;
 }) {
   const { supabase } = await requireAdmin();
   const params = await searchParams;
@@ -41,6 +43,9 @@ export default async function AdminPlayersPage({
   const isIncomplete = (player: KwPlayer) => !player.photo_path || !player.cv_path;
   const incompleteCount = all.filter(isIncomplete).length;
   const incompleteOnly = params.incomplete === "1";
+  const completeness = new Map(all.map((player) => [player.id, profileCompleteness(player)]));
+  const gapsCount = all.filter((player) => completeness.get(player.id)!.percent < 100).length;
+  const gapsOnly = params.gaps === "1";
   const search = (params.q ?? "").slice(0, 80);
   const players = all.filter(
     (player) =>
@@ -48,17 +53,21 @@ export default async function AdminPlayersPage({
       (!kind || player.kind === kind) &&
       (!checkOnly || freshness.get(player.id)!.stale) &&
       (!incompleteOnly || isIncomplete(player)) &&
+      (!gapsOnly || completeness.get(player.id)!.percent < 100) &&
       matchesPlayerSearch(player, search)
   );
+  // With the "Profil unvollständig" filter the emptiest profiles come first.
+  if (gapsOnly) players.sort((a, b) => completeness.get(a.id)!.percent - completeness.get(b.id)!.percent);
   const photos = await signedFileUrls(supabase, players.map((player) => player.photo_path));
   const released = all.filter((player) => player.visible_to_clubs).length;
 
-  const filterHref = (next: { position?: AttackPosition; kind?: string; check?: boolean; incomplete?: boolean }) => {
+  const filterHref = (next: { position?: AttackPosition; kind?: string; check?: boolean; incomplete?: boolean; gaps?: boolean }) => {
     const query = new URLSearchParams();
     if (next.position) query.set("position", next.position);
     if (next.kind) query.set("kind", next.kind);
     if (next.check) query.set("check", "1");
     if (next.incomplete) query.set("incomplete", "1");
+    if (next.gaps) query.set("gaps", "1");
     // Keep the name search when switching filters.
     if (params.q) query.set("q", params.q);
     const text = query.toString();
@@ -90,7 +99,7 @@ export default async function AdminPlayersPage({
       <PlayerSearch count={players.length} />
 
       <nav aria-label="Filter" className="flex flex-wrap gap-2">
-        <FilterChip href={filterHref({})} active={!position && !kind && !checkOnly && !incompleteOnly}>
+        <FilterChip href={filterHref({})} active={!position && !kind && !checkOnly && !incompleteOnly && !gapsOnly}>
           Alle
         </FilterChip>
         {ATTACK_POSITIONS.map((code) => (
@@ -109,6 +118,11 @@ export default async function AdminPlayersPage({
         {incompleteCount > 0 || incompleteOnly ? (
           <FilterChip href={filterHref({ incomplete: true })} active={incompleteOnly} tone="warn">
             Foto oder CV fehlt · {incompleteCount}
+          </FilterChip>
+        ) : null}
+        {gapsCount > 0 || gapsOnly ? (
+          <FilterChip href={filterHref({ gaps: true })} active={gapsOnly} tone="warn">
+            Profil unvollständig · {gapsCount}
           </FilterChip>
         ) : null}
       </nav>
@@ -164,6 +178,7 @@ export default async function AdminPlayersPage({
                       {player.cv_path ? "CV" : "CV fehlt"}
                     </span>
                     <FreshnessTag freshness={freshness.get(player.id)!} />
+                    <CompletenessMeter completeness={completeness.get(player.id)!} />
                   </div>
                 }
               />

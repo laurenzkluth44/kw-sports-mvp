@@ -203,7 +203,7 @@ export type KwPlayerGame = {
   updated_at: string;
 };
 
-export type MatchReasonKey = "position" | "coach_role" | "availability" | "age" | "height" | "languages" | "player_types" | "league";
+export type MatchReasonKey = "position" | "coach_role" | "availability" | "age" | "height" | "handedness" | "languages" | "player_types" | "league";
 
 /** Why a player fits a need. Language-neutral: `value` is a code or number, labels come from matching-i18n. */
 export type MatchReason = { key: MatchReasonKey; ok: boolean | null; value?: string };
@@ -221,6 +221,8 @@ export type NeedMatch = {
   responded_at: string | null;
   responded_by: string | null;
   handled_at: string | null;
+  /** When the club first opened the suggestion. */
+  seen_at: string | null;
   created_at: string;
   updated_at: string;
 };
