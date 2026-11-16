@@ -64,7 +64,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
+      # setup-cli looks up "latest" via the GitHub API, which sometimes hits the rate limit.
+      # Try once more after a short pause instead of failing the whole job.
+      - id: cli
+        uses: supabase/setup-cli@v1
+        continue-on-error: true
+        with:
+          version: latest
+      - if: steps.cli.outcome == 'failure'
+        run: sleep 30
+      - if: steps.cli.outcome == 'failure'
+        uses: supabase/setup-cli@v1
         with:
           version: latest
       # Starts the real Supabase Postgres, applies every migration and the seed files.
