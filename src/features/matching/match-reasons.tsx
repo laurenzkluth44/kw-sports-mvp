@@ -11,6 +11,10 @@ import type { AttackPosition, CoachRole, Language, MatchReason, PlayerType } fro
 
 const text = {
   de: {
+    handLeft: "Linkshänder",
+    handBoth: "Beidhänder",
+    handRight: "Rechtshänder",
+    handUnknown: "Wurfhand offen",
     position: (v: string) => `Position ${v}`,
     coachRole: (v: string) => `Rolle ${v}`,
     from: (v: string) => `frei ab ${v}`,
@@ -29,6 +33,10 @@ const text = {
     leagueUnknown: "Liga-Erfahrung offen"
   },
   en: {
+    handLeft: "left-handed",
+    handBoth: "ambidextrous",
+    handRight: "right-handed",
+    handUnknown: "throwing hand open",
     position: (v: string) => `Position ${v}`,
     coachRole: (v: string) => `Role ${v}`,
     from: (v: string) => `free from ${v}`,
@@ -47,6 +55,10 @@ const text = {
     leagueUnknown: "league experience open"
   },
   fr: {
+    handLeft: "gaucher",
+    handBoth: "ambidextre",
+    handRight: "droitier",
+    handUnknown: "main de tir ouverte",
     position: (v: string) => `Poste ${v}`,
     coachRole: (v: string) => `Rôle ${v}`,
     from: (v: string) => `libre dès ${v}`,
@@ -65,6 +77,10 @@ const text = {
     leagueUnknown: "expérience ouverte"
   },
   es: {
+    handLeft: "zurdo",
+    handBoth: "ambidiestro",
+    handRight: "diestro",
+    handUnknown: "mano abierta",
     position: (v: string) => `Puesto ${v}`,
     coachRole: (v: string) => `Rol ${v}`,
     from: (v: string) => `libre desde ${v}`,
@@ -105,6 +121,9 @@ export function reasonLabel(reason: MatchReason, locale: ClubLocale) {
       return reason.ok === null ? t.ageUnknown : t.age(value);
     case "height":
       return reason.ok === null ? t.heightUnknown : t.height(value);
+    case "handedness":
+      if (reason.ok === null) return t.handUnknown;
+      return value === "links" ? t.handLeft : value === "beidhaendig" ? t.handBoth : t.handRight;
     case "languages":
       if (reason.ok === null) return t.languagesUnknown;
       if (!reason.ok) return t.languagesNo;

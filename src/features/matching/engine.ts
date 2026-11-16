@@ -10,8 +10,9 @@ import type { KwPlayer, MatchReason, PlayerNeed } from "@/types/domain";
  *   - coach need:  the wanted coach role
  * Scored (each with a weight; criteria the club left empty are skipped, so the
  * score is "share of the club's criteria the player meets"):
- *   availability 30 · age 15 · height 10 · languages 10 · player type 10 · league experience 10
- *   plus the position itself 15 (always met when suggested).
+ *   availability 25 · age 15 · player type 15 (share of the wanted types) · height 12 ·
+ *   throwing hand 10 (only for right-side needs: RR/RA want a left-hander) ·
+ *   league experience 10 · languages 8, plus the position itself 15 (always met when suggested).
  * Unknown player data (e.g. no birth date) counts half and shows as "?".
  */
 export type MatchResult = {
@@ -23,13 +24,17 @@ export type MatchResult = {
 const WEIGHTS = {
   position: 15,
   coach_role: 15,
-  availability: 30,
+  availability: 25,
   age: 15,
-  height: 10,
-  languages: 10,
-  player_types: 10,
+  height: 12,
+  handedness: 10,
+  languages: 8,
+  player_types: 15,
   league: 10
 } as const;
+
+/** Positions on the right side, where a left-hander is the natural fit. */
+const RIGHT_SIDE = ["RR", "RA"];
 
 function ageAt(birthDate: string, onDate: string) {
   const birth = new Date(`${birthDate}T00:00:00Z`);
@@ -71,10 +76,11 @@ export function scorePlayerForNeed(
   let earned = 0;
   let possible = 0;
 
-  function add(key: MatchReason["key"], ok: boolean | null, value?: string) {
+  /** share: part of the weight earned when ok (e.g. 1 of 2 wanted player types). */
+  function add(key: MatchReason["key"], ok: boolean | null, value?: string, share = 1) {
     const weight = WEIGHTS[key];
     possible += weight;
-    earned += ok === true ? weight : ok === null ? weight / 2 : 0;
+    earned += ok === true ? weight * share : ok === null ? weight / 2 : 0;
     reasons.push(value === undefined ? { key, ok } : { key, ok, value });
   }
 
@@ -127,7 +133,18 @@ export function scorePlayerForNeed(
 
     if (need.player_types.length > 0) {
       const shared = need.player_types.filter((type) => player.player_types.includes(type));
-      add("player_types", player.player_types.length === 0 ? null : shared.length > 0, shared.join(","));
+      // Two wanted types and the player has one: half the points, still shown as a fit.
+      add("player_types", player.player_types.length === 0 ? null : shared.length > 0, shared.join(","), shared.length / need.player_types.length);
+    }
+
+    // Right back / right wing: clubs look for left-handers. Only when every wanted attack position is on the right.
+    const rightSideOnly = need.attack_positions.length > 0 && need.attack_positions.every((position) => RIGHT_SIDE.includes(position));
+    if (rightSideOnly) {
+      add(
+        "handedness",
+        player.handedness === null ? null : player.handedness === "links" || player.handedness === "beidhaendig",
+        player.handedness ?? undefined
+      );
     }
   }
 

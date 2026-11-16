@@ -3,7 +3,7 @@
 import { scorePlayerForNeed, rankPlayersForNeed } from "../../src/features/matching/engine.ts";
 const base = { kind:"spieler", first_name:"A", last_name:"A", birth_date:null, nationality:null, attack_positions:[], defense_positions:[], coach_roles:[], handedness:null, height_cm:null, current_club:null, current_league:null, contract_until:null, available_from:null, languages:[], player_types:[], league_experience:null, profile:null, video_url:null, photo_path:null, cv_path:null, consent_at:null, visible_to_clubs:true, created_at:"", updated_at:"", id:"x" } as any;
 const need = { need_type:"spieler", attack_positions:["RR"], defense_positions:[], coach_role:null, needed_from_date:"2027-07-01", age_min:22, age_max:28, height_min:190, languages:["de"], player_types:["wurfstark"], league_experience:"2. Bundesliga" } as any;
-const perfect = { ...base, last_name:"Perfect", attack_positions:["RR","RA"], birth_date:"2002-03-01", height_cm:194, contract_until:"2027-06-30", languages:["de","en"], player_types:["wurfstark"], current_league:"2. Bundesliga" };
+const perfect = { ...base, last_name:"Perfect", attack_positions:["RR","RA"], handedness:"links", birth_date:"2002-03-01", height_cm:194, contract_until:"2027-06-30", languages:["de","en"], player_types:["wurfstark"], current_league:"2. Bundesliga" };
 const wrongPos = { ...base, last_name:"Wrong", attack_positions:["LA"] };
 const unknown = { ...base, last_name:"Unknown", attack_positions:["RR"] };
 const tooOld = { ...perfect, last_name:"Old", birth_date:"1990-01-01", contract_until:"2028-06-30" };
@@ -43,3 +43,17 @@ const noDef = scorePlayerForNeed(rlA2, { ...base, attack_positions:["RL"], defen
 assert(noDef.eligible && noDef.reasons[0].ok === null && noDef.reasons[0].value === "RL · A?", "RL without recorded defence stays in, marked unknown");
 assert(!scorePlayerForNeed(rlA2, { ...base, attack_positions:["LA"], defense_positions:[] }).eligible, "unknown defence never rescues a wrong attack position");
 assert(scorePlayerForNeed(defNeed, { ...base, attack_positions:["LA"], defense_positions:[3] }).eligible, "defence-only need: any attack position");
+
+// Throwing hand: right-side needs (RR/RA) prefer left-handers; other positions ignore the hand.
+const lefty = scorePlayerForNeed(need, perfect);
+const righty = scorePlayerForNeed(need, { ...perfect, handedness: "rechts" });
+assert(righty.eligible && righty.score < lefty.score && righty.reasons.find(r=>r.key==="handedness")?.ok === false, `right-hander for RR ranks below left-hander (${righty.score} < ${lefty.score})`);
+const rlNeed = { ...need, attack_positions:["RL"] };
+assert(!scorePlayerForNeed(rlNeed, { ...perfect, attack_positions:["RL"], handedness:"rechts" }).reasons.some(r=>r.key==="handedness"), "hand not judged for a left-back need");
+assert(scorePlayerForNeed(need, { ...perfect, handedness:"beidhaendig" }).score === 100, "ambidextrous counts as a fit on the right");
+
+// Player types: share of the wanted types
+const twoTypes = { ...need, player_types:["wurfstark","abwehrstark"] };
+const oneOfTwo = scorePlayerForNeed(twoTypes, perfect);
+const both = scorePlayerForNeed(twoTypes, { ...perfect, player_types:["wurfstark","abwehrstark"] });
+assert(both.score === 100 && oneOfTwo.score < 100 && oneOfTwo.reasons.find(r=>r.key==="player_types")?.ok === true, `1 of 2 wanted types gives partial points (${oneOfTwo.score})`);

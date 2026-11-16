@@ -203,7 +203,7 @@ export type KwPlayerGame = {
   updated_at: string;
 };
 
-export type MatchReasonKey = "position" | "coach_role" | "availability" | "age" | "height" | "languages" | "player_types" | "league";
+export type MatchReasonKey = "position" | "coach_role" | "availability" | "age" | "height" | "handedness" | "languages" | "player_types" | "league";
 
 /** Why a player fits a need. Language-neutral: `value` is a code or number, labels come from matching-i18n. */
 export type MatchReason = { key: MatchReasonKey; ok: boolean | null; value?: string };
